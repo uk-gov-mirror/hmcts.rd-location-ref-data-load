@@ -1,0 +1,67 @@
+#!groovy
+properties(
+  [
+    [
+      $class       : 'GithubProjectProperty',
+      projectUrlStr: 'https://github.com/hmcts/rd-fee-pay-ref-data-load'
+    ],
+    pipelineTriggers([[$class: 'GitHubPushTrigger']])
+  ]
+)
+
+@Library("Infrastructure")
+
+def type = "java"
+def product = "rd"
+def component = "fee-pay-ref-data-load"
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [$class     : 'AzureKeyVaultSecret',
+   secretType : 'Secret',
+   name       : secretName,
+   version    : '',
+   envVariable: envVar
+  ]
+}
+
+def vaultOverrides = [
+    'preview' : 'aat',
+    'spreview': 'saat'
+]
+
+def secrets = [
+    'rd-${env}': [
+        secret('rd-fee-pay-ref-data-load-s2s-secret', 'S2S_SECRET')
+    ]
+]
+
+withPipeline(type, product, component) {
+  onMaster {
+    enableSlackNotifications('#rd-fee-pay-ref-data-load-builds')
+  }
+  onPR {
+    enableSlackNotifications('#rd-fee-pay-ref-data-load-builds')
+  }
+
+  overrideVaultEnvironments(vaultOverrides)
+  loadVaultSecrets(secrets)
+  enableAksStagingDeployment()
+  disableLegacyDeploymentOnAAT()
+  disableLegacyDeployment()
+
+  after('functionalTest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+  }
+
+  after('functionalTest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+  }
+
+  after('smoketest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
+  }
+
+  after('smoketest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
+  }
+}

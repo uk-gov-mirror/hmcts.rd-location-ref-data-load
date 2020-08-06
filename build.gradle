@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '3.0'
 }
 
-group = 'uk.gov.hmcts.reform'
+group = 'uk.gov.hmcts.reform.rd'
 version = '0.0.1'
 
 allprojects {
@@ -112,9 +112,10 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: spring-boot-template"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:spring-boot-template"
+    property "sonar.projectName", "rd-fee-pay-ref-data-load"
+    property "sonar.projectKey", "uk.gov.hmcts.reform:rd-fee-pay-ref-data-load"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
+    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/**"
   }
 }
 
@@ -192,7 +193,7 @@ dependencies {
 
   compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
   compile group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.13.3'
-  
+
   compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.37'
   compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.37'
 
@@ -214,7 +215,7 @@ mainClassName = 'uk.gov.hmcts.reform.demo.Application'
 
 bootJar {
   getArchiveFileName().set(provider {
-    'spring-boot-template.jar'
+    'rd-fee-pay-ref-data-load.jar'
   })
 
   manifest {

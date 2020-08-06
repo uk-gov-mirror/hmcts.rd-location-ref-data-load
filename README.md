@@ -1,6 +1,6 @@
 # Spring Boot application template
 
-[![Build Status](https://travis-ci.org/hmcts/spring-boot-template.svg?branch=master)](https://travis-ci.org/hmcts/spring-boot-template)
+[![Build Status](https://travis-ci.org/hmcts/rd-fee-pay-ref-data-load.svg?branch=master)](https://travis-ci.org/hmcts/rd-fee-pay-ref-data-load)
 
 ## Purpose
 
@@ -22,8 +22,8 @@ The template is a working application with a minimal setup. It contains:
  * MIT license and contribution information
  * Helm chart using chart-java.
 
-The application exposes health endpoint (http://localhost:4550/health) and metrics endpoint
-(http://localhost:4550/metrics).
+The application exposes health endpoint (http://localhost:8099/health) and metrics endpoint
+(http://localhost:8099/metrics).
 
 ## Plugins
 
@@ -125,7 +125,7 @@ Create docker image:
   docker-compose build
 ```
 
-Run the distribution (created in `build/install/spring-boot-template` directory)
+Run the distribution (created in `build/install/rd-fee-pay-ref-data-load` directory)
 by executing the following command:
 
 ```bash
@@ -133,12 +133,12 @@ by executing the following command:
 ```
 
 This will start the API container exposing the application's port
-(set to `4550` in this template app).
+(set to `8099` in this template app).
 
 In order to test if the application is up, you can call its health endpoint:
 
 ```bash
-  curl http://localhost:4550/health
+  curl http://localhost:8099/health
 ```
 
 You should get a response similar to this:
