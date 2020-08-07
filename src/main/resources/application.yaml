@@ -10,3 +10,27 @@ management:
       base-path: /
       exposure:
         include: health, info, prometheus
+
+idam:
+  s2s-auth:
+    # AAAAAAAAAAAAAAAA
+    totp_secret: ${RD_FEE_PAY_REF_DATA_LOAD_S2S:AAAAAAAAAAAAAAAA}
+    microservice: rd_fee_pay_ref_data_load
+    url: ${IDAM_S2S_URL:http://localhost:4502}
+    s2s-authorised:
+      services: ${RD_FEE_PAY_REF_DATA_LOAD_AUTHORIZED_SERVICES:ccd_gw,rd_fee_pay_ref_data_load,am_role_assignment_service}
+
+security:
+  anonymousPaths:
+    - "/"
+    - "/health/**"
+    - "/actuator/**"
+    - "/loggers/**"
+    - "/swagger-ui.html"
+    - "/swagger-resources/**"
+    - "/v2/api-docs"
+    - "/webjars/springfox-swagger-ui/**"
+    - "/search/**"
+    - "/csrf"
+    - "/error"
+    - "/favicon.ico"

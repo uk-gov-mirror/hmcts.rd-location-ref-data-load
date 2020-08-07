@@ -25,4 +25,9 @@ public class RootController {
     public ResponseEntity<String> welcome() {
         return ok("Welcome to rd-fee-pay-ref-data-load");
     }
+
+    @GetMapping("/getS2S")
+    public ResponseEntity<String> getS2S() {
+        return ok("Welcome to rd-fee-pay-ref-data-load using Service Auth");
+    }
 }
