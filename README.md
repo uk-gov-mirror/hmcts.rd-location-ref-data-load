@@ -1,6 +1,6 @@
 # Spring Boot application template
 
-[![Build Status](https://travis-ci.org/hmcts/rd-location-data-load.svg?branch=master)](https://travis-ci.org/hmcts/rd-location-data-load)
+[![Build Status](https://travis-ci.org/hmcts/rd-location-ref-data-load.svg?branch=master)](https://travis-ci.org/hmcts/rd-location-ref-data-load)
 
 ## Purpose
 
@@ -125,7 +125,7 @@ Create docker image:
   docker-compose build
 ```
 
-Run the distribution (created in `build/install/rd-location-data-load` directory)
+Run the distribution (created in `build/install/rd-location-ref-data-load` directory)
 by executing the following command:
 
 ```bash

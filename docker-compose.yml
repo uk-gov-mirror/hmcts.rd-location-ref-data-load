@@ -1,14 +1,14 @@
 version: '2.1'
 
 services:
-  rd-location-data-load:
+  rd-location-ref-data-load:
     build:
       context: .
       args:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: hmctspublic.azurecr.io/rd/location-data-load
+    image: hmctspublic.azurecr.io/rd/location-ref-data-load
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
