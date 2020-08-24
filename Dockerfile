@@ -5,7 +5,7 @@ ARG APP_INSIGHTS_AGENT_VERSION=2.5.1
 FROM hmctspublic.azurecr.io/base/java:openjdk-11-distroless-1.2
 
 COPY lib/AI-Agent.xml /opt/app/
-COPY build/libs/rd-fee-pay-ref-data-load.jar /opt/app/
+COPY build/libs/rd-location-data-load.jar /opt/app/
 
 EXPOSE 8099
-CMD [ "rd-fee-pay-ref-data-load.jar" ]
+CMD [ "rd-location-data-load.jar" ]

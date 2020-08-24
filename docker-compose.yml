@@ -1,14 +1,14 @@
 version: '2.1'
 
 services:
-  rd-fee-pay-ref-data-load:
+  rd-location-data-load:
     build:
       context: .
       args:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: hmctspublic.azurecr.io/rd/fee-pay-ref-data-load
+    image: hmctspublic.azurecr.io/rd/location-data-load
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER

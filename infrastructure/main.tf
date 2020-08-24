@@ -31,12 +31,12 @@ data "azurerm_key_vault_secret" "s2s_url" {
 }
 
 data "azurerm_key_vault_secret" "s2s_secret" {
-  name = "microservicekey-rd-fee-pay-ref-data-load"
+  name = "microservicekey-rd-location-data-load"
   key_vault_id = "${data.azurerm_key_vault.s2s_key_vault.id}"
 }
 
-resource "azurerm_key_vault_secret" "rd_fee_pay_ref_data_load" {
-  name = "rd-fee-pay-ref-data-load-s2s-secret"
+resource "azurerm_key_vault_secret" "rd_location_data_load" {
+  name = "rd-location-data-load-s2s-secret"
   value = data.azurerm_key_vault_secret.s2s_secret.value
   key_vault_id = data.azurerm_key_vault.rd_key_vault.id
 }

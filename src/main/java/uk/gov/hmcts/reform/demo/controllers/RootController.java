@@ -23,6 +23,6 @@ public class RootController {
      */
     @GetMapping("/")
     public ResponseEntity<String> welcome() {
-        return ok("Welcome to rd-fee-pay-ref-data-load");
+        return ok("Welcome to rd-location-data-load");
     }
 }

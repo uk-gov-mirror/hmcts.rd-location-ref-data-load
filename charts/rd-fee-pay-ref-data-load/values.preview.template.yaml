@@ -4,4 +4,4 @@ java:
   keyVaults:
     rd:
       secrets:
-        - rd-fee-pay-ref-data-load-s2s-secret
+        - rd-location-data-load-s2s-secret
