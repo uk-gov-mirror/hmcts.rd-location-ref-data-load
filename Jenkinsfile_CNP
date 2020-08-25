@@ -3,7 +3,7 @@ properties(
   [
     [
       $class       : 'GithubProjectProperty',
-      projectUrlStr: 'https://github.com/hmcts/rd-fee-pay-ref-data-load'
+      projectUrlStr: 'https://github.com/hmcts/rd-location-ref-data-load'
     ],
     pipelineTriggers([[$class: 'GitHubPushTrigger']])
   ]
@@ -13,7 +13,7 @@ properties(
 
 def type = "java"
 def product = "rd"
-def component = "fee-pay-ref-data-load"
+def component = "location-ref-data-load"
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   [$class     : 'AzureKeyVaultSecret',
@@ -31,16 +31,16 @@ def vaultOverrides = [
 
 def secrets = [
     'rd-${env}': [
-        secret('rd-fee-pay-ref-data-load-s2s-secret', 'S2S_SECRET')
+        secret('rd-location-ref-data-load-s2s-secret', 'S2S_SECRET')
     ]
 ]
 
 withPipeline(type, product, component) {
   onMaster {
-    enableSlackNotifications('#rd-fee-pay-ref-data-load-builds')
+    enableSlackNotifications('#rd-location-ref-data-load-builds')
   }
   onPR {
-    enableSlackNotifications('#rd-fee-pay-ref-data-load-builds')
+    enableSlackNotifications('#rd-location-ref-data-load-builds')
   }
 
   overrideVaultEnvironments(vaultOverrides)
