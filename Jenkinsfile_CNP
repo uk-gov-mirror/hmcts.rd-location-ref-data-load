@@ -29,12 +29,6 @@ def vaultOverrides = [
     'spreview': 'saat'
 ]
 
-def secrets = [
-    'rd-${env}': [
-        secret('rd-location-ref-data-load-s2s-secret', 'S2S_SECRET')
-    ]
-]
-
 withPipeline(type, product, component) {
   onMaster {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
@@ -44,7 +38,6 @@ withPipeline(type, product, component) {
   }
 
   overrideVaultEnvironments(vaultOverrides)
-  loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeploymentOnAAT()
   disableLegacyDeployment()
