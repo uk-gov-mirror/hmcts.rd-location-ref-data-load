@@ -240,7 +240,7 @@ dependencies {
 
 }
 
-mainClassName = 'uk.gov.hmcts.reform.demo.Application'
+mainClassName = 'uk.gov.hmcts.reform.locationrefdata.Application'
 
 bootJar {
   getArchiveFileName().set(provider {
