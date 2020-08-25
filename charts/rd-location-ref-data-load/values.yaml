@@ -8,4 +8,3 @@ java:
     rd:
       secrets:
         - AppInsightsInstrumentationKey
-        - rd-location-ref-data-load-s2s-secret
