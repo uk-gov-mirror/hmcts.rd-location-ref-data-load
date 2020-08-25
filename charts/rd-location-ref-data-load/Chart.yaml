@@ -7,6 +7,6 @@ version: 0.0.2
 maintainers:
   - name: Reference Data Team
 dependencies:
-  - name: java
-    version: 3.0.2
+  - name: job
+    version: ~0.6.0
     repository: '@hmctspublic'
