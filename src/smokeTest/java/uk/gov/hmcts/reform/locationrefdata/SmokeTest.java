@@ -1,12 +1,12 @@
-package uk.gov.hmcts.reform.juddata;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package uk.gov.hmcts.reform.locationrefdata;
 
 import io.restassured.RestAssured;
 import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.springframework.http.HttpStatus;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.OK;
 
 public class SmokeTest {
 
@@ -17,7 +17,7 @@ public class SmokeTest {
         );
 
     @Test
-    public void should_prove_app_is_running_and_healthy() {
+    public void isRunningAndHealthy() {
 
         RestAssured.baseURI = targetInstance;
         RestAssured.useRelaxedHTTPSValidation();
@@ -26,7 +26,7 @@ public class SmokeTest {
             .when()
             .get("/health")
             .then()
-            .statusCode(HttpStatus.OK.value())
+            .statusCode(OK.value())
             .and()
             .extract().body().asString();
 
