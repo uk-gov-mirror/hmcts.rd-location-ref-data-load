@@ -200,6 +200,7 @@ dependencies {
   compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.37'
   compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.37'
   compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+  compile group: 'javax.el', name: 'javax.el-api', version: '3.0.0'
 
   compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
