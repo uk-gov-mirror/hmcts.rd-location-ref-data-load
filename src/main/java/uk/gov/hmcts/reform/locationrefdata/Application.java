@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationContext;
 import uk.gov.hmcts.reform.health.HealthAutoConfiguration;
 
 @SpringBootApplication(scanBasePackages = "uk.gov.hmcts.reform", exclude = HealthAutoConfiguration.class)
-// @SuppressWarnings("HideUtilityClassConstructor") // Spring needs a constructor, its not a utility class
+@SuppressWarnings ("PMD.DoNotCallSystemExit")
 @Slf4j
 public class Application implements ApplicationRunner {
 
