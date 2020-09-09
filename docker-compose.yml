@@ -1,16 +1,17 @@
 version: '2.1'
 
+
 services:
-  rd-location-ref-data-load:
+
+  rd-location-ref-data-db:
     build:
-      context: .
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    image: hmctspublic.azurecr.io/rd/location-ref-data-load
+      context: database
+    image: hmcts/rd-location-ref-data-db
+    container_name: rd-location-ref-data-db
+    volumes:
+      - rd-location-ref-data-db-volume:/var/lib/postgresql/data
     environment:
-      # these environment variables are used by java-logging library
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-locrefdata}"
       - ROOT_APPENDER
       - JSON_CONSOLE_PRETTY_PRINT
       - ROOT_LOGGING_LEVEL
@@ -23,4 +24,7 @@ services:
       - LOGBACK_REQUIRE_ALERT_LEVEL=false
       - LOGBACK_REQUIRE_ERROR_CODE=false
     ports:
-      - 8099:8099
+      - 5458:5432
+
+volumes:
+  rd-location-ref-data-db-volume:
