@@ -6,9 +6,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import uk.gov.hmcts.reform.health.HealthAutoConfiguration;
 
-@SpringBootApplication(scanBasePackages = "uk.gov.hmcts.reform", exclude = HealthAutoConfiguration.class)
+@SpringBootApplication(scanBasePackages = "uk.gov.hmcts.reform")
 @SuppressWarnings ("PMD.DoNotCallSystemExit")
 @Slf4j
 public class Application implements ApplicationRunner {
