@@ -7,6 +7,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 public class ApplicationTest {
 
+
     @Test
     public void mainTest() {
         Application.main(new String[] {});
