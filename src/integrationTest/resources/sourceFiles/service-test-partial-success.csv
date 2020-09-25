@@ -1,0 +1,3 @@
+service_code,ccd_service_name,ccd_jurisdiction_name
+AAA1,"service1,service2",test-jurisdiction1
+AAA2,"",test-jurisdiction2

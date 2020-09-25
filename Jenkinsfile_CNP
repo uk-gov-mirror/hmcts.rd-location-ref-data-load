@@ -29,6 +29,15 @@ def vaultOverrides = [
     'spreview': 'saat'
 ]
 
+def secrets = [
+  'rd-${env}': [
+    secret('ACCOUNT-KEY-PREVIEW', 'ACCOUNT_KEY_PREVIEW'),
+    secret('ACCOUNT-KEY-AAT', 'ACCOUNT_KEY_AAT'),
+    secret('ACCOUNT-NAME', 'ACCOUNT_NAME')
+  ]
+]
+
+
 withPipeline(type, product, component) {
   onMaster {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
@@ -42,6 +51,14 @@ withPipeline(type, product, component) {
   disableLegacyDeploymentOnAAT()
   disableLegacyDeployment()
   nonServiceApp()
+
+  before('integrationTest:preview') {
+    env.execution_environment = "preview"
+  }
+
+  before('integrationTest:aat') {
+    env.execution_environment = "aat"
+  }
 
   after('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
