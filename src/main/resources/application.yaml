@@ -25,6 +25,10 @@ spring:
             non_contextual_creation: true
   batch:
     initialize-schema: always
+      #run spring batch job manually as need to validate idempotent condition in code
+      #rather than giving control to spring
+    job:
+      enabled: false
 #  jackson.date-format: yyyy-MM-dd
   flyway:
     enabled: ${FLYWAY_ENABLED:true}
@@ -36,19 +40,18 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5458}/${POSTGRES_NAME:locrefdata}${POSTGRES_CONNECTION_OPTIONS:}
     username: ${POSTGRES_USERNAME:locrefdata}
     password: ${POSTGRES_PASSWORD:locrefdata}
-    tomcat:
-      max-active: 10
-      max-idle: 10
-      min-idle: 2
-      max-wait: 10000
-      test-on-borrow: true
-      test-on-connect: true
-      test-on-idle: true
-      validation-query: "SELECT 1"
-      time-between-eviction-runs-millis: 10000
-      test-while-idle: true
-      test-on-return: true
-      remove-abandoned: true
-      remove-abandoned-timeout: 60
-      log-abandoned: true
-      abandon-when-percentage-full: 0
+    properties:
+      charSet: UTF-8
+    hikari:
+      max-lifetime: 600000
+      maximum-pool-size: 5
+      idle-timeout: 30000
+      minimum-idle: 1
+
+  profiles:
+    include:
+      - lrd-router
+      - lib
+      - camel-routes-common
+mail:
+  enabled: false

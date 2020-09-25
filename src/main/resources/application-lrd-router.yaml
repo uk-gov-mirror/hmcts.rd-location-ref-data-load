@@ -1,0 +1,19 @@
+jdbc-batch-size: 10
+routes-to-execute-orchestration: lrd-service
+route:
+  lrd-service:
+    id: lrd-service
+    file-name: Service.csv
+    table-name: SERVICE_TO_CCD_SERVICE_ASSOC
+    delete-sql:
+      sql:delete from service_to_ccd_service_assoc where service_code = :#service_code
+      and :#ccd_service_name not in (select ccd_service_name from service_to_ccd_service_assoc where service_code = :#service_code)
+      ?batch=true&dataSource=dataSource
+    insert-sql:
+      sql:insert into service_to_ccd_service_assoc (service_code, ccd_service_name, ccd_jurisdiction_name, created_date)
+      values (:#service_code,:#ccd_service_name,:#ccd_jurisdiction_name, now() at time zone 'utc')?batch=true&dataSource=dataSource
+    blob-path:
+      azure-blob://${azure.storage.account-name}/lrd-ref-data/Service.csv?credentials=#credsreg&operation=updateBlockBlob
+    processor-class: ServiceToCcdServiceProcessor
+    mapper-class: ServiceToCcdServiceMapper
+    csv-binder-object: ServiceToCcdService
