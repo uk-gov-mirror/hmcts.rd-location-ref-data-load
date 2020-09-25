@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.camel.test.spring.CamelTestContextBootstrapper;
 import org.apache.camel.test.spring.MockEndpoints;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -50,6 +51,15 @@ public class LrdBatchApplicationTest extends LrdBatchIntegrationSupport {
 
     @Value("${archival-route}")
     String archivalRoute;
+
+
+    @BeforeClass
+    public static void beforeAll() throws Exception {
+        if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
+            System.setProperty("ACCOUNT_KEY", System.getenv("ACCOUNT_KEY_PREVIEW"));
+            System.setProperty("ACCOUNT_NAME", "rdpreview");
+        }
+    }
 
     @Before
     public void init() {

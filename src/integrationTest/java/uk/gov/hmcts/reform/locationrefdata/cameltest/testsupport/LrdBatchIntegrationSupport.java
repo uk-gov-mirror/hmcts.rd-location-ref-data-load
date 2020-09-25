@@ -72,14 +72,6 @@ public abstract class LrdBatchIntegrationSupport {
     @Autowired
     protected IntegrationTestSupport integrationTestSupport;
 
-    @BeforeClass
-    public  static void beforeClass() {
-        if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
-            System.setProperty("azure.storage.account-key", System.getenv("ACCOUNT_KEY_PREVIEW"));
-            System.setProperty("azure.storage.account-name", "rdpreview");
-        }
-    }
-
 
     protected void validateLrdServiceFile(JdbcTemplate jdbcTemplate, String serviceSql,
                                           List<ServiceToCcdService> exceptedResult, int size) {
