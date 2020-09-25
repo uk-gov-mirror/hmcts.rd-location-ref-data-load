@@ -39,6 +39,8 @@ def secrets = [
 
 
 withPipeline(type, product, component) {
+  overrideVaultEnvironments(vaultOverrides)
+  loadVaultSecrets(secrets)
   onMaster {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
     env.execution_environment = "aat"
@@ -47,9 +49,6 @@ withPipeline(type, product, component) {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
     env.execution_environment = "preview"
   }
-
-  overrideVaultEnvironments(vaultOverrides)
-  loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeploymentOnAAT()
   disableLegacyDeployment()
