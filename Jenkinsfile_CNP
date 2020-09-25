@@ -43,16 +43,22 @@ withPipeline(type, product, component) {
   loadVaultSecrets(secrets)
   onMaster {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
-    env.execution_environment = "aat"
   }
   onPR {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
-    env.execution_environment = "preview"
   }
   enableAksStagingDeployment()
   disableLegacyDeploymentOnAAT()
   disableLegacyDeployment()
   nonServiceApp()
+
+  before(test:preview) {
+    env.execution_environment = "preview"
+  }
+
+  before(test:aat) {
+    env.execution_environment = "aat"
+  }
 
   after('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
