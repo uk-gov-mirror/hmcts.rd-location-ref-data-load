@@ -52,11 +52,11 @@ withPipeline(type, product, component) {
   disableLegacyDeployment()
   nonServiceApp()
 
-  before(test:preview) {
+  before('test:preview') {
     env.execution_environment = "preview"
   }
 
-  before(test:aat) {
+  before('test:aat') {
     env.execution_environment = "aat"
   }
 
