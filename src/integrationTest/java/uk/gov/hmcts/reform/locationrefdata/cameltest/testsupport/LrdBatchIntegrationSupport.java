@@ -75,8 +75,8 @@ public abstract class LrdBatchIntegrationSupport {
     @BeforeClass
     public  static void beforeClass() {
         if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
-            System.setProperty("ACCOUNT_KEY", System.getenv("ACCOUNT_KEY_PREVIEW"));
-            System.setProperty("ACCOUNT_NAME", "rdpreview");
+            System.setProperty("azure.storage.account-key", System.getenv("ACCOUNT_KEY_PREVIEW"));
+            System.setProperty("azure.storage.account-name", "rdpreview");
         }
     }
 
