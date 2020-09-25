@@ -6,7 +6,6 @@ import org.apache.camel.test.spring.MockEndpoints;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -53,16 +52,6 @@ public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegratio
     public void init() {
         jdbcTemplate.execute(truncateAudit);
         SpringRestarter.getInstance().restart();
-    }
-
-
-
-    @BeforeClass
-    public static void beforeAll() throws Exception {
-        if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
-            System.setProperty("ACCOUNT_KEY", System.getenv("ACCOUNT_KEY_PREVIEW"));
-            System.setProperty("ACCOUNT_NAME", "rdpreview");
-        }
     }
 
     @Test

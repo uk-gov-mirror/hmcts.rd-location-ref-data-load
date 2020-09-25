@@ -4,6 +4,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
+import org.junit.BeforeClass;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,6 +72,14 @@ public abstract class LrdBatchIntegrationSupport {
     @Autowired
     protected IntegrationTestSupport integrationTestSupport;
 
+
+    @BeforeClass
+    public static void beforeAll() throws Exception {
+        if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
+            System.setProperty("ACCOUNT_KEY", System.getenv("ACCOUNT_KEY_PREVIEW"));
+            System.setProperty("ACCOUNT_NAME", "rdpreview");
+        }
+    }
 
     protected void validateLrdServiceFile(JdbcTemplate jdbcTemplate, String serviceSql,
                                           List<ServiceToCcdService> exceptedResult, int size) {

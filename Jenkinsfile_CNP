@@ -41,9 +41,11 @@ def secrets = [
 withPipeline(type, product, component) {
   onMaster {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
+    env.execution_environment = "aat"
   }
   onPR {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
+    env.execution_environment = "preview"
   }
 
   overrideVaultEnvironments(vaultOverrides)
@@ -52,14 +54,6 @@ withPipeline(type, product, component) {
   disableLegacyDeploymentOnAAT()
   disableLegacyDeployment()
   nonServiceApp()
-
-  before('integrationTest:preview') {
-    env.execution_environment = "preview"
-  }
-
-  before('integrationTest:aat') {
-    env.execution_environment = "aat"
-  }
 
   after('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
