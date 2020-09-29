@@ -23,8 +23,8 @@ spring:
       enabled: false
 
 #Local integration testing these values should be actual
-ACCOUNT_NAME: ${ACCOUNT_NAME}
-ACCOUNT_KEY: ${ACCOUNT_KEY}
+#ACCOUNT_NAME: ${ACCOUNT_NAME}
+#ACCOUNT_KEY: ${ACCOUNT_KEY}
 
 start-route: direct:LRD
 archival-route: direct:LrdArchival
