@@ -22,6 +22,14 @@ spring:
     job:
       enabled: false
 
+#Local integration testing these values should be actual
+ACCOUNT_NAME: ${ACCOUNT_NAME}
+ACCOUNT_KEY: ${ACCOUNT_KEY}
+
+azure:
+  storage:
+    account-name: ${ACCOUNT_NAME}
+    account-key: ${ACCOUNT_KEY}
 
 start-route: direct:LRD
 archival-route: direct:LrdArchival
@@ -78,6 +86,3 @@ component:
 mail:
   enabled: false
 
-#Local integration testing these values should be actual
-ACCOUNT_NAME: ${ACCOUNT_NAME}
-ACCOUNT_KEY: ${ACCOUNT_KEY}
