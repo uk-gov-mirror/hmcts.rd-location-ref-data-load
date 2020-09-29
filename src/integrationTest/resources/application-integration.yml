@@ -79,7 +79,5 @@ mail:
   enabled: false
 
 #Local integration testing these values should be actual
-azure:
-  storage:
-    account-name: ${ACCOUNT_NAME}
-    account-key: ${ACCOUNT_KEY}
+ACCOUNT_NAME: ${ACCOUNT_NAME}
+ACCOUNT_KEY: ${ACCOUNT_KEY}

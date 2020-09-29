@@ -32,7 +32,6 @@ def vaultOverrides = [
 def secrets = [
   'rd-${env}': [
     secret('ACCOUNT-KEY-PREVIEW', 'ACCOUNT_KEY_PREVIEW'),
-    secret('ACCOUNT-KEY-AAT', 'ACCOUNT_KEY_AAT'),
     secret('ACCOUNT-NAME', 'ACCOUNT_NAME')
   ]
 ]
