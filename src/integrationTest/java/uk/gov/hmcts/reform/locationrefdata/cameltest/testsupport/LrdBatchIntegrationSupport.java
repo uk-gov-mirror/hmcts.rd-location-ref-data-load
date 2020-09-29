@@ -75,10 +75,8 @@ public abstract class LrdBatchIntegrationSupport {
 
     @BeforeClass
     public static void beforeAll() throws Exception {
-        if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
-            System.setProperty("ACCOUNT_KEY", System.getenv("ACCOUNT_KEY_PREVIEW"));
-            System.setProperty("ACCOUNT_NAME", "rdpreview");
-        }
+        System.setProperty("ACCOUNT_KEY", System.getenv("ACCOUNT_KEY_PREVIEW"));
+        System.setProperty("ACCOUNT_NAME", "rdpreview");
     }
 
     protected void validateLrdServiceFile(JdbcTemplate jdbcTemplate, String serviceSql,
