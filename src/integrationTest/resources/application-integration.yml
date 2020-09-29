@@ -26,15 +26,10 @@ spring:
 ACCOUNT_NAME: ${ACCOUNT_NAME}
 ACCOUNT_KEY: ${ACCOUNT_KEY}
 
-azure:
-  storage:
-    account-name: ${ACCOUNT_NAME}
-    account-key: ${ACCOUNT_KEY}
-
 start-route: direct:LRD
 archival-route: direct:LrdArchival
-archival-path: azure-blob://${azure.storage.account-name}/lrd-ref-data-archive
-active-blob-path: azure-blob://${azure.storage.account-name}/lrd-ref-data
+archival-path: azure-blob://${ACCOUNT_NAME}/lrd-ref-data-archive
+active-blob-path: azure-blob://${ACCOUNT_KEY}/lrd-ref-data
 archival-file-names: service-test.csv
 archival-cred: credentials=#credsreg&operation=updateBlockBlob
 #archival-date-format keep in dd-MM-yyyy as to delete in testing
