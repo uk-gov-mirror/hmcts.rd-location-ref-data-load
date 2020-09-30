@@ -31,8 +31,8 @@ def vaultOverrides = [
 
 def secrets = [
   'rd-${env}': [
-    secret('ACCOUNT-KEY-PREVIEW', 'ACCOUNT_KEY_PREVIEW'),
-    secret('ACCOUNT-NAME', 'ACCOUNT_NAME')
+    secret('ld-location-storage-account-primary-key', 'ACCOUNT_KEY_PREVIEW'),
+    secret('ld-location-storage-account-name', 'ACCOUNT_NAME')
   ]
 ]
 
@@ -60,6 +60,14 @@ withPipeline(type, product, component) {
 
   after('functionalTest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+  }
+
+  after('integrationTest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
+  }
+
+  after('integrationTest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
   }
 
   after('smoketest:preview') {
