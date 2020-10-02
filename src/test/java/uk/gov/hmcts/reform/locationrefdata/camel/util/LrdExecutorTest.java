@@ -20,7 +20,9 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 @RunWith(SpringRunner.class)
 public class LrdExecutorTest {
 
-    LrdExecutor lrdExecutor = spy(new LrdExecutor());
+    LrdExecutor lrdExecutor = new LrdExecutor();
+
+    LrdExecutor lrdExecutorSpy = spy(lrdExecutor);
 
     CamelContext camelContext = new DefaultCamelContext();
 
@@ -30,21 +32,21 @@ public class LrdExecutorTest {
 
     @Before
     public void init() {
-        setField(lrdExecutor, "auditService", auditService);
+        setField(lrdExecutorSpy, "auditService", auditService);
     }
 
     @Test
     public void testExecute() {
         doNothing().when(producerTemplate).sendBody(any());
         doNothing().when(auditService).auditSchedulerStatus(camelContext);
-        lrdExecutor.execute(camelContext, "test", "test");
-        verify(lrdExecutor, times(1)).execute(camelContext, "test", "test");
+        lrdExecutorSpy.execute(camelContext, "test", "test");
+        verify(lrdExecutorSpy, times(1)).execute(camelContext, "test", "test");
     }
 
     @Test
     public void testExecuteException() {
         doNothing().when(auditService).auditSchedulerStatus(camelContext);
-        lrdExecutor.execute(camelContext, "test", "test");
-        verify(lrdExecutor, times(1)).execute(camelContext, "test", "test");
+        lrdExecutorSpy.execute(camelContext, "test", "test");
+        verify(lrdExecutorSpy, times(1)).execute(camelContext, "test", "test");
     }
 }
