@@ -115,7 +115,7 @@ pmd {
 }
 
 jacocoTestReport {
-  executionData(test, integration)
+  executionData(test)
   reports {
     xml.enabled = true
     csv.enabled = false
@@ -125,7 +125,7 @@ jacocoTestReport {
 
 pitest {
   targetClasses = ['uk.gov.hmcts.reform.juddata.*']
-  testSourceSets = [sourceSets.test, sourceSets.integrationTest]
+  testSourceSets = [sourceSets.test, sourceSets.functionalTest]
   excludedClasses = [
     'uk.gov.hmcts.reform.locationrefdata.config.*',
     'uk.gov.hmcts.reform.locationrefdata.LrdLoadApplication'
@@ -140,7 +140,7 @@ pitest {
   useClasspathFile = true
 }
 
-project.tasks['sonarqube'].dependsOn test, integration, jacocoTestReport
+project.tasks['sonarqube'].dependsOn test, jacocoTestReport
 
 sonarqube {
   properties {
