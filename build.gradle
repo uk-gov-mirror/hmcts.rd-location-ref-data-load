@@ -24,8 +24,8 @@ allprojects {
 sourceSets {
   functionalTest {
     java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
       srcDir file('src/functionalTest/java')
     }
     resources.srcDir file('src/functionalTest/resources')
@@ -281,6 +281,7 @@ dependencies {
   integrationTestImplementation sourceSets.test.runtimeClasspath
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
+  functionalTestImplementation sourceSets.test.runtimeClasspath
 
   smokeTestImplementation sourceSets.test.runtimeClasspath
 
@@ -291,10 +292,10 @@ dependencies {
   testCompile group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.2.4.RELEASE'
   testCompile group: 'org.javatuples', name: 'javatuples', version: '1.2'
 
-  integrationTestCompile group: 'org.apache.camel', name: 'camel-test-spring', version: versions.camel
-  integrationTestCompile group: 'org.apache.camel', name: 'camel-test', version: versions.camel
-  integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.12.5'
-  integrationTestCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
+  testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: versions.camel
+  testCompile group: 'org.apache.camel', name: 'camel-test', version: versions.camel
+  testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.12.5'
+  testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
 
 }
 
