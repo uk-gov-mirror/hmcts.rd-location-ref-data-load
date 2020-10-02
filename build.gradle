@@ -147,7 +147,7 @@ sonarqube {
     property "sonar.projectName", "rd-location-ref-data-load"
     property "sonar.projectKey", "uk.gov.hmcts.reform:rd-location-ref-data-load"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
-    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/locationrefdata/config/**" +
+    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/locationrefdata/configuration/**," +
     "src/main/java/uk/gov/hmcts/reform/locationrefdata/LrdLoadApplication.java"
   }
 }
