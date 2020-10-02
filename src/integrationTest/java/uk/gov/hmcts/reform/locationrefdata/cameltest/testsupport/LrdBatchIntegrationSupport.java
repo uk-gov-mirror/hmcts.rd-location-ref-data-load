@@ -75,6 +75,7 @@ public abstract class LrdBatchIntegrationSupport {
 
     @BeforeClass
     public static void beforeAll() throws Exception {
+        System.setProperty("LD_SDK_KEY", System.getenv("LD_SDK_KEY"));
         System.setProperty("ACCOUNT_KEY", System.getenv("ACCOUNT_KEY_PREVIEW"));
         System.setProperty("ACCOUNT_NAME", System.getenv("ACCOUNT_NAME"));
     }
