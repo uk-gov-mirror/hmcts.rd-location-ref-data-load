@@ -75,8 +75,13 @@ public abstract class LrdBatchIntegrationSupport {
 
     @BeforeClass
     public static void beforeAll() throws Exception {
-        System.setProperty("ACCOUNT_KEY", System.getenv("ACCOUNT_KEY_PREVIEW"));
-        System.setProperty("ACCOUNT_NAME", System.getenv("ACCOUNT_NAME"));
+        if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
+            System.setProperty("azure.storage.account-key", System.getenv("ACCOUNT_KEY_PREVIEW"));
+            System.setProperty("azure.storage.account-name", System.getenv("rdpreview"));
+        } else {
+            System.setProperty("azure.storage.account-key", System.getenv("ACCOUNT_KEY"));
+            System.setProperty("azure.storage.account-name", System.getenv("ACCOUNT_NAME"));
+        }
     }
 
     protected void validateLrdServiceFile(JdbcTemplate jdbcTemplate, String serviceSql,
