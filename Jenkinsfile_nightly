@@ -13,10 +13,7 @@ def component = "location-ref-data-load"
 
 withNightlyPipeline(type, product, component) {
   after('securityScan') {
-    echo "Checking case number:"
-    sh "cat ccdCaseId.tmp"
     echo "Just waiting a while to ensure that the pod has run the job"
-    sh "sleep 120s"
     def time = "120"
     echo "Waiting ${time} seconds for deployment to complete prior starting functional testing"
     sleep time.toInteger() // seconds
