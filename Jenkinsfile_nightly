@@ -11,4 +11,17 @@ def type = "java"
 def product = "rd"
 def component = "location-ref-data-load"
 
-withNightlyPipeline(type, product, component) {}
+withNightlyPipeline(type, product, component) {
+  after('securityScan') {
+    echo "Checking case number:"
+    sh "cat ccdCaseId.tmp"
+    echo "Just waiting a while to ensure that the pod has run the job"
+    sh "sleep 120s"
+    echo "Verifying that functional test data was processed correctly"
+    try {
+      builder.gradle('functional')
+    } finally {
+      junit '**/test-results/**/*.xml'
+    }
+  }
+}
