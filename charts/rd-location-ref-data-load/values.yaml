@@ -18,10 +18,10 @@ job:
       "rd":
         resourceGroup: rd
         secrets:
-          - rd-location-ref-api-POSTGRES-PASS
+          - location-ref-api-POSTGRES-PASS
           - AppInsightsInstrumentationKey
-          - ACCOUNT-NAME
-          - ACCOUNT-KEY
+          - LOC-ACCOUNT-NAME
+          - LOC-ACCOUNT-KEY
           - CONTAINER-NAME
           - BLOB-URL-SUFFIX
   postgresql:
