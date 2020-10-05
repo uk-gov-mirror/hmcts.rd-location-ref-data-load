@@ -74,8 +74,9 @@ withPipeline(type, product, component) {
     echo "Checking case number:"
     sh "cat ccdCaseId.tmp"
     echo "Just waiting a while to ensure that the pod has run the job"
-    sh "sleep 120s"
-    echo "Verifying that functional test data was processed correctly"
+    def time = "120"
+    echo "Waiting ${time} seconds for deployment to complete prior starting functional testing"
+    sleep time.toInteger() // seconds
     try {
       builder.gradle('functional')
     } finally {
