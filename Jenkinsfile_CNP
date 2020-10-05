@@ -36,6 +36,7 @@ def secrets = [
   ]
 ]
 
+GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
   overrideVaultEnvironments(vaultOverrides)

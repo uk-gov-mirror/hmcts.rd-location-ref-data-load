@@ -11,6 +11,8 @@ def type = "java"
 def product = "rd"
 def component = "location-ref-data-load"
 
+GradleBuilder builder = new GradleBuilder(this, product)
+
 withNightlyPipeline(type, product, component) {
   after('securityScan') {
     echo "Just waiting a while to ensure that the pod has run the job"
