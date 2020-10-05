@@ -13,10 +13,6 @@ job:
     postgresql:
       enabled: false
     image: 'hmctspublic.azurecr.io/rd/location-ref-data-load:latest'
-    kind: CronJob
-    schedule: "*/10 * * * *"
-    global:
-      jobKind: CronJob
 
     keyVaults:
       "rd":
@@ -33,3 +29,6 @@ job:
 
   blobstorage:
     enabled: false
+
+  global:
+    jobKind: CronJob
