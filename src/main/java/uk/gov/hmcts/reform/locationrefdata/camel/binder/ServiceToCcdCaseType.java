@@ -20,16 +20,16 @@ import javax.validation.constraints.NotEmpty;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class ServiceToCcdService {
+public class ServiceToCcdCaseType {
 
     @DataField(pos = 1, columnName = "service_code")
     @NotEmpty
     String serviceCode;
 
     @DataField(pos = 2, columnName = "ccd_service_name")
-    @NotEmpty
     String ccdServiceName;
 
-    @DataField(pos = 3, columnName = "ccd_jurisdiction_name")
-    String ccdJurisdictionName;
+    @DataField(pos = 3, columnName = "ccd_case_type")
+    @NotEmpty
+    String ccdCaseType;
 }

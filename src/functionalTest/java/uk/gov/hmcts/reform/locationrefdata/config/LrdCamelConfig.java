@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.data.ingestion.camel.service.EmailServiceImpl;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.IEmailService;
 import uk.gov.hmcts.reform.data.ingestion.camel.util.DataLoadUtil;
 import uk.gov.hmcts.reform.data.ingestion.camel.validator.JsrValidatorInitializer;
-import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdService;
+import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 import uk.gov.hmcts.reform.locationrefdata.camel.listener.JobResultListener;
 import uk.gov.hmcts.reform.locationrefdata.camel.mapper.ServiceToCcdServiceMapper;
 import uk.gov.hmcts.reform.locationrefdata.camel.processor.ServiceToCcdServiceProcessor;
@@ -50,7 +50,7 @@ public class LrdCamelConfig {
     }
 
     @Bean
-    public JsrValidatorInitializer<ServiceToCcdService> judicialUserProfileJsrValidatorInitializer() {
+    public JsrValidatorInitializer<ServiceToCcdCaseType> judicialUserProfileJsrValidatorInitializer() {
         return new JsrValidatorInitializer<>();
     }
 
@@ -65,9 +65,9 @@ public class LrdCamelConfig {
     }
 
     @Bean
-    public ServiceToCcdService serviceToCcdService() {
+    public ServiceToCcdCaseType serviceToCcdService() {
 
-        return new ServiceToCcdService();
+        return new ServiceToCcdCaseType();
     }
 
 
@@ -103,7 +103,7 @@ public class LrdCamelConfig {
 
     // db configuration starts
     private static final PostgreSQLContainer testPostgres = new PostgreSQLContainer("postgres")
-        .withDatabaseName("dbjuddata_test");
+        .withDatabaseName("dblrddata_test");
 
     static {
         testPostgres.start();

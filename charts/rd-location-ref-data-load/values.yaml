@@ -20,8 +20,8 @@ job:
         secrets:
           - location-ref-api-POSTGRES-PASS
           - AppInsightsInstrumentationKey
-          - LOC-ACCOUNT-NAME
-          - LOC-ACCOUNT-KEY
+          - LRD-ACCOUNT-NAME
+          - LRD-ACCOUNT-KEY
           - CONTAINER-NAME
           - BLOB-URL-SUFFIX
   postgresql:

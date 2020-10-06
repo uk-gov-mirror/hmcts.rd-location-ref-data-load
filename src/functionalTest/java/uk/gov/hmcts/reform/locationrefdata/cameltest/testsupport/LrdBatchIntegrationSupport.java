@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.data.ingestion.camel.processor.ExceptionProcessor;
 import uk.gov.hmcts.reform.data.ingestion.camel.route.DataLoadRoute;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.IEmailService;
 import uk.gov.hmcts.reform.data.ingestion.camel.util.DataLoadUtil;
-import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdService;
+import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 
 import java.util.List;
 
@@ -85,18 +85,18 @@ public abstract class LrdBatchIntegrationSupport {
     }
 
     protected void validateLrdServiceFile(JdbcTemplate jdbcTemplate, String serviceSql,
-                                          List<ServiceToCcdService> exceptedResult, int size) {
-        var rowMapper = newInstance(ServiceToCcdService.class);
+                                          List<ServiceToCcdCaseType> exceptedResult, int size) {
+        var rowMapper = newInstance(ServiceToCcdCaseType.class);
         var serviceToCcdServices = jdbcTemplate.query(serviceSql, rowMapper);
-        assertEquals(serviceToCcdServices.size(), size);
-        assertEquals(serviceToCcdServices, exceptedResult);
+        assertEquals(size, serviceToCcdServices.size());
+        assertEquals(exceptedResult, serviceToCcdServices);
     }
 
     protected void validateLrdServiceFileAudit(JdbcTemplate jdbcTemplate,
                                                String auditSchedulerQuery, String status) {
         var result = jdbcTemplate.queryForList(auditSchedulerQuery);
-        assertEquals(result.size(), 1);
-        assertEquals(result.get(0).get("scheduler_status"), status);
+        assertEquals(1, result.size());
+        assertEquals(status, result.get(0).get("scheduler_status"));
     }
 
     @SuppressWarnings("unchecked")
@@ -107,9 +107,9 @@ public abstract class LrdBatchIntegrationSupport {
         assertEquals(result.size(), size);
         for (Triplet triplet : triplets) {
             int index = 0;
-            assertEquals(result.get(index).get("field_in_error"), triplet.getValue0());
-            assertEquals(result.get(index).get("error_description"), triplet.getValue1());
-            assertEquals(result.get(index).get("key"), triplet.getValue2());
+            assertEquals(triplet.getValue0(), result.get(index).get("field_in_error"));
+            assertEquals(triplet.getValue1(), result.get(index).get("error_description"));
+            assertEquals(triplet.getValue2(), result.get(index).get("key"));
             index++;
         }
     }
@@ -119,10 +119,10 @@ public abstract class LrdBatchIntegrationSupport {
                                                    String exceptionQuery,
                                                    Pair<String, String> pair) {
         var result = jdbcTemplate.queryForList(exceptionQuery);
-        assertEquals(result.get(result.size() - 1).get("file_name"), pair.getValue0());
+        assertEquals(pair.getValue0(), result.get(result.size() - 1).get("file_name"));
         assertEquals(
-            result.get(result.size() - 1).get("error_description"),
-            pair.getValue1()
+            pair.getValue1(),
+            result.get(result.size() - 1).get("error_description")
         );
     }
 }

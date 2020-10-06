@@ -34,8 +34,8 @@ def vaultOverrides = [
 def secrets = [
   'rd-${env}': [
     secret('ACCOUNT-KEY-PREVIEW', 'ACCOUNT_KEY_PREVIEW'),
-    secret('LOC-ACCOUNT-NAME', 'ACCOUNT_NAME'),
-    secret('LOC-ACCOUNT-KEY', 'ACCOUNT_KEY')
+    secret('LRD-ACCOUNT-NAME', 'ACCOUNT_NAME'),
+    secret('LRD-ACCOUNT-KEY', 'ACCOUNT_KEY')
   ]
 ]
 
@@ -59,11 +59,11 @@ withPipeline(type, product, component) {
 
 
   after('functionalTest:preview') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true
   }
 
   after('functionalTest:aat') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true
   }
 
   after('smoketest:preview') {
@@ -75,7 +75,6 @@ withPipeline(type, product, component) {
   }
 
   after('akschartsinstall') {
-    echo "Just waiting a while to ensure that the pod has run the job"
     def time = "120"
     echo "Waiting ${time} seconds for deployment to complete prior starting functional testing"
     sleep time.toInteger() // seconds

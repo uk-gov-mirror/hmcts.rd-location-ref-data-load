@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.data.ingestion.camel.exception.RouteFailedException;
 import uk.gov.hmcts.reform.data.ingestion.camel.processor.JsrValidationBaseProcessor;
 import uk.gov.hmcts.reform.data.ingestion.camel.validator.JsrValidatorInitializer;
-import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdService;
+import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +18,10 @@ import static java.util.stream.Stream.of;
 
 @Slf4j
 @Component
-public class ServiceToCcdServiceProcessor extends JsrValidationBaseProcessor<ServiceToCcdService> {
+public class ServiceToCcdServiceProcessor extends JsrValidationBaseProcessor<ServiceToCcdCaseType> {
 
     @Autowired
-    JsrValidatorInitializer<ServiceToCcdService> serviceToCcdServiceJsrValidatorInitializer;
+    JsrValidatorInitializer<ServiceToCcdCaseType> serviceToCcdServiceJsrValidatorInitializer;
 
     @Value("${logging-component-name}")
     private String logComponentName;
@@ -30,59 +30,59 @@ public class ServiceToCcdServiceProcessor extends JsrValidationBaseProcessor<Ser
     @SuppressWarnings("unchecked")
     public void process(Exchange exchange) throws Exception {
 
-        List<ServiceToCcdService> serviceToCcdServices;
+        List<ServiceToCcdCaseType> serviceToCcdCaseTypes;
 
-        serviceToCcdServices = exchange.getIn().getBody() instanceof List
-            ? (List<ServiceToCcdService>) exchange.getIn().getBody()
-            : singletonList((ServiceToCcdService) exchange.getIn().getBody());
+        serviceToCcdCaseTypes = exchange.getIn().getBody() instanceof List
+            ? (List<ServiceToCcdCaseType>) exchange.getIn().getBody()
+            : singletonList((ServiceToCcdCaseType) exchange.getIn().getBody());
 
         log.info(" {} ServiceToCCDService Records count before Validation & before merging service names {}::",
-                 logComponentName, serviceToCcdServices.size()
+                 logComponentName, serviceToCcdCaseTypes.size()
         );
 
-        List<ServiceToCcdService> refinedServiceToCcdServices = populateService(serviceToCcdServices);
+        List<ServiceToCcdCaseType> refinedServiceToCcdCaseTypes = populateService(serviceToCcdCaseTypes);
         log.info(" {} ServiceToCCDService Records count before Validation & after merging service names {}::",
-                 logComponentName, refinedServiceToCcdServices.size()
+                 logComponentName, refinedServiceToCcdCaseTypes.size()
         );
 
-        List<ServiceToCcdService> filteredServiceToCcdServices = validate(
+        List<ServiceToCcdCaseType> filteredServiceToCcdCaseTypes = validate(
             serviceToCcdServiceJsrValidatorInitializer,
-            refinedServiceToCcdServices
+            refinedServiceToCcdCaseTypes
         );
         log.info(" {} ServiceToCCDService Records count after Validation & after merging service names {}::",
-                 logComponentName, filteredServiceToCcdServices.size()
+                 logComponentName, filteredServiceToCcdCaseTypes.size()
         );
 
         audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
 
-        if (filteredServiceToCcdServices.size() == 0) {
+        if (filteredServiceToCcdCaseTypes.size() == 0) {
             log.error(" {} ServiceToCcdService failed as no valid records present::", logComponentName);
 
             throw new RouteFailedException("ServiceToCcdService failed as no valid records present");
         }
-        exchange.getMessage().setBody(filteredServiceToCcdServices);
+        exchange.getMessage().setBody(filteredServiceToCcdCaseTypes);
     }
 
     /**
      * Spits list by , serviceNames and recreates the list.
      *
-     * @param serviceToCcdServices serviceToCcdServices
+     * @param serviceToCcdCaseTypes serviceToCcdServices
      * @return List
      */
-    private List<ServiceToCcdService> populateService(List<ServiceToCcdService> serviceToCcdServices) {
-        List<ServiceToCcdService> refinedServiceToCcdServices = new ArrayList<>();
-        serviceToCcdServices.forEach(serviceToCcdService ->
-                                         of(serviceToCcdService.getCcdServiceName().split(","))
-                                             .forEach(serviceNames -> {
-                                                 refinedServiceToCcdServices.add(ServiceToCcdService.builder()
+    private List<ServiceToCcdCaseType> populateService(List<ServiceToCcdCaseType> serviceToCcdCaseTypes) {
+        List<ServiceToCcdCaseType> refinedServiceToCcdCaseTypes = new ArrayList<>();
+        serviceToCcdCaseTypes.forEach(serviceToCcdService ->
+                                         of(serviceToCcdService.getCcdCaseType().split(","))
+                                             .forEach(caseTypes -> {
+                                                 refinedServiceToCcdCaseTypes.add(ServiceToCcdCaseType.builder()
                                                                                      .serviceCode(serviceToCcdService
                                                                                                       .getServiceCode())
-                                                                                     .ccdJurisdictionName(
+                                                                                     .ccdServiceName(
                                                                                          serviceToCcdService
-                                                                                             .getCcdJurisdictionName())
-                                                                                     .ccdServiceName(serviceNames)
+                                                                                             .getCcdServiceName())
+                                                                                     .ccdCaseType(caseTypes)
                                                                                      .build());
                                              }));
-        return refinedServiceToCcdServices;
+        return refinedServiceToCcdCaseTypes;
     }
 }

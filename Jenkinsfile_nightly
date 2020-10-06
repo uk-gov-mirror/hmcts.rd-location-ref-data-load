@@ -44,7 +44,6 @@ withNightlyPipeline(type, product, component) {
   loadVaultSecrets(secrets)
 
   after('securityScan') {
-    echo "Just waiting a while to ensure that the pod has run the job"
     def time = "120"
     echo "Waiting ${time} seconds for deployment to complete prior starting functional testing"
     sleep time.toInteger() // seconds

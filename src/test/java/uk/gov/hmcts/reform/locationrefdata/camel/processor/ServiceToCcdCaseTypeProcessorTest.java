@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.data.ingestion.camel.exception.RouteFailedException;
 import uk.gov.hmcts.reform.data.ingestion.camel.validator.JsrValidatorInitializer;
-import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdService;
+import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @SuppressWarnings("unchecked")
-public class ServiceToCcdServiceProcessorTest {
+public class ServiceToCcdCaseTypeProcessorTest {
 
 
     ServiceToCcdServiceProcessor serviceToCcdServiceProcessor = spy(new ServiceToCcdServiceProcessor());
@@ -35,7 +35,7 @@ public class ServiceToCcdServiceProcessorTest {
 
     Exchange exchange = new DefaultExchange(camelContext);
 
-    JsrValidatorInitializer<ServiceToCcdService> serviceToCcdServiceJsrValidatorInitializer
+    JsrValidatorInitializer<ServiceToCcdCaseType> serviceToCcdServiceJsrValidatorInitializer
         = new JsrValidatorInitializer<>();
 
     @Before
@@ -54,27 +54,27 @@ public class ServiceToCcdServiceProcessorTest {
     @Test
     public void testProcess() throws Exception {
 
-        List<ServiceToCcdService> serviceToCcdServices = new ArrayList<>();
-        serviceToCcdServices.add(ServiceToCcdService.builder().ccdServiceName("service1,service2")
-                                     .ccdJurisdictionName("service1 Jurisdiction").serviceCode("1111").build());
-        serviceToCcdServices.add(ServiceToCcdService.builder().ccdServiceName("service1")
-                                     .ccdJurisdictionName("service1 Jurisdiction").serviceCode("1112").build());
+        List<ServiceToCcdCaseType> serviceToCcdCaseTypes = new ArrayList<>();
+        serviceToCcdCaseTypes.add(ServiceToCcdCaseType.builder().ccdCaseType("service1,service2")
+                                     .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build());
+        serviceToCcdCaseTypes.add(ServiceToCcdCaseType.builder().ccdCaseType("service1")
+                                     .ccdServiceName("service1 Jurisdiction").serviceCode("1112").build());
 
-        exchange.getIn().setBody(serviceToCcdServices);
+        exchange.getIn().setBody(serviceToCcdCaseTypes);
         doNothing().when(serviceToCcdServiceProcessor).audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
         serviceToCcdServiceProcessor.process(exchange);
         verify(serviceToCcdServiceProcessor, times(1)).process(exchange);
 
-        List<ServiceToCcdService> resultList = ((List<ServiceToCcdService>) exchange.getMessage().getBody());
+        List<ServiceToCcdCaseType> resultList = ((List<ServiceToCcdCaseType>) exchange.getMessage().getBody());
 
         assertEquals(resultList.size(), 3);
-        List<ServiceToCcdService> excepted = ImmutableList.of(
-            ServiceToCcdService.builder().ccdServiceName("service1")
-                .ccdJurisdictionName("service1 Jurisdiction").serviceCode("1111").build(),
-            ServiceToCcdService.builder().ccdServiceName("service2")
-                .ccdJurisdictionName("service1 Jurisdiction").serviceCode("1111").build(),
-            ServiceToCcdService.builder().ccdServiceName("service1")
-                .ccdJurisdictionName("service1 Jurisdiction").serviceCode("1112").build()
+        List<ServiceToCcdCaseType> excepted = ImmutableList.of(
+            ServiceToCcdCaseType.builder().ccdCaseType("service1")
+                .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service2")
+                .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service1")
+                .ccdServiceName("service1 Jurisdiction").serviceCode("1112").build()
         );
         assertEquals(resultList, excepted);
     }
@@ -82,22 +82,22 @@ public class ServiceToCcdServiceProcessorTest {
     @Test
     public void testProcessSingleElement() throws Exception {
 
-        ServiceToCcdService serviceToCcdService = ServiceToCcdService.builder().ccdServiceName("service1,service2")
-            .ccdJurisdictionName("service1 Jurisdiction").serviceCode("1111").build();
+        ServiceToCcdCaseType serviceToCcdCaseType = ServiceToCcdCaseType.builder().ccdCaseType("service1,service2")
+            .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build();
 
-        exchange.getIn().setBody(serviceToCcdService);
+        exchange.getIn().setBody(serviceToCcdCaseType);
         doNothing().when(serviceToCcdServiceProcessor).audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
         serviceToCcdServiceProcessor.process(exchange);
         verify(serviceToCcdServiceProcessor, times(1)).process(exchange);
-        List<ServiceToCcdService> resultList = ((List<ServiceToCcdService>) exchange.getMessage().getBody());
+        List<ServiceToCcdCaseType> resultList = ((List<ServiceToCcdCaseType>) exchange.getMessage().getBody());
 
         assertEquals(resultList.size(), 2);
-        List<ServiceToCcdService> excepted = ImmutableList.of(
-            ServiceToCcdService.builder().ccdServiceName("service1")
-                .ccdJurisdictionName("service1 Jurisdiction")
+        List<ServiceToCcdCaseType> excepted = ImmutableList.of(
+            ServiceToCcdCaseType.builder().ccdCaseType("service1")
+                .ccdServiceName("service1 Jurisdiction")
                 .serviceCode("1111").build(),
-            ServiceToCcdService.builder().ccdServiceName("service2")
-                .ccdJurisdictionName("service1 Jurisdiction")
+            ServiceToCcdCaseType.builder().ccdCaseType("service2")
+                .ccdServiceName("service1 Jurisdiction")
                 .serviceCode("1111").build()
         );
         assertEquals(resultList, excepted);
@@ -106,10 +106,10 @@ public class ServiceToCcdServiceProcessorTest {
     @Test
     public void testProcessSingleElementWithException() throws Exception {
 
-        ServiceToCcdService serviceToCcdService = ServiceToCcdService.builder().ccdServiceName("")
-            .ccdJurisdictionName("service1 Jurisdiction").serviceCode("1111").build();
+        ServiceToCcdCaseType serviceToCcdCaseType = ServiceToCcdCaseType.builder().ccdCaseType("")
+            .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build();
 
-        exchange.getIn().setBody(serviceToCcdService);
+        exchange.getIn().setBody(serviceToCcdCaseType);
         doNothing().when(serviceToCcdServiceProcessor).audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
         assertThrows(RouteFailedException.class, () -> serviceToCcdServiceProcessor.process(exchange));
         verify(serviceToCcdServiceProcessor, times(1)).process(exchange);

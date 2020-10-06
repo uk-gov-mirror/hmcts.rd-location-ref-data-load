@@ -33,7 +33,7 @@ insert into jurisdiction (
     description,
     last_update)
 values (
-    'org_sub_business_area 2',
+    'Civil',
     now())
 ;
 
@@ -55,7 +55,7 @@ insert into jurisdiction (
     description,
     last_update)
 values (
-    'jurisdiction 3',
+    'Social Entitlement Chamber',
     now())
 ;
 
@@ -102,7 +102,7 @@ insert into jurisdiction (
     description,
     last_update)
 values (
-    'Civil',
+    'Employment Tribunerals',
     now())
 ;
 

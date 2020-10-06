@@ -20,7 +20,7 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.reform.data.ingestion.configuration.AzureBlobConfig;
 import uk.gov.hmcts.reform.data.ingestion.configuration.StorageCredentials;
-import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdService;
+import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.LrdBatchIntegrationSupport;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.RestartingSpringJUnit4ClassRunner;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.SpringRestarter;
@@ -66,14 +66,14 @@ public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegratio
         jobLauncherTestUtils.launchJob();
         //Validate Success Result
         validateLrdServiceFile(jdbcTemplate, lrdSelectData, ImmutableList.of(
-            ServiceToCcdService.builder().ccdServiceName("service1")
-                .ccdJurisdictionName("test-jurisdiction1").serviceCode("AAA1").build(),
-            ServiceToCcdService.builder().ccdServiceName("service2")
-                .ccdJurisdictionName("test-jurisdiction1").serviceCode("AAA1").build()
+            ServiceToCcdCaseType.builder().ccdCaseType("service1")
+                .ccdServiceName("ccd-service1").serviceCode("AAA1").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service2")
+                .ccdServiceName("ccd-service1").serviceCode("AAA1").build()
         ), 2);
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess");
-        Triplet<String, String, String> triplet = with("ccdServiceName", "must not be empty", "AAA2");
+        Triplet<String, String, String> triplet = with("ccdCaseType", "must not be empty", "AAA2");
         validateLrdServiceFileJsrException(jdbcTemplate, exceptionQuery, 1, triplet);
         //Delete Uploaded test file with Snapshot delete
         integrationTestSupport.deleteBlob("service-test.csv");
@@ -110,14 +110,14 @@ public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegratio
         jobLauncherTestUtils.launchJob();
         //Validate Success Result
         validateLrdServiceFile(jdbcTemplate, lrdSelectData, ImmutableList.of(
-            ServiceToCcdService.builder().ccdServiceName("service1")
-                .ccdJurisdictionName("test-jurisdiction1").serviceCode("AAA1").build(),
-            ServiceToCcdService.builder().ccdServiceName("service2")
-                .ccdJurisdictionName("test-jurisdiction1").serviceCode("AAA1").build(),
-            ServiceToCcdService.builder().ccdServiceName("service11")
-                .ccdJurisdictionName("test-jurisdiction2").serviceCode("AAA2").build(),
-            ServiceToCcdService.builder().ccdServiceName("service12")
-                .ccdJurisdictionName("test-jurisdiction2").serviceCode("AAA2").build()
+            ServiceToCcdCaseType.builder().ccdCaseType("service1")
+                .ccdServiceName("ccd-service1").serviceCode("AAA1").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service2")
+                .ccdServiceName("ccd-service1").serviceCode("AAA1").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service11")
+                .ccdServiceName("ccd-service2").serviceCode("AAA2").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service12")
+                .ccdServiceName("ccd-service2").serviceCode("AAA2").build()
         ), 4);
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success");
