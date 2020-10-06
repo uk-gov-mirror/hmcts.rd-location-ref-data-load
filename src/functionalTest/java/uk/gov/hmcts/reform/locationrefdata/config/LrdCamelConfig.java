@@ -170,7 +170,7 @@ public class LrdCamelConfig {
 
 
     @Bean
-    LrdExecutor jrdTask() {
+    LrdExecutor lrdTask() {
         return new LrdExecutor();
     }
     // tasks configuration ends

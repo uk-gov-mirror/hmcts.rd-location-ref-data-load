@@ -105,9 +105,6 @@ pmd {
   sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
   reportsDir = file("$project.buildDir/reports/pmd")
   ignoreFailures = true
-  // https://github.com/pmd/pmd/issues/876
-  //ruleSets = []
-  //ruleSetFiles = files("config/pmd/ruleset.xml")
   ruleSets = [
     'category/java/errorprone.xml',
     'category/java/bestpractices.xml'
