@@ -75,7 +75,6 @@ public class LrdBatchApplicationTest extends LrdBatchIntegrationSupport {
                 "classpath:sourceFiles/service-test-update.csv"))
         );
 
-        //camelContext.removeRouteDefinitions(camelContext.getRouteDefinitions());
         producerTemplate.sendBody(startRoute, "retrigger");
 
         validateLrdServiceFile(jdbcTemplate, lrdSelectData, ImmutableList.of(
