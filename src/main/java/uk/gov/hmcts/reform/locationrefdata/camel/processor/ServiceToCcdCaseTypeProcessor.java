@@ -12,13 +12,17 @@ import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @Slf4j
 @Component
-public class ServiceToCcdServiceProcessor extends JsrValidationBaseProcessor<ServiceToCcdCaseType> {
+public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<ServiceToCcdCaseType> {
 
     @Autowired
     JsrValidatorInitializer<ServiceToCcdCaseType> serviceToCcdServiceJsrValidatorInitializer;
@@ -70,19 +74,30 @@ public class ServiceToCcdServiceProcessor extends JsrValidationBaseProcessor<Ser
      * @return List
      */
     private List<ServiceToCcdCaseType> populateService(List<ServiceToCcdCaseType> serviceToCcdCaseTypes) {
+
+        Predicate<ServiceToCcdCaseType> isValidCaseType = e -> isNotEmpty(e.getCcdCaseType());
+        Predicate<ServiceToCcdCaseType> isValidService = e -> isNotEmpty(e.getCcdServiceName())
+            && isEmpty(e.getCcdCaseType());
+
         List<ServiceToCcdCaseType> refinedServiceToCcdCaseTypes = new ArrayList<>();
-        serviceToCcdCaseTypes.forEach(serviceToCcdService ->
-                                         of(serviceToCcdService.getCcdCaseType().split(","))
-                                             .forEach(caseTypes -> {
-                                                 refinedServiceToCcdCaseTypes.add(ServiceToCcdCaseType.builder()
-                                                                                     .serviceCode(serviceToCcdService
-                                                                                                      .getServiceCode())
-                                                                                     .ccdServiceName(
-                                                                                         serviceToCcdService
-                                                                                             .getCcdServiceName())
-                                                                                     .ccdCaseType(caseTypes)
-                                                                                     .build());
-                                             }));
+        serviceToCcdCaseTypes.stream()
+            .filter(isValidCaseType)
+            .forEach(serviceToCcdService ->
+                         of(serviceToCcdService.getCcdCaseType().split(","))
+                             .forEach(caseTypes -> {
+                                 refinedServiceToCcdCaseTypes.add(ServiceToCcdCaseType.builder()
+                                                                      .serviceCode(serviceToCcdService
+                                                                                       .getServiceCode())
+                                                                      .ccdServiceName(
+                                                                          serviceToCcdService
+                                                                              .getCcdServiceName())
+                                                                      .ccdCaseType(caseTypes)
+                                                                      .build());
+                             }));
+
+        refinedServiceToCcdCaseTypes.addAll(serviceToCcdCaseTypes.stream()
+                                                .filter(isValidService).collect(toList()));
+
         return refinedServiceToCcdCaseTypes;
     }
 }

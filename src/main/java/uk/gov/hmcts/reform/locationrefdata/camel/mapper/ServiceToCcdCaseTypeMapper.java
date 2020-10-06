@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class ServiceToCcdServiceMapper implements IMapper {
+public class ServiceToCcdCaseTypeMapper implements IMapper {
 
     @Override
     public Map<String, Object> getMap(Object serviceToCcdService) {

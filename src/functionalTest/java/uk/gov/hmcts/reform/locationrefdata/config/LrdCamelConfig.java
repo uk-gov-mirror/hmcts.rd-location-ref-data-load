@@ -27,8 +27,8 @@ import uk.gov.hmcts.reform.data.ingestion.camel.util.DataLoadUtil;
 import uk.gov.hmcts.reform.data.ingestion.camel.validator.JsrValidatorInitializer;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 import uk.gov.hmcts.reform.locationrefdata.camel.listener.JobResultListener;
-import uk.gov.hmcts.reform.locationrefdata.camel.mapper.ServiceToCcdServiceMapper;
-import uk.gov.hmcts.reform.locationrefdata.camel.processor.ServiceToCcdServiceProcessor;
+import uk.gov.hmcts.reform.locationrefdata.camel.mapper.ServiceToCcdCaseTypeMapper;
+import uk.gov.hmcts.reform.locationrefdata.camel.processor.ServiceToCcdCaseTypeProcessor;
 import uk.gov.hmcts.reform.locationrefdata.camel.task.LrdRouteTask;
 import uk.gov.hmcts.reform.locationrefdata.camel.util.LrdExecutor;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.IntegrationTestSupport;
@@ -55,13 +55,13 @@ public class LrdCamelConfig {
     }
 
     @Bean
-    public ServiceToCcdServiceProcessor serviceToCcdServiceProcessor() {
-        return new ServiceToCcdServiceProcessor();
+    public ServiceToCcdCaseTypeProcessor serviceToCcdServiceProcessor() {
+        return new ServiceToCcdCaseTypeProcessor();
     }
 
     @Bean
-    public ServiceToCcdServiceMapper serviceToCcdServiceMapper() {
-        return new ServiceToCcdServiceMapper();
+    public ServiceToCcdCaseTypeMapper serviceToCcdServiceMapper() {
+        return new ServiceToCcdCaseTypeMapper();
     }
 
     @Bean

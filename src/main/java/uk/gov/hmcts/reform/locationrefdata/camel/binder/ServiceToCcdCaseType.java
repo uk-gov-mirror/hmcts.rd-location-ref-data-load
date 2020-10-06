@@ -30,6 +30,5 @@ public class ServiceToCcdCaseType {
     String ccdServiceName;
 
     @DataField(pos = 3, columnName = "ccd_case_type")
-    @NotEmpty
     String ccdCaseType;
 }
