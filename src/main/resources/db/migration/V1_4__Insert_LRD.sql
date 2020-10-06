@@ -4,14 +4,14 @@ insert into org_unit (
     last_update)
 values (
     'HMCTS',
-    now());
+    timezone('utc', now()));
 
 insert into org_business_area (
     description,
     last_update)
 values (
     'Civil, Family and Tribunals',
-    now())
+    timezone('utc', now()))
 ;
 
 insert into org_sub_business_area (
@@ -19,7 +19,7 @@ insert into org_sub_business_area (
     last_update)
 values (
     'Civil and Family',
-    now())
+    timezone('utc', now()))
 ;
 
 insert into org_sub_business_area (
@@ -27,14 +27,14 @@ insert into org_sub_business_area (
     last_update)
 values (
     'Tribunals',
-    now())
+    timezone('utc', now()))
 ;
 insert into jurisdiction (
     description,
     last_update)
 values (
     'Civil',
-    now())
+    timezone('utc', now()))
 ;
 
 insert into jurisdiction (
@@ -42,21 +42,21 @@ insert into jurisdiction (
     last_update)
 values (
     'Family',
-    now())
+    timezone('utc', now()))
 ;
 insert into jurisdiction (
     description,
     last_update)
 values (
     'General Regulatory Chamber',
-    now())
+    timezone('utc', now()))
 ;
 insert into jurisdiction (
     description,
     last_update)
 values (
     'Social Entitlement Chamber',
-    now())
+    timezone('utc', now()))
 ;
 
 insert into jurisdiction (
@@ -64,7 +64,7 @@ insert into jurisdiction (
     last_update)
 values (
     'Health, Education and Social Care Chamber',
-    now())
+    timezone('utc', now()))
 ;
 
 insert into jurisdiction (
@@ -72,7 +72,7 @@ insert into jurisdiction (
     last_update)
 values (
     'Tax Chamber',
-    now())
+    timezone('utc', now()))
 ;
 
 insert into jurisdiction (
@@ -80,7 +80,7 @@ insert into jurisdiction (
     last_update)
 values (
     'War Pensions and Armed Forces Compensation Chamber',
-    now())
+    timezone('utc', now()))
 ;
 
 insert into jurisdiction (
@@ -88,14 +88,14 @@ insert into jurisdiction (
     last_update)
 values (
     'Immigration and Asylum Chamber',
-    now())
+    timezone('utc', now()))
 ;
 insert into jurisdiction (
     description,
     last_update)
 values (
     'Property Chamber',
-    now())
+    timezone('utc', now()))
 ;
 
 insert into jurisdiction (
@@ -103,7 +103,7 @@ insert into jurisdiction (
     last_update)
 values (
     'Employment Tribunerals',
-    now())
+    timezone('utc', now()))
 ;
 
 
