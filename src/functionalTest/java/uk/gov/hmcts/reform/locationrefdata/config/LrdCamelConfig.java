@@ -31,7 +31,7 @@ import uk.gov.hmcts.reform.locationrefdata.camel.mapper.ServiceToCcdCaseTypeMapp
 import uk.gov.hmcts.reform.locationrefdata.camel.processor.ServiceToCcdCaseTypeProcessor;
 import uk.gov.hmcts.reform.locationrefdata.camel.task.LrdRouteTask;
 import uk.gov.hmcts.reform.locationrefdata.camel.util.LrdExecutor;
-import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.IntegrationTestSupport;
+import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.LrdBlobSupport;
 
 import javax.sql.DataSource;
 
@@ -45,8 +45,8 @@ public class LrdCamelConfig {
     ApplicationContext applicationContext;
 
     @Bean
-    IntegrationTestSupport integrationTestSupport() {
-        return new IntegrationTestSupport();
+    LrdBlobSupport integrationTestSupport() {
+        return new LrdBlobSupport();
     }
 
     @Bean

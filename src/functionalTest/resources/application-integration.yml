@@ -45,16 +45,16 @@ scheduler-insert-sql:  insert into dataload_schedular_audit (scheduler_name,sche
 audit-enable: true
 lrd-route-task: lrdRouteTask
 
-routes-to-execute-orchestration: lrd-service
+routes-to-execute: lrd-ccd-casetype-load
 route:
-  lrd-service:
-    id: lrd-service
+  lrd-ccd-casetype-load:
+    id: lrd-ccd-casetype-load
     file-name: service-test.csv
     table-name: service_to_ccd_case_type_assoc
     delete-sql:
-      sql:delete from service_to_ccd_case_type_assoc where service_code = :#service_code
-      and :#ccd_case_type not in (select ccd_case_type from service_to_ccd_case_type_assoc where service_code = :#service_code)
-      ?batch=true&dataSource=dataSource
+      sql:delete from service_to_ccd_case_type_assoc where ccd_case_type in (select ccd_case_type
+      from service_to_ccd_case_type_assoc where service_code = :#service_code
+      and  ccd_case_type <> :#ccd_case_type) and service_code = :#service_code?batch=true&dataSource=dataSource
     insert-sql:
       sql:insert into service_to_ccd_case_type_assoc (service_code, ccd_service_name, ccd_case_type, created_date)
       values (:#service_code,:#ccd_service_name,:#ccd_case_type, now() at time zone 'utc')
@@ -72,6 +72,8 @@ exception-select-query: select * from  dataload_exception_records
 select-dataload-scheduler: select *  from dataload_schedular_audit
 
 truncate-audit: truncate dataload_schedular_audit
+
+get-ccd-case-time: select created_date from SERVICE_TO_CCD_CASE_TYPE_ASSOC where service_code = ? and ccd_case_type = ?
 
 jdbc-batch-size: 10
 

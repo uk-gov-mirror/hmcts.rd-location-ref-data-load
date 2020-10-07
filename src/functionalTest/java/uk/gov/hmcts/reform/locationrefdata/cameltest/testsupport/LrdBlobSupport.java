@@ -23,7 +23,7 @@ import static com.microsoft.azure.storage.blob.DeleteSnapshotsOption.INCLUDE_SNA
 @Component
 @ContextConfiguration(classes = {
     AzureBlobConfig.class, StorageCredentials.class}, initializers = ConfigFileApplicationContextInitializer.class)
-public class IntegrationTestSupport {
+public class LrdBlobSupport {
 
     CloudStorageAccount acc;
 

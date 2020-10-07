@@ -30,7 +30,7 @@ public class LrdRouteTask implements Tasklet {
     @Autowired
     DataLoadRoute dataLoadRoute;
 
-    @Value("${routes-to-execute-orchestration}")
+    @Value("${routes-to-execute}")
     List<String> routesToExecute;
 
     @Value("${logging-component-name}")

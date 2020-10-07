@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.reform.data.ingestion.configuration.AzureBlobConfig;
 import uk.gov.hmcts.reform.data.ingestion.configuration.StorageCredentials;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
-import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.LrdBatchIntegrationSupport;
+import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.LrdIntegrationBaseTest;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.RestartingSpringJUnit4ClassRunner;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.SpringRestarter;
 import uk.gov.hmcts.reform.locationrefdata.config.LrdCamelConfig;
@@ -46,7 +46,7 @@ import static org.springframework.util.ResourceUtils.getFile;
 @SqlConfig(dataSource = "dataSource", transactionManager = "txManager",
     transactionMode = SqlConfig.TransactionMode.ISOLATED)
 @SuppressWarnings("unchecked")
-public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegrationSupport {
+public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest {
 
     @Before
     public void init() {
@@ -57,7 +57,7 @@ public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegratio
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
     public void testTaskletPartialSuccessAndJsr() throws Exception {
-        integrationTestSupport.uploadFile(
+        lrdBlobSupport.uploadFile(
             "service-test.csv",
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-partial-success.csv"))
@@ -76,13 +76,13 @@ public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegratio
         Triplet<String, String, String> triplet = with("serviceCode", "must not be blank", "");
         validateLrdServiceFileJsrException(jdbcTemplate, exceptionQuery, 1, triplet);
         //Delete Uploaded test file with Snapshot delete
-        integrationTestSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob("service-test.csv");
     }
 
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
     public void testTaskletFailure() throws Exception {
-        integrationTestSupport.uploadFile(
+        lrdBlobSupport.uploadFile(
             "service-test.csv",
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-failure.csv"))
@@ -97,11 +97,11 @@ public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegratio
             "ServiceToCcdService failed as no valid records present"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
-        integrationTestSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob("service-test.csv");
     }
 
     private void testInsertion() throws Exception {
-        integrationTestSupport.uploadFile(
+        lrdBlobSupport.uploadFile(
             "service-test.csv",
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test.csv"))
@@ -122,6 +122,6 @@ public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegratio
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success");
         //Delete Uploaded test file with Snapshot delete
-        integrationTestSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob("service-test.csv");
     }
 }

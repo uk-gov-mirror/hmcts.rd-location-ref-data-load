@@ -15,12 +15,13 @@ import uk.gov.hmcts.reform.data.ingestion.camel.service.IEmailService;
 import uk.gov.hmcts.reform.data.ingestion.camel.util.DataLoadUtil;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.jdbc.core.BeanPropertyRowMapper.newInstance;
 
-public abstract class LrdBatchIntegrationSupport {
+public abstract class LrdIntegrationBaseTest {
 
     public static final String DB_SCHEDULER_STATUS = "scheduler_status";
 
@@ -69,8 +70,11 @@ public abstract class LrdBatchIntegrationSupport {
     @Value("${select-dataload-scheduler}")
     protected String auditSchedulerQuery;
 
+    @Value("${get-ccd-case-time}")
+    protected String getCcdCaseTime;
+
     @Autowired
-    protected IntegrationTestSupport integrationTestSupport;
+    protected LrdBlobSupport lrdBlobSupport;
 
     @BeforeClass
     public static void beforeAll() throws Exception {
@@ -90,6 +94,7 @@ public abstract class LrdBatchIntegrationSupport {
         assertEquals(size, serviceToCcdServices.size());
         assertEquals(exceptedResult, serviceToCcdServices);
     }
+
 
     protected void validateLrdServiceFileAudit(JdbcTemplate jdbcTemplate,
                                                String auditSchedulerQuery, String status) {
@@ -123,5 +128,9 @@ public abstract class LrdBatchIntegrationSupport {
             pair.getValue1(),
             result.get(result.size() - 1).get("error_description")
         );
+    }
+
+    protected Timestamp getTime(String sql, String serviceCode, String caseType) {
+        return jdbcTemplate.queryForObject(sql, new Object[]{serviceCode, caseType}, Timestamp.class);
     }
 }
