@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.locationrefdata.configuration.BatchConfig;
 
 import java.io.FileInputStream;
 
+import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.springframework.util.ResourceUtils.getFile;
 
 @TestPropertySource(properties = {"spring.config.location=classpath:application-integration.yml,"
@@ -65,6 +66,39 @@ public class LrdBatchApplicationTest extends LrdBatchIntegrationSupport {
 
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
+    public void testTaskletSuccessWithEmptyCaseTypeOrName() throws Exception {
+        integrationTestSupport.uploadFile(
+            "service-test.csv",
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/service-test-empty-case-or-name.csv"))
+        );
+
+        jobLauncherTestUtils.launchJob();
+        //Validate Success Result
+        validateLrdServiceFile(jdbcTemplate, lrdSelectData, ImmutableList.of(
+            ServiceToCcdCaseType.builder().ccdCaseType("service1")
+                .ccdServiceName("ccd-service1").serviceCode("AAA1").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service2")
+                .ccdServiceName("ccd-service1").serviceCode("AAA1").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service11")
+                .ccdServiceName("ccd-service2").serviceCode("AAA2").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service12")
+                .ccdServiceName("ccd-service2").serviceCode("AAA2").build(),
+            ServiceToCcdCaseType.builder()
+                .ccdCaseType("service14").serviceCode("AAA4")
+                .ccdServiceName(EMPTY).build(),
+            ServiceToCcdCaseType.builder()
+                .ccdServiceName("ccd-service3").serviceCode("AAA3")
+                .ccdCaseType(EMPTY).build()
+        ), 6);
+        //Validates Success Audit
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success");
+        //Delete Uploaded test file with Snapshot delete
+        integrationTestSupport.deleteBlob("service-test.csv");
+    }
+
+    @Test
+    @Sql(scripts = {"/testData/truncate-lrd.sql"})
     public void testTaskletSuccessWithUpdateAndDelete() throws Exception {
 
         testInsertion();
@@ -72,7 +106,7 @@ public class LrdBatchApplicationTest extends LrdBatchIntegrationSupport {
         integrationTestSupport.uploadFile(
             "service-test.csv",
             new FileInputStream(getFile(
-                "classpath:sourceFiles/service-test-update.csv"))
+                "classpath:sourceFiles/service-test-delete-insert.csv"))
         );
 
         producerTemplate.sendBody(startRoute, "retrigger");

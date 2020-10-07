@@ -72,7 +72,6 @@ public abstract class LrdBatchIntegrationSupport {
     @Autowired
     protected IntegrationTestSupport integrationTestSupport;
 
-
     @BeforeClass
     public static void beforeAll() throws Exception {
         if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {

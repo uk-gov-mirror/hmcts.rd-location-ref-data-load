@@ -1,0 +1,6 @@
+service_code,ccd_service_name,ccd_case_type
+AAA1,ccd-service1,"service1,service2"
+AAA2,ccd-service2,"service11,service12"
+AAA3,ccd-service3,
+AAA4,,service14
+AAA5,,
