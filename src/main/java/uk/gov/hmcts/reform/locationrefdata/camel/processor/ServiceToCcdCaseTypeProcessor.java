@@ -18,7 +18,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 @Slf4j
 @Component
@@ -75,8 +75,8 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
      */
     private List<ServiceToCcdCaseType> populateService(List<ServiceToCcdCaseType> serviceToCcdCaseTypes) {
 
-        Predicate<ServiceToCcdCaseType> isValidCaseType = e -> isNotEmpty(e.getCcdCaseType());
-        Predicate<ServiceToCcdCaseType> isValidService = e -> isNotEmpty(e.getCcdServiceName())
+        Predicate<ServiceToCcdCaseType> isValidCaseType = e -> isNotBlank(e.getCcdCaseType());
+        Predicate<ServiceToCcdCaseType> isValidService = e -> isNotBlank(e.getCcdServiceName())
             && isEmpty(e.getCcdCaseType());
 
         List<ServiceToCcdCaseType> refinedServiceToCcdCaseTypes = new ArrayList<>();
