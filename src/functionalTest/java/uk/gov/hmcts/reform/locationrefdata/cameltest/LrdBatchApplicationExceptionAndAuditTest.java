@@ -73,7 +73,7 @@ public class LrdBatchApplicationExceptionAndAuditTest extends LrdBatchIntegratio
         ), 2);
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess");
-        Triplet<String, String, String> triplet = with("serviceCode", "must not be empty", "");
+        Triplet<String, String, String> triplet = with("serviceCode", "must not be blank", "");
         validateLrdServiceFileJsrException(jdbcTemplate, exceptionQuery, 1, triplet);
         //Delete Uploaded test file with Snapshot delete
         integrationTestSupport.deleteBlob("service-test.csv");
