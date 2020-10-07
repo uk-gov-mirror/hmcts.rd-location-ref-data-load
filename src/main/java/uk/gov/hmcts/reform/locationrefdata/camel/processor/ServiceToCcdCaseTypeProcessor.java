@@ -59,7 +59,7 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
 
         audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
 
-        if (filteredServiceToCcdCaseTypes.size() == 0) {
+        if (filteredServiceToCcdCaseTypes.isEmpty()) {
             log.error(" {} ServiceToCcdService failed as no valid records present::", logComponentName);
 
             throw new RouteFailedException("ServiceToCcdService failed as no valid records present");
@@ -84,7 +84,7 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
             .filter(isValidCaseType)
             .forEach(serviceToCcdService ->
                          of(serviceToCcdService.getCcdCaseType().split(","))
-                             .forEach(caseTypes -> {
+                             .forEach(caseTypes ->
                                  refinedServiceToCcdCaseTypes.add(ServiceToCcdCaseType.builder()
                                                                       .serviceCode(serviceToCcdService
                                                                                        .getServiceCode())
@@ -92,8 +92,8 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
                                                                           serviceToCcdService
                                                                               .getCcdServiceName())
                                                                       .ccdCaseType(caseTypes)
-                                                                      .build());
-                             }));
+                                                                      .build())
+                             ));
 
         refinedServiceToCcdCaseTypes.addAll(serviceToCcdCaseTypes.stream()
                                                 .filter(isValidService).collect(toList()));

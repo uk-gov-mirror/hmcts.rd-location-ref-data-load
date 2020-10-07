@@ -41,6 +41,7 @@ public class LrdRouteTask implements Tasklet {
         log.info("{}:: ParentRouteTask starts::", logComponentName);
         dataLoadRoute.startRoute(startRoute, routesToExecute);
         String status = lrdExecutor.execute(camelContext, "LRD Route", startRoute);
+        log.info("{}:: ParentRouteTask completes with status::{}", logComponentName, status);
         return RepeatStatus.FINISHED;
     }
 }

@@ -56,9 +56,9 @@ public class ServiceToCcdCaseTypeProcessorTest {
 
         List<ServiceToCcdCaseType> serviceToCcdCaseTypes = new ArrayList<>();
         serviceToCcdCaseTypes.add(ServiceToCcdCaseType.builder().ccdCaseType("service1,service2")
-                                     .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build());
+                                      .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build());
         serviceToCcdCaseTypes.add(ServiceToCcdCaseType.builder().ccdCaseType("service1")
-                                     .ccdServiceName("service1 Jurisdiction").serviceCode("1112").build());
+                                      .ccdServiceName("service1 Jurisdiction").serviceCode("1112").build());
 
         exchange.getIn().setBody(serviceToCcdCaseTypes);
         doNothing().when(serviceToCcdCaseTypeProcessor).audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
@@ -67,7 +67,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
 
         List<ServiceToCcdCaseType> resultList = ((List<ServiceToCcdCaseType>) exchange.getMessage().getBody());
 
-        assertEquals(resultList.size(), 3);
+        assertEquals(3, resultList.size());
         List<ServiceToCcdCaseType> excepted = ImmutableList.of(
             ServiceToCcdCaseType.builder().ccdCaseType("service1")
                 .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build(),
@@ -91,7 +91,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
         verify(serviceToCcdCaseTypeProcessor, times(1)).process(exchange);
         List<ServiceToCcdCaseType> resultList = ((List<ServiceToCcdCaseType>) exchange.getMessage().getBody());
 
-        assertEquals(resultList.size(), 2);
+        assertEquals(2, resultList.size());
         List<ServiceToCcdCaseType> excepted = ImmutableList.of(
             ServiceToCcdCaseType.builder().ccdCaseType("service1")
                 .ccdServiceName("service1 Jurisdiction")
@@ -116,7 +116,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
         verify(serviceToCcdCaseTypeProcessor, times(1)).process(exchange);
         List<ServiceToCcdCaseType> resultList = ((List<ServiceToCcdCaseType>) exchange.getMessage().getBody());
 
-        assertEquals(resultList.size(), 1);
+        assertEquals(1, resultList.size());
         List<ServiceToCcdCaseType> excepted = ImmutableList.of(
             ServiceToCcdCaseType.builder().ccdCaseType("service1")
                 .ccdServiceName("service1 Jurisdiction")
@@ -134,7 +134,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
         verify(serviceToCcdCaseTypeProcessor, times(1)).process(exchange);
         List<ServiceToCcdCaseType> resultList = ((List<ServiceToCcdCaseType>) exchange.getMessage().getBody());
 
-        assertEquals(resultList.size(), 1);
+        assertEquals(1, resultList.size());
         List<ServiceToCcdCaseType> excepted = ImmutableList.of(
             ServiceToCcdCaseType.builder()
                 .ccdServiceName("service1 Jurisdiction")
@@ -152,7 +152,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
         verify(serviceToCcdCaseTypeProcessor, times(1)).process(exchange);
         List<ServiceToCcdCaseType> resultList = ((List<ServiceToCcdCaseType>) exchange.getMessage().getBody());
 
-        assertEquals(resultList.size(), 1);
+        assertEquals(1, resultList.size());
         List<ServiceToCcdCaseType> excepted = ImmutableList.of(
             ServiceToCcdCaseType.builder()
                 .ccdCaseType("service1")
