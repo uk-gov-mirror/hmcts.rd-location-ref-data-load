@@ -10,7 +10,7 @@ import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
 import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 
 @Component
 @Setter
@@ -23,7 +23,7 @@ import javax.validation.constraints.NotEmpty;
 public class ServiceToCcdCaseType {
 
     @DataField(pos = 1, columnName = "service_code")
-    @NotEmpty
+    @NotBlank
     String serviceCode;
 
     @DataField(pos = 2, columnName = "ccd_service_name")
