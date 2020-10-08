@@ -1,7 +1,7 @@
 spring:
   cloud:
     propertiesvolume:
-      prefixed: false
+      prefixed: true
       paths: /mnt/secrets/rd
       aliases:
         rd.location-ref-api-postgres-db: spring.datasource.password
