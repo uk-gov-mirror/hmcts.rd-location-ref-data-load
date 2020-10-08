@@ -5,11 +5,11 @@ plugins {
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
   id 'org.springframework.boot' version '2.3.4.RELEASE'
-  id 'org.owasp.dependencycheck' version '5.3.2.1'
   id 'com.github.ben-manes.versions' version '0.31.0'
   id 'org.sonarqube' version '3.0'
   id "org.flywaydb.flyway" version "6.5.5"
-  id 'uk.gov.hmcts.java' version '0.9.0'
+  id "info.solidsoft.pitest" version '1.5.1'
+  id 'uk.gov.hmcts.java' version '0.12.0'
 }
 
 group = 'uk.gov.hmcts.reform.rd'
@@ -23,8 +23,8 @@ allprojects {
 sourceSets {
   functionalTest {
     java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
       srcDir file('src/functionalTest/java')
     }
     resources.srcDir file('src/functionalTest/resources')
@@ -103,13 +103,15 @@ pmd {
   toolVersion = "6.18.0"
   sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
   reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
-  ruleSetFiles = files("config/pmd/ruleset.xml")
+  ignoreFailures = true
+  ruleSets = [
+    'category/java/errorprone.xml',
+    'category/java/bestpractices.xml'
+  ]
 }
 
 jacocoTestReport {
-  executionData(test, integration)
+  executionData(test)
   reports {
     xml.enabled = true
     csv.enabled = false
@@ -117,14 +119,33 @@ jacocoTestReport {
   }
 }
 
-project.tasks['sonarqube'].dependsOn test
+pitest {
+  targetClasses = ['uk.gov.hmcts.reform.juddata.*']
+  testSourceSets = [sourceSets.test, sourceSets.functionalTest]
+  excludedClasses = [
+    'uk.gov.hmcts.reform.locationrefdata.config.*',
+    'uk.gov.hmcts.reform.locationrefdata.LrdLoadApplication'
+  ]
+  threads = 10
+  enableDefaultIncrementalAnalysis = true
+  historyInputLocation = 'build/reports/pitest/fastermutationtesting'
+  historyOutputLocation = 'build/reports/pitest/fastermutationtestingoutput'
+  outputFormats = ['XML', 'HTML']
+  timestampedReports = true
+  mutationThreshold = 90
+  useClasspathFile = true
+}
+
+project.tasks['sonarqube'].dependsOn test, jacocoTestReport
 
 sonarqube {
   properties {
     property "sonar.projectName", "rd-location-ref-data-load"
     property "sonar.projectKey", "uk.gov.hmcts.reform:rd-location-ref-data-load"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
-    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/**"
+    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/locationrefdata/configuration/**," +
+    "src/main/java/uk/gov/hmcts/reform/locationrefdata/LrdLoadApplication.java," +
+    "src/main/java/uk/gov/hmcts/reform/locationrefdata/camel/binder/**"
   }
 }
 
@@ -167,6 +188,9 @@ repositories {
   mavenLocal()
   jcenter()
   mavenCentral()
+  maven {
+    url "https://dl.bintray.com/hmcts/hmcts-maven"
+  }
 }
 
 def versions = [
@@ -177,7 +201,8 @@ def versions = [
   springfoxSwagger    : '2.9.2',
   serenity            : '2.0.76',
   lombok              : '1.18.6',
-  flyway              : '6.5.5'
+  flyway              : '6.5.5',
+  camel               : '2.25.2'
 ]
 
 ext.libraries = [
@@ -196,7 +221,6 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-json'
 
-
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
 
   compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
@@ -212,7 +236,7 @@ dependencies {
   compile group: 'javax.el', name: 'javax.el-api', version: '3.0.0'
   compile group: 'org.flywaydb', name: 'flyway-core', version: versions.flyway
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
-
+  compile group: 'uk.gov.hmcts.reform', name: 'data-ingestion-lib', version: '0.3.7-beta'
   compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
@@ -248,17 +272,31 @@ dependencies {
     }
 
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
+  testCompile 'org.codehaus.sonar-plugins:sonar-pitest-plugin:0.5'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
+  functionalTestImplementation sourceSets.test.runtimeClasspath
 
   smokeTestImplementation sourceSets.test.runtimeClasspath
 
+  testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: versions.camel
+  testCompile group: 'org.apache.camel', name: 'camel-test', version: versions.camel
+  testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.12.5'
+  testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
+  testCompile group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.2.4.RELEASE'
+  testCompile group: 'org.javatuples', name: 'javatuples', version: '1.2'
+
+  testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: versions.camel
+  testCompile group: 'org.apache.camel', name: 'camel-test', version: versions.camel
+  testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.12.5'
+  testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
+
 }
 
-mainClassName = 'uk.gov.hmcts.reform.locationrefdata.Application'
+mainClassName = 'uk.gov.hmcts.reform.locationrefdata.LrdLoadApplication'
 
 bootJar {
   getArchiveFileName().set(provider {
@@ -269,8 +307,6 @@ bootJar {
     attributes('Implementation-Version': project.version.toString())
   }
 }
-
-
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL

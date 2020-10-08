@@ -1,0 +1,85 @@
+spring:
+  mail:
+    from: no-reply@reform.hmcts.net
+    to:  abhijit.diwan@hmcts.net,mallikarjun.puttana@hmcts.net
+    subject:  LRD - Exception in processing -
+    host: mta.reform.hmcts.net
+    port: 25
+    enabled: true
+    properties:
+      mail-smtp:
+        starttls:
+          enable: false
+        ssl:
+          trust: "*"
+  flyway:
+    locations: classpath:db/testmigration
+    enabled: true
+  batch:
+    initialize-schema: always
+    # set batch false in integration test and run batch manually with batch runner to set dynamic test property values
+    # eg. dynamic properties ${parent.file.name}
+    job:
+      enabled: false
+
+#Local integration testing these values should be actual
+#ACCOUNT_NAME: ${ACCOUNT_NAME}
+#ACCOUNT_KEY: ${ACCOUNT_KEY}
+
+start-route: direct:LRD
+archival-route: direct:LrdArchival
+archival-path: azure-blob://${azure.storage.account-name}/lrd-ref-data-archive
+active-blob-path: azure-blob://${azure.storage.account-name}/lrd-ref-data
+archival-file-names: service-test.csv
+archival-cred: credentials=#credsreg&operation=updateBlockBlob
+#archival-date-format keep in dd-MM-yyyy as to delete in testing
+archival-date-format: dd-MM-yyyy
+file-read-time-out: 2000
+scheduler-audit-select: select count(*) from dataload_schedular_audit where date(scheduler_start_time) = current_date
+invalid-exception-sql: insert into dataload_exception_records(file_name,scheduler_start_time,scheduler_name,error_description,updated_timestamp) values(?, ?, ?, ?, ?)
+invalid-jsr-sql: insert into dataload_exception_records(table_name,scheduler_start_time,scheduler_name,key,field_in_error,error_description,updated_timestamp) values(?, ?, ?, ?, ?, ?, ?)
+jsr-threshold-limit: 5
+batchjob-name: LocationRefDataLoad
+scheduler-insert-sql:  insert into dataload_schedular_audit (scheduler_name,scheduler_start_time,scheduler_end_time,scheduler_status)
+  values(?,?,?,?)
+audit-enable: true
+lrd-route-task: lrdRouteTask
+
+routes-to-execute: lrd-ccd-casetype-load
+route:
+  lrd-ccd-casetype-load:
+    id: lrd-ccd-casetype-load
+    file-name: service-test.csv
+    table-name: service_to_ccd_case_type_assoc
+    delete-sql:
+      sql:delete from service_to_ccd_case_type_assoc where ccd_case_type in (select ccd_case_type
+      from service_to_ccd_case_type_assoc where service_code = :#service_code
+      and  ccd_case_type <> :#ccd_case_type) and service_code = :#service_code?batch=true&dataSource=dataSource
+    insert-sql:
+      sql:insert into service_to_ccd_case_type_assoc (service_code, ccd_service_name, ccd_case_type, created_date)
+      values (:#service_code,:#ccd_service_name,:#ccd_case_type, now() at time zone 'utc')
+      on conflict (service_code, ccd_case_type) do nothing ?batch=true&dataSource=dataSource
+    blob-path:
+      azure-blob://${azure.storage.account-name}/lrd-ref-data/service-test.csv?credentials=#credsreg&operation=updateBlockBlob
+    processor-class: ServiceToCcdServiceProcessor
+    mapper-class: ServiceToCcdServiceMapper
+    csv-binder-object: ServiceToCcdService
+
+lrd-select-sql: SELECT * FROM service_to_ccd_case_type_assoc
+
+exception-select-query: select * from  dataload_exception_records
+
+select-dataload-scheduler: select *  from dataload_schedular_audit
+
+truncate-audit: truncate dataload_schedular_audit
+
+get-ccd-case-time: select created_date from SERVICE_TO_CCD_CASE_TYPE_ASSOC where service_code = ? and ccd_case_type = ?
+
+jdbc-batch-size: 10
+
+logging-component-name: Location_Ref_Data
+component:
+  name: Location Reference Data
+mail:
+  enabled: false
+

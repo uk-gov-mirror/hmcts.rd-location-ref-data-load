@@ -10,6 +10,8 @@ properties(
 )
 
 @Library("Infrastructure")
+import uk.gov.hmcts.contino.GradleBuilder
+
 
 def type = "java"
 def product = "rd"
@@ -29,26 +31,39 @@ def vaultOverrides = [
     'spreview': 'saat'
 ]
 
+def secrets = [
+  'rd-${env}': [
+    secret('ACCOUNT-KEY-PREVIEW', 'ACCOUNT_KEY_PREVIEW'),
+    secret('LRD-ACCOUNT-NAME', 'ACCOUNT_NAME'),
+    secret('LRD-ACCOUNT-KEY', 'ACCOUNT_KEY')
+  ]
+]
+
+GradleBuilder builder = new GradleBuilder(this, product)
+
 withPipeline(type, product, component) {
+  overrideVaultEnvironments(vaultOverrides)
+  loadVaultSecrets(secrets)
   onMaster {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
+    env.execution_environment = "aat"
   }
   onPR {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
+    env.execution_environment = "preview"
   }
-
-  overrideVaultEnvironments(vaultOverrides)
   enableAksStagingDeployment()
   disableLegacyDeploymentOnAAT()
   disableLegacyDeployment()
   nonServiceApp()
 
+
   after('functionalTest:preview') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true
   }
 
   after('functionalTest:aat') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true
   }
 
   after('smoketest:preview') {
@@ -57,5 +72,16 @@ withPipeline(type, product, component) {
 
   after('smoketest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
+  }
+
+  after('akschartsinstall') {
+    def time = "120"
+    echo "Waiting ${time} seconds for deployment to complete prior starting functional testing"
+    sleep time.toInteger() // seconds
+    try {
+      builder.gradle('functional')
+    } finally {
+      junit '**/test-results/**/*.xml'
+    }
   }
 }

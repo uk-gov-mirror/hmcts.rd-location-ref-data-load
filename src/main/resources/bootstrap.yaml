@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    propertiesvolume:
+      prefixed: false
+      paths: /mnt/secrets/rd
+      aliases:
+        rd.location-ref-api-postgres-db: spring.datasource.password
+        rd.AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
+        rd.LOC-ACCOUNT-NAME: azure.storage.account-name
+        rd.LOC-ACCOUNT-KEY: azure.storage.account-key
+        rd.CONTAINER-NAME: azure.storage.container-name
+        rd.BLOB-URL-SUFFIX: azure.storage.blob-url-suffix
+
+

@@ -1,0 +1,60 @@
+#!groovy
+@Library("Infrastructure") _
+
+properties([
+  parameters([
+      string(name: 'PRODUCT_NAME', defaultValue: 'rd', description: ''),
+      string(name: 'APP', defaultValue: 'location-ref-data-load', description: 'location ref data load'),
+      string(name: 'TYPE', defaultValue: 'java', description: ''),
+      string(name: 'ENVIRONMENT', defaultValue: 'sandbox', description: 'Environment where code should be build and deployed'),
+      choice(name: 'SUBSCRIPTION', choices: 'sandbox\nnonprod\nprod', description: 'Azure subscriptions available to build in'),
+  ])
+])
+
+String type = "java"
+String product = "rd"
+String component = "location-ref-data-load"
+
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+    [$class     : 'AzureKeyVaultSecret',
+     secretType : 'Secret',
+     name       : secretName,
+     version    : '',
+     envVariable: envVar
+    ]
+}
+
+def vaultOverrides = [
+    'preview' : 'aat',
+    'spreview': 'saat'
+]
+
+withParameterizedPipeline(type, product, component, 'sandbox', 'sandbox') {
+    after('smoketest:aat') {
+        sh "rm -rf infrastructure/"
+    }
+
+    overrideVaultEnvironments(vaultOverrides)
+    setVaultName('rd')
+    loadVaultSecrets(secrets)
+
+    enableDbMigration()
+    enableDockerBuild()
+
+    after('integrationTest:preview') {
+        steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
+    }
+
+    after('integrationTest:aat') {
+        steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
+    }
+
+    after('functionalTest:preview') {
+        steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
+    }
+
+    after('functionalTest:aat') {
+        steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
+    }
+}

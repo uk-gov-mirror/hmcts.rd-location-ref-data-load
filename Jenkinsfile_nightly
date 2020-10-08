@@ -6,9 +6,64 @@ properties([
 ])
 
 @Library("Infrastructure")
+import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
 def product = "rd"
 def component = "location-ref-data-load"
 
-withNightlyPipeline(type, product, component) {}
+def secrets = [
+  'rd-${env}': [
+    secret('LOC-ACCOUNT-NAME', 'ACCOUNT_NAME'),
+    secret('LOC-ACCOUNT-KEY', 'ACCOUNT_KEY')
+  ]
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [$class     : 'AzureKeyVaultSecret',
+   secretType : 'Secret',
+   name       : secretName,
+   version    : '',
+   envVariable: envVar
+  ]
+}
+
+def vaultOverrides = [
+  'preview' : 'aat',
+  'spreview': 'saat'
+]
+
+GradleBuilder builder = new GradleBuilder(this, product)
+
+withNightlyPipeline(type, product, component) {
+
+  env.Rules = params.SecurityRules
+  env.execution_environment = "aat"
+
+  overrideVaultEnvironments(vaultOverrides)
+  loadVaultSecrets(secrets)
+
+  after('securityScan') {
+    def time = "120"
+    echo "Waiting ${time} seconds for deployment to complete prior starting functional testing"
+    sleep time.toInteger() // seconds
+    try {
+      builder.gradle('functional')
+    } finally {
+      junit '**/test-results/**/*.xml'
+    }
+  }
+}
+#!groovy
+
+properties([
+  pipelineTriggers([cron('21 01 * * *')]), // scheduling to trigger jenkins job
+  parameters([
+    string(name: 'URL_TO_TEST', defaultValue: 'http://rd-professional-api-aat.service.core-compute-aat.internal', description: 'The URL you want to run these tests against'),
+    string(name: 'SecurityRules',
+      defaultValue: 'http://raw.githubusercontent.com/hmcts/security-test-rules/master/conf/security-rules.conf',
+      description: 'The URL you want to run these tests against'),
+  ])
+])
+
+
