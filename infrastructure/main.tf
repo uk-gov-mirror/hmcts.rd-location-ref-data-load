@@ -26,12 +26,12 @@ resource "azurerm_key_vault_secret" "rd_location_ref_data_load" {
   key_vault_id  = data.azurerm_key_vault.rd_key_vault.id
 }
 
-data "azurerm_key_vault_secret" "LRD_ACCOUNT_NAME" {
+data "azurerm_key_vault_secret" "ACCOUNT_NAME" {
   name = "LRD-ACCOUNT-NAME"
   key_vault_id = "${data.azurerm_key_vault.rd_key_vault.id}"
 }
 
-data "azurerm_key_vault_secret" "LRD_ACCOUNT_KEY" {
+data "azurerm_key_vault_secret" "ACCOUNT_KEY" {
   name = "LRD-ACCOUNT-KEY"
   key_vault_id = "${data.azurerm_key_vault.rd_key_vault.id}"
 }
