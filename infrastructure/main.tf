@@ -25,3 +25,23 @@ resource "azurerm_key_vault_secret" "rd_location_ref_data_load" {
   value         = data.azurerm_key_vault_secret.s2s_secret.value
   key_vault_id  = data.azurerm_key_vault.rd_key_vault.id
 }
+
+data "azurerm_key_vault_secret" "ACCOUNT_NAME" {
+  name = "LRD-ACCOUNT-NAME"
+  key_vault_id = "${data.azurerm_key_vault.rd_key_vault.id}"
+}
+
+data "azurerm_key_vault_secret" "ACCOUNT_KEY" {
+  name = "LRD-ACCOUNT-KEY"
+  key_vault_id = "${data.azurerm_key_vault.rd_key_vault.id}"
+}
+
+data "azurerm_key_vault_secret" "CONTAINER_NAME" {
+  name = "CONTAINER-NAME"
+  key_vault_id = "${data.azurerm_key_vault.rd_key_vault.id}"
+}
+
+data "azurerm_key_vault_secret" "BLOB_URL_SUFFIX" {
+  name = "BLOB-URL-SUFFIX"
+  key_vault_id = "${data.azurerm_key_vault.rd_key_vault.id}"
+}
