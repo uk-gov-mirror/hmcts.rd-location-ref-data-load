@@ -55,17 +55,17 @@ public class LrdCamelConfig {
     }
 
     @Bean
-    public ServiceToCcdCaseTypeProcessor serviceToCcdServiceProcessor() {
+    public ServiceToCcdCaseTypeProcessor serviceToCcdCaseTypeProcessor() {
         return new ServiceToCcdCaseTypeProcessor();
     }
 
     @Bean
-    public ServiceToCcdCaseTypeMapper serviceToCcdServiceMapper() {
+    public ServiceToCcdCaseTypeMapper serviceToCcdCaseTypeMapper() {
         return new ServiceToCcdCaseTypeMapper();
     }
 
     @Bean
-    public ServiceToCcdCaseType serviceToCcdService() {
+    public ServiceToCcdCaseType serviceToCcdCaseType() {
 
         return new ServiceToCcdCaseType();
     }

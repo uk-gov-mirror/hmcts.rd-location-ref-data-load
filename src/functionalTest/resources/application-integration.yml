@@ -61,9 +61,9 @@ route:
       on conflict (service_code, ccd_case_type) do nothing ?batch=true&dataSource=dataSource
     blob-path:
       azure-blob://${azure.storage.account-name}/lrd-ref-data/service-test.csv?credentials=#credsreg&operation=updateBlockBlob
-    processor-class: ServiceToCcdServiceProcessor
-    mapper-class: ServiceToCcdServiceMapper
-    csv-binder-object: ServiceToCcdService
+    processor-class: serviceToCcdCaseTypeProcessor
+    mapper-class: serviceToCcdCaseTypeMapper
+    csv-binder-object: serviceToCcdCaseType
 
 lrd-select-sql: SELECT * FROM service_to_ccd_case_type_assoc
 
