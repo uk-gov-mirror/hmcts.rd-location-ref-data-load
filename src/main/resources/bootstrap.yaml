@@ -4,7 +4,7 @@ spring:
       prefixed: true
       paths: /mnt/secrets/rd
       aliases:
-        rd.location-ref-api-postgres-db: spring.datasource.password
+        rd.location-ref-api-POSTGRES-PASS: spring.datasource.password
         rd.AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
         rd.LRD-ACCOUNT-NAME: ACCOUNT_NAME
         rd.LRD-ACCOUNT-KEY: ACCOUNT_KEY
