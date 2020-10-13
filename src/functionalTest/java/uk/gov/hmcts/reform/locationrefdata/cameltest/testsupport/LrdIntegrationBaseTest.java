@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 import java.sql.Timestamp;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.jdbc.core.BeanPropertyRowMapper.newInstance;
 
@@ -124,9 +126,9 @@ public abstract class LrdIntegrationBaseTest {
                                                    Pair<String, String> pair) {
         var result = jdbcTemplate.queryForList(exceptionQuery);
         assertEquals(pair.getValue0(), result.get(result.size() - 1).get("file_name"));
-        assertEquals(
-            pair.getValue1(),
-            result.get(result.size() - 1).get("error_description")
+        assertThat(
+            (String) result.get(result.size() - 1).get("error_description"),
+            containsString(pair.getValue1())
         );
     }
 

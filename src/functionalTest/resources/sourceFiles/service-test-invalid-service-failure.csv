@@ -1,3 +1,2 @@
 service_code,ccd_service_name,ccd_case_type
-AAA1,ccd-service1,
-AAA2,ccd-service2,
+InvalidServiceCd,ccd-service2,"case1"

@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @Component
@@ -29,6 +30,7 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
 
     @Value("${logging-component-name}")
     private String logComponentName;
+
 
     @Override
     @SuppressWarnings("unchecked")
@@ -48,6 +50,11 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
         log.info(" {} ServiceToCCDService Records count before Validation & after merging service names {}::",
                  logComponentName, refinedServiceToCcdCaseTypes.size()
         );
+
+        if (isNotEmpty(refinedServiceToCcdCaseTypes)) {
+            log.info(" {} {} Records Skipped due to blank service name and Case types::",
+                     logComponentName, serviceToCcdCaseTypes.size() - refinedServiceToCcdCaseTypes.size());
+        }
 
         List<ServiceToCcdCaseType> filteredServiceToCcdCaseTypes = validate(
             serviceToCcdServiceJsrValidatorInitializer,
@@ -85,14 +92,14 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
             .forEach(serviceToCcdService ->
                          of(serviceToCcdService.getCcdCaseType().split(","))
                              .forEach(caseTypes ->
-                                 refinedServiceToCcdCaseTypes.add(ServiceToCcdCaseType.builder()
-                                                                      .serviceCode(serviceToCcdService
-                                                                                       .getServiceCode())
-                                                                      .ccdServiceName(
-                                                                          serviceToCcdService
-                                                                              .getCcdServiceName())
-                                                                      .ccdCaseType(caseTypes)
-                                                                      .build())
+                                          refinedServiceToCcdCaseTypes.add(ServiceToCcdCaseType.builder()
+                                                                               .serviceCode(serviceToCcdService
+                                                                                                .getServiceCode())
+                                                                               .ccdServiceName(
+                                                                                   serviceToCcdService
+                                                                                       .getCcdServiceName())
+                                                                               .ccdCaseType(caseTypes)
+                                                                               .build())
                              ));
 
         refinedServiceToCcdCaseTypes.addAll(serviceToCcdCaseTypes.stream()
