@@ -37,7 +37,7 @@ spring:
 
   datasource:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5458}/${POSTGRES_NAME:locrefdata}${POSTGRES_CONNECTION_OPTIONS:}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5458}/${POSTGRES_NAME:locrefdata}?currentSchema=locrefdata
     username: ${POSTGRES_USERNAME:locrefdata}
     password: ${POSTGRES_PASSWORD:locrefdata}
     properties:

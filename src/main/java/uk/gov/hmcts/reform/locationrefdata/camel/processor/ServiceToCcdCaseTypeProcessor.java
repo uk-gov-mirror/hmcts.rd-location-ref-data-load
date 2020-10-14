@@ -19,7 +19,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @Component
@@ -51,10 +50,8 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
                  logComponentName, refinedServiceToCcdCaseTypes.size()
         );
 
-        if (isNotEmpty(refinedServiceToCcdCaseTypes)) {
-            log.info(" {} {} Records Skipped due to blank service name and Case types::",
+        log.info(" {} {} Records Skipped due to blank service name and Case types::",
                      logComponentName, serviceToCcdCaseTypes.size() - refinedServiceToCcdCaseTypes.size());
-        }
 
         List<ServiceToCcdCaseType> filteredServiceToCcdCaseTypes = validate(
             serviceToCcdServiceJsrValidatorInitializer,
@@ -68,9 +65,9 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
 
         if (filteredServiceToCcdCaseTypes.isEmpty()) {
             log.error(" {} ServiceToCcdService failed as no valid records present::", logComponentName);
-
             throw new RouteFailedException("ServiceToCcdService failed as no valid records present");
         }
+
         exchange.getMessage().setBody(filteredServiceToCcdCaseTypes);
     }
 
