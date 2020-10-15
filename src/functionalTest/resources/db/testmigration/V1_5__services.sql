@@ -1,4 +1,5 @@
 insert into service (
+    service_id,
     org_unit_id,
     business_area_id,
     sub_business_area_id,
@@ -7,7 +8,7 @@ insert into service (
     service_description,
     service_short_description,
     last_update)
-    select (select org_unit_id from ORG_UNIT where description ='HMCTS') as org_unit_id,
+    select 1, (select org_unit_id from ORG_UNIT where description ='HMCTS') as org_unit_id,
     (select business_area_id from ORG_BUSINESS_AREA
      where description ='Civil, Family and Tribunals')
     as business_area_id,
@@ -23,6 +24,7 @@ insert into service (
     from ORG_UNIT;
 
     insert into service (
+    service_id,
     org_unit_id,
     business_area_id,
     sub_business_area_id,
@@ -31,7 +33,7 @@ insert into service (
     service_description,
     service_short_description,
     last_update)
-    select (select org_unit_id from ORG_UNIT where description ='HMCTS') as org_unit_id,
+    select 2, (select org_unit_id from ORG_UNIT where description ='HMCTS') as org_unit_id,
     (select business_area_id from ORG_BUSINESS_AREA
      where description ='Civil, Family and Tribunals')
     as business_area_id,
@@ -46,7 +48,8 @@ insert into service (
     now()
     from ORG_UNIT;
 
-     insert into service (
+   insert into service (
+    service_id,
     org_unit_id,
     business_area_id,
     sub_business_area_id,
@@ -55,7 +58,7 @@ insert into service (
     service_description,
     service_short_description,
     last_update)
-    select (select org_unit_id from ORG_UNIT where description ='HMCTS') as org_unit_id,
+    select 3, (select org_unit_id from ORG_UNIT where description ='HMCTS') as org_unit_id,
     (select business_area_id from ORG_BUSINESS_AREA
      where description ='Civil, Family and Tribunals')
     as business_area_id,
@@ -70,7 +73,8 @@ insert into service (
     now()
     from ORG_UNIT;
 
-       insert into service (
+    insert into service (
+    service_id,
     org_unit_id,
     business_area_id,
     sub_business_area_id,
@@ -79,7 +83,7 @@ insert into service (
     service_description,
     service_short_description,
     last_update)
-    select (select org_unit_id from ORG_UNIT where description ='HMCTS') as org_unit_id,
+    select 4, (select org_unit_id from ORG_UNIT where description ='HMCTS') as org_unit_id,
     (select business_area_id from ORG_BUSINESS_AREA
      where description ='Civil, Family and Tribunals')
     as business_area_id,

@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ProducerTemplate;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.junit.BeforeClass;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.hmcts.reform.data.ingestion.camel.processor.ExceptionProcessor;
@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 import java.sql.Timestamp;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.jdbc.core.BeanPropertyRowMapper.newInstance;
 
@@ -29,6 +31,7 @@ public abstract class LrdIntegrationBaseTest {
     protected CamelContext camelContext;
 
     @Autowired
+    @Qualifier("springJdbcTemplate")
     protected JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -37,8 +40,6 @@ public abstract class LrdIntegrationBaseTest {
     @Value("${start-route}")
     protected String startRoute;
 
-    @Autowired
-    protected ProducerTemplate producerTemplate;
 
     @Value("${archival-cred}")
     protected String archivalCred;
@@ -124,9 +125,9 @@ public abstract class LrdIntegrationBaseTest {
                                                    Pair<String, String> pair) {
         var result = jdbcTemplate.queryForList(exceptionQuery);
         assertEquals(pair.getValue0(), result.get(result.size() - 1).get("file_name"));
-        assertEquals(
-            pair.getValue1(),
-            result.get(result.size() - 1).get("error_description")
+        assertThat(
+            (String) result.get(result.size() - 1).get("error_description"),
+            containsString(pair.getValue1())
         );
     }
 

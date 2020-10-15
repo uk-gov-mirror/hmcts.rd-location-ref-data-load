@@ -97,6 +97,7 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
             "ServiceToCcdService failed as no valid records present"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure");
         lrdBlobSupport.deleteBlob("service-test.csv");
     }
 
@@ -122,6 +123,28 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success");
         //Delete Uploaded test file with Snapshot delete
+        lrdBlobSupport.deleteBlob("service-test.csv");
+    }
+
+    @Test
+    @Sql(scripts = {"/testData/truncate-lrd.sql"})
+    public void testTaskletFailureForInvalidService() throws Exception {
+        lrdBlobSupport.uploadFile(
+            "service-test.csv",
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/service-test-invalid-service-failure.csv"))
+        );
+
+        jobLauncherTestUtils.launchJob();
+        var serviceToCcdServices = jdbcTemplate.queryForList(lrdSelectData);
+        assertEquals(serviceToCcdServices.size(), 0);
+
+        Pair<String, String> pair = new Pair<>(
+            "service-test.csv",
+            "violates foreign key constraint"
+        );
+        validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure");
         lrdBlobSupport.deleteBlob("service-test.csv");
     }
 }

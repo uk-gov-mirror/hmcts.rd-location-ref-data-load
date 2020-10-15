@@ -30,6 +30,7 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
     @Value("${logging-component-name}")
     private String logComponentName;
 
+
     @Override
     @SuppressWarnings("unchecked")
     public void process(Exchange exchange) throws Exception {
@@ -49,6 +50,9 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
                  logComponentName, refinedServiceToCcdCaseTypes.size()
         );
 
+        log.info(" {} {} Records Skipped due to blank service name and Case types::",
+                     logComponentName, serviceToCcdCaseTypes.size() - refinedServiceToCcdCaseTypes.size());
+
         List<ServiceToCcdCaseType> filteredServiceToCcdCaseTypes = validate(
             serviceToCcdServiceJsrValidatorInitializer,
             refinedServiceToCcdCaseTypes
@@ -61,9 +65,9 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
 
         if (filteredServiceToCcdCaseTypes.isEmpty()) {
             log.error(" {} ServiceToCcdService failed as no valid records present::", logComponentName);
-
             throw new RouteFailedException("ServiceToCcdService failed as no valid records present");
         }
+
         exchange.getMessage().setBody(filteredServiceToCcdCaseTypes);
     }
 
@@ -85,14 +89,14 @@ public class ServiceToCcdCaseTypeProcessor extends JsrValidationBaseProcessor<Se
             .forEach(serviceToCcdService ->
                          of(serviceToCcdService.getCcdCaseType().split(","))
                              .forEach(caseTypes ->
-                                 refinedServiceToCcdCaseTypes.add(ServiceToCcdCaseType.builder()
-                                                                      .serviceCode(serviceToCcdService
-                                                                                       .getServiceCode())
-                                                                      .ccdServiceName(
-                                                                          serviceToCcdService
-                                                                              .getCcdServiceName())
-                                                                      .ccdCaseType(caseTypes)
-                                                                      .build())
+                                          refinedServiceToCcdCaseTypes.add(ServiceToCcdCaseType.builder()
+                                                                               .serviceCode(serviceToCcdService
+                                                                                                .getServiceCode())
+                                                                               .ccdServiceName(
+                                                                                   serviceToCcdService
+                                                                                       .getCcdServiceName())
+                                                                               .ccdCaseType(caseTypes)
+                                                                               .build())
                              ));
 
         refinedServiceToCcdCaseTypes.addAll(serviceToCcdCaseTypes.stream()
