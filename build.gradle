@@ -235,7 +235,7 @@ dependencies {
   compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
   compile group: 'javax.el', name: 'javax.el-api', version: '3.0.0'
   compile group: 'org.flywaydb', name: 'flyway-core', version: versions.flyway
-  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
+  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.17'
   compile group: 'uk.gov.hmcts.reform', name: 'data-ingestion-lib', version: '0.3.7.1-beta'
   compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
@@ -285,14 +285,14 @@ dependencies {
   testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: versions.camel
   testCompile group: 'org.apache.camel', name: 'camel-test', version: versions.camel
   testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.12.5'
-  testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
+  testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.17'
   testCompile group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.2.4.RELEASE'
   testCompile group: 'org.javatuples', name: 'javatuples', version: '1.2'
 
   testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: versions.camel
   testCompile group: 'org.apache.camel', name: 'camel-test', version: versions.camel
   testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.12.5'
-  testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
+  testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.17'
 
 }
 
