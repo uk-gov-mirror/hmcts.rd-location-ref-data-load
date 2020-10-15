@@ -97,6 +97,7 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
             "ServiceToCcdService failed as no valid records present"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure");
         lrdBlobSupport.deleteBlob("service-test.csv");
     }
 
@@ -143,6 +144,7 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
             "violates foreign key constraint"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure");
         lrdBlobSupport.deleteBlob("service-test.csv");
     }
 }

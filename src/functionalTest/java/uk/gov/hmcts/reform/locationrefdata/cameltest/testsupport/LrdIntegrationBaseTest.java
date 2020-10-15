@@ -7,6 +7,7 @@ import org.javatuples.Triplet;
 import org.junit.BeforeClass;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.hmcts.reform.data.ingestion.camel.processor.ExceptionProcessor;
@@ -31,6 +32,7 @@ public abstract class LrdIntegrationBaseTest {
     protected CamelContext camelContext;
 
     @Autowired
+    @Qualifier("springJdbcTemplate")
     protected JdbcTemplate jdbcTemplate;
 
     @Autowired

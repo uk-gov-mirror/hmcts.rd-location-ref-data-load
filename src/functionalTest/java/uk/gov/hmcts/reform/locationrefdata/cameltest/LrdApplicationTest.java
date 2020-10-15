@@ -7,6 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
@@ -16,7 +18,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import uk.gov.hmcts.reform.data.ingestion.configuration.AzureBlobConfig;
 import uk.gov.hmcts.reform.data.ingestion.configuration.StorageCredentials;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
@@ -52,6 +57,10 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
     @Value("${archival-route}")
     String archivalRoute;
 
+    @Autowired
+    @Qualifier("springJdbcTransactionManager")
+    protected PlatformTransactionManager platformTransactionManager;
+
     @Before
     public void init() {
         jdbcTemplate.execute(truncateAudit);
@@ -69,14 +78,19 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
     public void testTaskletSuccessWithInsertAndTruncateInsertDay2() throws Exception {
 
         testInsertion();
-        jdbcTemplate.execute("delete from DATALOAD_SCHEDULAR_AUDIT");
+
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        jdbcTemplate.update("delete from DATALOAD_SCHEDULAR_AUDIT");
+        TransactionStatus status = platformTransactionManager.getTransaction(def);
+        platformTransactionManager.commit(status);
+        SpringRestarter.getInstance().restart();
         lrdBlobSupport.uploadFile(
             "service-test.csv",
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-day2.csv"))
         );
 
-        producerTemplate.sendBody(startRoute, "retrigger");
+        jobLauncherTestUtils.launchJob();
 
         validateLrdServiceFile(jdbcTemplate, lrdSelectData, ImmutableList.of(
             ServiceToCcdCaseType.builder().ccdCaseType("service1")
@@ -88,8 +102,7 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
             ServiceToCcdCaseType.builder().ccdCaseType("service16")
                 .ccdServiceName("ccd-service2").serviceCode("AAA2").build()
         ), 4);
-
-        producerTemplate.sendBody(archivalRoute, "retrigger");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success");
         lrdBlobSupport.deleteBlob("service-test.csv");
     }
 
