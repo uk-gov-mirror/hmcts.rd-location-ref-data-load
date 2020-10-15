@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ProducerTemplate;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.junit.BeforeClass;
@@ -41,8 +40,6 @@ public abstract class LrdIntegrationBaseTest {
     @Value("${start-route}")
     protected String startRoute;
 
-    @Autowired
-    protected ProducerTemplate producerTemplate;
 
     @Value("${archival-cred}")
     protected String archivalCred;
