@@ -78,6 +78,7 @@ public abstract class LrdIntegrationBaseTest {
             System.setProperty("azure.storage.account-key", System.getenv("ACCOUNT_KEY"));
             System.setProperty("azure.storage.account-name", System.getenv("ACCOUNT_NAME"));
         }
+        System.setProperty("azure.storage.container-name", "lrd-ref-data");
     }
 
     protected void validateLrdServiceFile(JdbcTemplate jdbcTemplate, String serviceSql,
