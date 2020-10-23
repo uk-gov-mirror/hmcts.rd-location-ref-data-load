@@ -14,12 +14,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.containers.PostgreSQLContainer;
+import uk.gov.hmcts.reform.data.ingestion.DataIngestionLibraryRunner;
 import uk.gov.hmcts.reform.data.ingestion.camel.processor.ArchiveFileProcessor;
 import uk.gov.hmcts.reform.data.ingestion.camel.processor.ExceptionProcessor;
 import uk.gov.hmcts.reform.data.ingestion.camel.processor.FileReadProcessor;
+import uk.gov.hmcts.reform.data.ingestion.camel.processor.FileResponseProcessor;
 import uk.gov.hmcts.reform.data.ingestion.camel.processor.HeaderValidationProcessor;
 import uk.gov.hmcts.reform.data.ingestion.camel.route.ArchivalRoute;
 import uk.gov.hmcts.reform.data.ingestion.camel.route.DataLoadRoute;
+import uk.gov.hmcts.reform.data.ingestion.camel.service.ArchivalBlobServiceImpl;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.AuditServiceImpl;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.EmailServiceImpl;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.IEmailService;
@@ -217,6 +220,21 @@ public class LrdCamelConfig {
     @Bean
     JobResultListener jobResultListener() {
         return new JobResultListener();
+    }
+
+    @Bean
+    FileResponseProcessor fileResponseProcessor() {
+        return new FileResponseProcessor();
+    }
+
+    @Bean
+    ArchivalBlobServiceImpl archivalBlobService() {
+        return new ArchivalBlobServiceImpl();
+    }
+
+    @Bean
+    DataIngestionLibraryRunner dataIngestionLibraryRunner() {
+        return new DataIngestionLibraryRunner();
     }
     // miscellaneous configuration ends
 }
