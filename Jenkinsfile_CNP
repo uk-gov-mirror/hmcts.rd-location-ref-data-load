@@ -44,6 +44,7 @@ GradleBuilder builder = new GradleBuilder(this, product)
 withPipeline(type, product, component) {
   overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
+  env.CONTAINER_NAME = "lrd-ref-data"
   onMaster {
     enableSlackNotifications('#rd-location-ref-data-load-builds')
     env.execution_environment = "aat"
