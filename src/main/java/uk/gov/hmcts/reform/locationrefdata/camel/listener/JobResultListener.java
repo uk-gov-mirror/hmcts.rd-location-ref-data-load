@@ -1,35 +1,22 @@
 package uk.gov.hmcts.reform.locationrefdata.camel.listener;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.ProducerTemplate;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.data.ingestion.camel.route.ArchivalRoute;
-
-import java.util.List;
-
+import uk.gov.hmcts.reform.data.ingestion.camel.service.ArchivalBlobServiceImpl;
 
 @Component
 @Slf4j
 public class JobResultListener implements JobExecutionListener {
 
-    @Value("${archival-file-names}")
-    List<String> archivalFileNames;
-
-    @Autowired
-    ArchivalRoute archivalRoute;
-
-    @Autowired
-    ProducerTemplate producerTemplate;
-
-    @Value("${archival-route}")
-    String archivalRouteName;
-
     @Value("${logging-component-name}")
     private String logComponentName;
+
+    @Autowired
+    ArchivalBlobServiceImpl archivalBlobService;
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
@@ -38,7 +25,6 @@ public class JobResultListener implements JobExecutionListener {
 
     @Override
     public void afterJob(JobExecution jobExecution) {
-        archivalRoute.archivalRoute(archivalFileNames);
-        producerTemplate.sendBody(archivalRouteName, "starting Archival");
+        archivalBlobService.executeArchiving();
     }
 }

@@ -12,9 +12,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import uk.gov.hmcts.reform.data.ingestion.DataIngestionLibraryRunner;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.AuditServiceImpl;
-
-import static org.apache.commons.lang.BooleanUtils.isFalse;
 
 @SpringBootApplication(scanBasePackages = "uk.gov.hmcts.reform")
 @SuppressWarnings ("PMD.DoNotCallSystemExit")
@@ -35,6 +34,9 @@ public class LrdLoadApplication implements ApplicationRunner {
     @Autowired
     AuditServiceImpl auditService;
 
+    @Autowired
+    DataIngestionLibraryRunner dataIngestionLibraryRunner;
+
     public static void main(final String[] args) throws InterruptedException {
         ApplicationContext context = SpringApplication.run(LrdLoadApplication.class);
         //Sleep added to allow app-insights to flush the logs
@@ -46,18 +48,10 @@ public class LrdLoadApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-
         JobParameters params = new JobParametersBuilder()
             .addString(jobName, String.valueOf(System.currentTimeMillis()))
             .toJobParameters();
-
-        if (isFalse(auditService.isAuditingCompleted())) {
-            log.info("{}:: Location Ref data load job running first time for a day::", logComponentName);
-            jobLauncher.run(job, params);
-            log.info("{}:: Location Ref data load  job run completed::", logComponentName);
-        } else {
-            log.info("{}:: no run of Location Ref data load job as it has ran for the day::", logComponentName);
-        }
+        dataIngestionLibraryRunner.run(job, params);
     }
 
     @Value("${logging-component-name}")

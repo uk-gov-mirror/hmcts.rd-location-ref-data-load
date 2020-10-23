@@ -25,8 +25,6 @@ import static org.springframework.jdbc.core.BeanPropertyRowMapper.newInstance;
 
 public abstract class LrdIntegrationBaseTest {
 
-    public static final String DB_SCHEDULER_STATUS = "scheduler_status";
-
     @Autowired
     protected CamelContext camelContext;
 
@@ -65,14 +63,8 @@ public abstract class LrdIntegrationBaseTest {
     @Value("${exception-select-query}")
     protected String exceptionQuery;
 
-    @Value("${truncate-audit}")
-    protected String truncateAudit;
-
     @Value("${select-dataload-scheduler}")
     protected String auditSchedulerQuery;
-
-    @Value("${get-ccd-case-time}")
-    protected String getCcdCaseTime;
 
     @Autowired
     protected LrdBlobSupport lrdBlobSupport;
@@ -86,6 +78,7 @@ public abstract class LrdIntegrationBaseTest {
             System.setProperty("azure.storage.account-key", System.getenv("ACCOUNT_KEY"));
             System.setProperty("azure.storage.account-name", System.getenv("ACCOUNT_NAME"));
         }
+        System.setProperty("azure.storage.container-name", "lrd-ref-data");
     }
 
     protected void validateLrdServiceFile(JdbcTemplate jdbcTemplate, String serviceSql,
@@ -98,10 +91,11 @@ public abstract class LrdIntegrationBaseTest {
 
 
     protected void validateLrdServiceFileAudit(JdbcTemplate jdbcTemplate,
-                                               String auditSchedulerQuery, String status) {
+                                               String auditSchedulerQuery, String status, String fileName) {
         var result = jdbcTemplate.queryForList(auditSchedulerQuery);
         assertEquals(1, result.size());
-        assertEquals(status, result.get(0).get("scheduler_status"));
+        assertEquals(status, result.get(0).get("status"));
+        assertEquals(fileName, result.get(0).get("file_name"));
     }
 
     @SuppressWarnings("unchecked")
@@ -124,7 +118,6 @@ public abstract class LrdIntegrationBaseTest {
                                                    String exceptionQuery,
                                                    Pair<String, String> pair) {
         var result = jdbcTemplate.queryForList(exceptionQuery);
-        assertEquals(pair.getValue0(), result.get(result.size() - 1).get("file_name"));
         assertThat(
             (String) result.get(result.size() - 1).get("error_description"),
             containsString(pair.getValue1())
