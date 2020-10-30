@@ -4,7 +4,7 @@ start-route: direct:LRD
 archival-route: direct:LrdArchival
 archival-path: azure-blob://${azure.storage.account-name}/lrd-ref-data-archive
 active-blob-path: azure-blob://${azure.storage.account-name}/lrd-ref-data
-archival-file-names: Service.csv
+archival-file-names: OrgServiceCCDMapping.csv
 archival-cred: credentials=#credsreg&operation=updateBlockBlob
 archival-date-format: dd-MM-yyyy--HH-mm
 file-read-time-out: 180000

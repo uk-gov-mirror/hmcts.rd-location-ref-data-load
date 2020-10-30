@@ -6,6 +6,8 @@ import org.apache.camel.test.spring.MockEndpoints;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,9 +34,13 @@ import uk.gov.hmcts.reform.locationrefdata.config.LrdCamelConfig;
 import uk.gov.hmcts.reform.locationrefdata.configuration.BatchConfig;
 
 import java.io.FileInputStream;
+import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.util.ResourceUtils.getFile;
 import static uk.gov.hmcts.reform.data.ingestion.camel.util.MappingConstants.SCHEDULER_START_TIME;
 
@@ -133,6 +139,56 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", "service-test.csv");
         //Delete Uploaded test file with Snapshot delete
+        lrdBlobSupport.deleteBlob("service-test.csv");
+    }
+
+    @Test
+    @Sql(scripts = {"/testData/truncate-lrd.sql"})
+    public void testTaskletIdempotent() throws Exception {
+        lrdBlobSupport.uploadFile(
+            "service-test.csv",
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/service-test.csv"))
+        );
+        JobParameters params = new JobParametersBuilder()
+            .addString(jobLauncherTestUtils.getJob().getName(), String.valueOf(System.currentTimeMillis()))
+            .toJobParameters();
+        dataIngestionLibraryRunner.run(jobLauncherTestUtils.getJob(),params);
+        SpringRestarter.getInstance().restart();
+
+        lrdBlobSupport.uploadFile(
+            "service-test.csv",
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/service-test-empty-case-or-name.csv"))
+        );
+        List<Map<String, Object>> auditDetails = jdbcTemplate.queryForList(auditSchedulerQuery);
+        final Timestamp timestamp = (Timestamp) auditDetails.get(0).get("scheduler_end_time");
+        dataIngestionLibraryRunner.run(jobLauncherTestUtils.getJob(),params);
+        //Load result with only files service-test.csv
+        validateLrdServiceFile(jdbcTemplate, lrdSelectData, ImmutableList.of(
+            ServiceToCcdCaseType.builder().ccdCaseType("service1")
+                .ccdServiceName("ccd-service1").serviceCode("AAA1").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service2")
+                .ccdServiceName("ccd-service1").serviceCode("AAA1").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service11")
+                .ccdServiceName("ccd-service2").serviceCode("AAA2").build(),
+            ServiceToCcdCaseType.builder().ccdCaseType("service12")
+                .ccdServiceName("ccd-service2").serviceCode("AAA2").build()
+        ), 4);
+        //Validates Success Audit
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", "service-test.csv");
+        //Delete Uploaded test file with Snapshot delete
+        lrdBlobSupport.deleteBlob("service-test.csv");
+        dataIngestionLibraryRunner.run(jobLauncherTestUtils.getJob(),params);
+        lrdBlobSupport.uploadFile(
+            "service-test.csv",
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/service-test-empty-case-or-name.csv"))
+        );
+
+        List<Map<String, Object>> auditDetailsNextRun = jdbcTemplate.queryForList(auditSchedulerQuery);
+        final Timestamp timestampNextRun = (Timestamp) auditDetailsNextRun.get(0).get("scheduler_end_time");
+        assertEquals(timestamp,timestampNextRun);
         lrdBlobSupport.deleteBlob("service-test.csv");
     }
 

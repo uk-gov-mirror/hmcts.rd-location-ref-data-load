@@ -1,6 +1,5 @@
 CREATE TABLE dataload_exception_records(
                                            id SERIAL NOT NULL,
-                                           file_name varchar(256),
                                            table_Name varchar(64),
                                            scheduler_name varchar(64) NOT NULL,
                                            scheduler_start_time timestamp NOT NULL,

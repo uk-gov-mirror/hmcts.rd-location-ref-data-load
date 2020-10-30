@@ -3,7 +3,7 @@ routes-to-execute: lrd-ccd-casetype-load
 route:
   lrd-ccd-casetype-load:
     id: lrd-ccd-casetype-load
-    file-name: Service.csv
+    file-name: OrgServiceCCDMapping.csv
     table-name: service_to_ccd_case_type_assoc
     truncate-sql:
       sql:truncate service_to_ccd_case_type_assoc restart identity?dataSource=dataSource
@@ -12,7 +12,7 @@ route:
       values (:#service_code,:#ccd_service_name,:#ccd_case_type, now() at time zone 'utc')
       on conflict (service_code, ccd_case_type) do nothing ?batch=true&dataSource=dataSource
     blob-path:
-      azure-blob://${azure.storage.account-name}/lrd-ref-data/Service.csv?credentials=#credsreg&operation=updateBlockBlob
+      azure-blob://${azure.storage.account-name}/lrd-ref-data/OrgServiceCCDMapping.csv?credentials=#credsreg&operation=updateBlockBlob
     processor-class: serviceToCcdCaseTypeProcessor
     mapper-class: serviceToCcdCaseTypeMapper
     csv-binder-object: serviceToCcdCaseType
