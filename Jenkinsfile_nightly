@@ -14,8 +14,8 @@ def component = "location-ref-data-load"
 
 def secrets = [
   'rd-${env}': [
-    secret('LRD-ACCOUNT-NAME', 'ACCOUNT_NAME'),
-    secret('LRD-ACCOUNT-KEY', 'ACCOUNT_KEY')
+    secret('RD-LOCATION-STORAGE-ACCOUNT-NAME', 'ACCOUNT_NAME'),
+    secret('RD-LOCATION-STORAGE-ACCOUNT-PRIMARY-KEY', 'ACCOUNT_KEY')
   ]
 ]
 

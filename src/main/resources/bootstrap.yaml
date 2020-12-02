@@ -6,8 +6,8 @@ spring:
       aliases:
         rd.location-ref-api-POSTGRES-PASS: spring.datasource.password
         rd.AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
-        rd.LRD-ACCOUNT-NAME: ACCOUNT_NAME
-        rd.LRD-ACCOUNT-KEY: ACCOUNT_KEY
+        rd.RD-LOCATION-STORAGE-ACCOUNT-NAME: ACCOUNT_NAME
+        rd.RD-LOCATION-STORAGE-ACCOUNT-PRIMARY-KEY: ACCOUNT_KEY
         rd.CONTAINER-NAME: CONTAINER_NAME
         rd.BLOB-URL-SUFFIX: BLOB_URL_SUFFIX
 
