@@ -22,8 +22,8 @@ job:
       secrets:
         - location-ref-api-POSTGRES-PASS
         - AppInsightsInstrumentationKey
-        - rd-location-storage-account-name
-        - rd-location-storage-account-primary-key
+        - RD-LOCATION-STORAGE-ACCOUNT-NAME
+        - RD-LOCATION-STORAGE-ACCOUNT-PRIMARY-KEY
         - BLOB-URL-SUFFIX
   postgresql:
     enabled: false
