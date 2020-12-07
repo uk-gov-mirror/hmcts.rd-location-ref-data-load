@@ -12,7 +12,6 @@ properties(
 @Library("Infrastructure")
 import uk.gov.hmcts.contino.GradleBuilder
 
-
 def type = "java"
 def product = "rd"
 def component = "location-ref-data-load"
@@ -39,6 +38,9 @@ def secrets = [
   ]
 ]
 
+// Configure branches to sync with master branch
+def branchesToSync = ['ithc', 'perftest']
+
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
@@ -58,6 +60,8 @@ withPipeline(type, product, component) {
   disableLegacyDeployment()
   nonServiceApp()
 
+  // Sync demo and perftest with master branch
+  syncBranchesWithMaster(branchesToSync)
 
   after('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true
