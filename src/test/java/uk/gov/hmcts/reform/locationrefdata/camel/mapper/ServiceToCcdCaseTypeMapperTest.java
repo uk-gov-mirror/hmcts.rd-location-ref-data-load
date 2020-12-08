@@ -18,7 +18,7 @@ public class ServiceToCcdCaseTypeMapperTest {
     @Test
     public void testGetMap() {
         ServiceToCcdCaseType serviceToCcdCaseType = ServiceToCcdCaseType.builder().serviceCode("test")
-            .ccdCaseType("case1,case2").ccdServiceName("service1").build();
+            .ccdCaseType(" case1,case2 ").ccdServiceName(" service1 ").build();
         Map<String, Object> resultMap = serviceToCcdCaseTypeMapper.getMap(serviceToCcdCaseType);
         assertEquals(resultMap, ImmutableMap.of(
             "ccd_case_type", "case1,case2",
