@@ -1,13 +1,13 @@
 package uk.gov.hmcts.reform.locationrefdata.camel.mapper;
 
-import static java.util.Objects.nonNull;
-
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.data.ingestion.camel.mapper.IMapper;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Objects.nonNull;
 
 @Component
 public class ServiceToCcdCaseTypeMapper implements IMapper {
