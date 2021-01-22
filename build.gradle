@@ -299,13 +299,10 @@ dependencies {
 
   testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: versions.camel
   testCompile group: 'org.apache.camel', name: 'camel-test', version: versions.camel
-  testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.14.3'
+  testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.15.1'
   testCompile group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.2.4.RELEASE'
   testCompile group: 'org.javatuples', name: 'javatuples', version: '1.2'
 
-  testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: versions.camel
-  testCompile group: 'org.apache.camel', name: 'camel-test', version: versions.camel
-  testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.14.3'
   testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
 
 }
