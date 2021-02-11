@@ -1,14 +1,12 @@
 spring:
   cloud:
     propertiesvolume:
-      prefixed: true
+      prefixed: false
       paths: /mnt/secrets/rd
       aliases:
-        rd.location-ref-api-POSTGRES-PASS: spring.datasource.password
-        rd.AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
-        rd.rd-location-storage-account-name: ACCOUNT_NAME
-        rd.rd-location-storage-account-primary-key: ACCOUNT_KEY
-        rd.CONTAINER-NAME: CONTAINER_NAME
-        rd.BLOB-URL-SUFFIX: BLOB_URL_SUFFIX
-
-
+        location-ref-api-POSTGRES-PASS: spring.datasource.password
+        AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
+        rd-location-storage-account-name: ACCOUNT_NAME
+        rd-location-storage-account-primary-key: ACCOUNT_KEY
+        CONTAINER-NAME: CONTAINER_NAME
+        BLOB-URL-SUFFIX: BLOB_URL_SUFFIX
