@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.locationrefdata.cameltest;
 
 import com.google.common.collect.ImmutableList;
+import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
+import net.thucydides.core.annotations.WithTag;
+import net.thucydides.core.annotations.WithTags;
 import org.apache.camel.test.spring.CamelTestContextBootstrapper;
 import org.apache.camel.test.spring.MockEndpoints;
 import org.javatuples.Pair;
@@ -22,7 +25,6 @@ import uk.gov.hmcts.reform.data.ingestion.configuration.AzureBlobConfig;
 import uk.gov.hmcts.reform.data.ingestion.configuration.BlobStorageCredentials;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.LrdIntegrationBaseTest;
-import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.RestartingSpringJUnit4ClassRunner;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.SpringRestarter;
 import uk.gov.hmcts.reform.locationrefdata.config.LrdCamelConfig;
 import uk.gov.hmcts.reform.locationrefdata.configuration.BatchConfig;
@@ -37,7 +39,6 @@ import static uk.gov.hmcts.reform.data.ingestion.camel.util.MappingConstants.SCH
 
 @TestPropertySource(properties = {"spring.config.location=classpath:application-integration.yml,"
     + "classpath:application-leaf-integration.yml"})
-@RunWith(RestartingSpringJUnit4ClassRunner.class)
 @MockEndpoints("log:*")
 @ContextConfiguration(classes = {LrdCamelConfig.class, CamelTestContextBootstrapper.class,
     JobLauncherTestUtils.class, BatchConfig.class, AzureBlobConfig.class, BlobStorageCredentials.class},
@@ -47,6 +48,8 @@ import static uk.gov.hmcts.reform.data.ingestion.camel.util.MappingConstants.SCH
 @EnableTransactionManagement
 @SqlConfig(dataSource = "dataSource", transactionManager = "txManager",
     transactionMode = SqlConfig.TransactionMode.ISOLATED)
+@RunWith(SpringIntegrationSerenityRunner.class)
+@WithTags({@WithTag("testType:Functional")})
 @SuppressWarnings("unchecked")
 public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest {
 
