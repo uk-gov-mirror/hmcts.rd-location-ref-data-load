@@ -156,11 +156,20 @@ public class LrdCamelConfig {
         return platformTransactionManager;
     }
 
-    @Bean
+
+    @Bean(name = "PROPAGATION_REQUIRED")
     public SpringTransactionPolicy getSpringTransaction() {
         SpringTransactionPolicy springTransactionPolicy = new SpringTransactionPolicy();
         springTransactionPolicy.setTransactionManager(txManager());
         springTransactionPolicy.setPropagationBehaviorName("PROPAGATION_REQUIRED");
+        return springTransactionPolicy;
+    }
+
+    @Bean(name = "PROPAGATION_REQUIRES_NEW")
+    public SpringTransactionPolicy propagationRequiresNew() {
+        SpringTransactionPolicy springTransactionPolicy = new SpringTransactionPolicy();
+        springTransactionPolicy.setTransactionManager(txManager());
+        springTransactionPolicy.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW");
         return springTransactionPolicy;
     }
     // transaction configuration ends
@@ -236,5 +245,6 @@ public class LrdCamelConfig {
     DataIngestionLibraryRunner dataIngestionLibraryRunner() {
         return new DataIngestionLibraryRunner();
     }
+
     // miscellaneous configuration ends
 }
