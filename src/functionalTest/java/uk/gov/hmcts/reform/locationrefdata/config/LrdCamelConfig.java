@@ -156,8 +156,7 @@ public class LrdCamelConfig {
         return platformTransactionManager;
     }
 
-
-    @Bean(name = "PROPAGATION_REQUIRED")
+    @Bean
     public SpringTransactionPolicy getSpringTransaction() {
         SpringTransactionPolicy springTransactionPolicy = new SpringTransactionPolicy();
         springTransactionPolicy.setTransactionManager(txManager());
@@ -165,13 +164,6 @@ public class LrdCamelConfig {
         return springTransactionPolicy;
     }
 
-    @Bean(name = "PROPAGATION_REQUIRES_NEW")
-    public SpringTransactionPolicy propagationRequiresNew() {
-        SpringTransactionPolicy springTransactionPolicy = new SpringTransactionPolicy();
-        springTransactionPolicy.setTransactionManager(txManager());
-        springTransactionPolicy.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW");
-        return springTransactionPolicy;
-    }
     // transaction configuration ends
 
     // tasks configuration starts
