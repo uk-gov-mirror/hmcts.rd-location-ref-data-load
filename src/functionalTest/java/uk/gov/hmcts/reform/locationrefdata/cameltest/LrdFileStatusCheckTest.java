@@ -91,7 +91,7 @@ public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
             .toJobParameters();
         jobLauncherTestUtils.launchJob(params);
         Pair<String, String> pair = new Pair<>(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             "not loaded due to file stale error"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
@@ -104,7 +104,7 @@ public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
     }
 
     private void deleteFile() throws Exception {
-        lrdBlobSupport.deleteBlob("service-test.csv", false);
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME, false);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
             .toJobParameters();
         jobLauncherTestUtils.launchJob(params);
         Pair<String, String> pair = new Pair<>(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             "service-test.csv file is not exists in container"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
@@ -151,7 +151,7 @@ public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
     private void uploadFiles(String time) throws Exception {
         camelContext.getGlobalOptions().put(SCHEDULER_START_TIME, time);
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test.csv"))
         );

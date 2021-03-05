@@ -73,6 +73,8 @@ public abstract class LrdIntegrationBaseTest {
     @Autowired
     protected DataIngestionLibraryRunner dataIngestionLibraryRunner;
 
+    public static final String UPLOAD_FILE_NAME = "service-test.csv";
+
     @BeforeClass
     public static void beforeAll() throws Exception {
         if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
