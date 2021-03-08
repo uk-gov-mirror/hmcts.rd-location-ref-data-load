@@ -124,11 +124,13 @@ public abstract class LrdIntegrationBaseTest {
                                                    String exceptionQuery,
                                                    Pair<String, String> pair) {
         var result = jdbcTemplate.queryForList(exceptionQuery);
+        var lastIndex = (result.size() > 1) ? 2 : 1;
         assertThat(
-            (String) result.get(result.size() - 1).get("error_description"),
+            (String) result.get(result.size() - lastIndex).get("error_description"),
             containsString(pair.getValue1())
         );
     }
+
 
     protected Timestamp getTime(String sql, String serviceCode, String caseType) {
         return jdbcTemplate.queryForObject(sql, new Object[]{serviceCode, caseType}, Timestamp.class);

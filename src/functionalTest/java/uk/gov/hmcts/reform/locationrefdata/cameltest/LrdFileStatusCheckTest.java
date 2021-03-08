@@ -131,7 +131,7 @@ public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
         jobLauncherTestUtils.launchJob(params);
         Pair<String, String> pair = new Pair<>(
             UPLOAD_FILE_NAME,
-            "service-test.csv file is not exists in container"
+            "service-test.csv file does not exist in azure storage account"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
         var result = jdbcTemplate.queryForList(auditSchedulerQuery);
