@@ -61,7 +61,7 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
     public void testTaskletPartialSuccessAndJsr() throws Exception {
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-partial-success.csv"))
         );
@@ -75,18 +75,18 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
                 .ccdServiceName("ccd-service1").serviceCode("AAA1").build()
         ), 2);
         //Validates Success Audit
-        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess","service-test.csv");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess", UPLOAD_FILE_NAME);
         Triplet<String, String, String> triplet = with("serviceCode", "must not be blank", "");
         validateLrdServiceFileJsrException(jdbcTemplate, exceptionQuery, 1, triplet);
         //Delete Uploaded test file with Snapshot delete
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
     }
 
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
     public void testTaskletFailure() throws Exception {
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-failure.csv"))
         );
@@ -96,17 +96,17 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
         assertEquals(serviceToCcdServices.size(), 0);
 
         Pair<String, String> pair = new Pair<>(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             "ServiceToCcdService failed as no valid records present"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
-        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure", "service-test.csv");
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure", UPLOAD_FILE_NAME);
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
     }
 
     private void testInsertion() throws Exception {
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test.csv"))
         );
@@ -124,16 +124,16 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
                 .ccdServiceName("ccd-service2").serviceCode("AAA2").build()
         ), 4);
         //Validates Success Audit
-        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", "service-test.csv");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", UPLOAD_FILE_NAME);
         //Delete Uploaded test file with Snapshot delete
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
     }
 
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
     public void testTaskletFailureForInvalidService() throws Exception {
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-invalid-service-failure.csv"))
         );
@@ -143,11 +143,11 @@ public class LrdApplicationExceptionAndAuditTest extends LrdIntegrationBaseTest 
         assertEquals(serviceToCcdServices.size(), 0);
 
         Pair<String, String> pair = new Pair<>(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             "violates foreign key constraint"
         );
         validateLrdServiceFileException(jdbcTemplate, exceptionQuery, pair);
-        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure", "service-test.csv");
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure", UPLOAD_FILE_NAME);
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
     }
 }

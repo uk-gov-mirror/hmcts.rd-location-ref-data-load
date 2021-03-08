@@ -5,7 +5,6 @@ import org.apache.camel.component.bean.validator.HibernateValidationProviderReso
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.spring.spi.SpringTransactionPolicy;
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorFactoryImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -43,9 +42,6 @@ import static org.mockito.Mockito.mock;
 
 @Configuration
 public class LrdCamelConfig {
-
-    @Autowired
-    ApplicationContext applicationContext;
 
     @Bean
     LrdBlobSupport integrationTestSupport() {
@@ -114,21 +110,22 @@ public class LrdCamelConfig {
 
     @Bean
     public DataSource dataSource() {
+        DataSourceBuilder dataSourceBuilder = getDataSourceBuilder();
+        return dataSourceBuilder.build();
+    }
+
+    private DataSourceBuilder getDataSourceBuilder() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName("org.postgresql.Driver");
         dataSourceBuilder.url(testPostgres.getJdbcUrl());
         dataSourceBuilder.username(testPostgres.getUsername());
         dataSourceBuilder.password(testPostgres.getPassword());
-        return dataSourceBuilder.build();
+        return dataSourceBuilder;
     }
 
     @Bean("springJdbcDataSource")
     public DataSource springJdbcDataSource() {
-        DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-        dataSourceBuilder.driverClassName("org.postgresql.Driver");
-        dataSourceBuilder.url(testPostgres.getJdbcUrl());
-        dataSourceBuilder.username(testPostgres.getUsername());
-        dataSourceBuilder.password(testPostgres.getPassword());
+        DataSourceBuilder dataSourceBuilder = getDataSourceBuilder();
         return dataSourceBuilder.build();
     }
 
@@ -156,11 +153,19 @@ public class LrdCamelConfig {
         return platformTransactionManager;
     }
 
-    @Bean
+    @Bean(name = "PROPAGATION_REQUIRED")
     public SpringTransactionPolicy getSpringTransaction() {
         SpringTransactionPolicy springTransactionPolicy = new SpringTransactionPolicy();
         springTransactionPolicy.setTransactionManager(txManager());
         springTransactionPolicy.setPropagationBehaviorName("PROPAGATION_REQUIRED");
+        return springTransactionPolicy;
+    }
+
+    @Bean(name = "PROPAGATION_REQUIRES_NEW")
+    public SpringTransactionPolicy propagationRequiresNew() {
+        SpringTransactionPolicy springTransactionPolicy = new SpringTransactionPolicy();
+        springTransactionPolicy.setTransactionManager(txManager());
+        springTransactionPolicy.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW");
         return springTransactionPolicy;
     }
 
@@ -191,9 +196,8 @@ public class LrdCamelConfig {
     }
 
     @Bean
-    public CamelContext camelContext() {
-        CamelContext camelContext = new SpringCamelContext(applicationContext);
-        return camelContext;
+    public CamelContext camelContext(ApplicationContext applicationContext) {
+        return new SpringCamelContext(applicationContext);
     }
     // camel related configuration ends
 

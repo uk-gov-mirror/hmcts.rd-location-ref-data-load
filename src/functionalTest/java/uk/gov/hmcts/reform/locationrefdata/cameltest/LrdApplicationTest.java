@@ -94,7 +94,7 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
         platformTransactionManager.commit(status);
         SpringRestarter.getInstance().restart();
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-day2.csv"))
         );
@@ -113,13 +113,13 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
             ServiceToCcdCaseType.builder().ccdCaseType("service16")
                 .ccdServiceName("ccd-service2").serviceCode("AAA2").build()
         ), 4);
-        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", "service-test.csv");
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", UPLOAD_FILE_NAME);
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
     }
 
     private void testInsertion() throws Exception {
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test.csv"))
         );
@@ -137,16 +137,16 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
                 .ccdServiceName("ccd-service2").serviceCode("AAA2").build()
         ), 4);
         //Validates Success Audit
-        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", "service-test.csv");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", UPLOAD_FILE_NAME);
         //Delete Uploaded test file with Snapshot delete
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
     }
 
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
     public void testTaskletIdempotent() throws Exception {
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test.csv"))
         );
@@ -157,7 +157,7 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
         SpringRestarter.getInstance().restart();
 
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-empty-case-or-name.csv"))
         );
@@ -176,12 +176,12 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
                 .ccdServiceName("ccd-service2").serviceCode("AAA2").build()
         ), 4);
         //Validates Success Audit
-        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", "service-test.csv");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", UPLOAD_FILE_NAME);
         //Delete Uploaded test file with Snapshot delete
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
         dataIngestionLibraryRunner.run(jobLauncherTestUtils.getJob(),params);
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-empty-case-or-name.csv"))
         );
@@ -189,14 +189,14 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
         List<Map<String, Object>> auditDetailsNextRun = jdbcTemplate.queryForList(auditSchedulerQuery);
         final Timestamp timestampNextRun = (Timestamp) auditDetailsNextRun.get(0).get("scheduler_end_time");
         assertEquals(timestamp,timestampNextRun);
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
     }
 
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
     public void testTaskletSuccessWithEmptyCaseTypeOrName() throws Exception {
         lrdBlobSupport.uploadFile(
-            "service-test.csv",
+            UPLOAD_FILE_NAME,
             new FileInputStream(getFile(
                 "classpath:sourceFiles/service-test-empty-case-or-name.csv"))
         );
@@ -220,8 +220,8 @@ public class LrdApplicationTest extends LrdIntegrationBaseTest {
                 .ccdCaseType(EMPTY).build()
         ), 6);
         //Validates Success Audit
-        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", "service-test.csv");
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", UPLOAD_FILE_NAME);
         //Delete Uploaded test file with Snapshot delete
-        lrdBlobSupport.deleteBlob("service-test.csv");
+        lrdBlobSupport.deleteBlob(UPLOAD_FILE_NAME);
     }
 }
