@@ -11,12 +11,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class ServiceToCcdCaseTypeMapperTest {
+class ServiceToCcdCaseTypeMapperTest {
 
     ServiceToCcdCaseTypeMapper serviceToCcdCaseTypeMapper = spy(new ServiceToCcdCaseTypeMapper());
 
     @Test
-    public void testGetMap() {
+    void testGetMap() {
         ServiceToCcdCaseType serviceToCcdCaseType = ServiceToCcdCaseType.builder().serviceCode("test")
             .ccdCaseType(" case1,case2 ").ccdServiceName(" service1 ").build();
         Map<String, Object> resultMap = serviceToCcdCaseTypeMapper.getMap(serviceToCcdCaseType);

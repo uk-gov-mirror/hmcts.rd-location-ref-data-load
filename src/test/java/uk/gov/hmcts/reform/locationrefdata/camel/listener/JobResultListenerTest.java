@@ -13,7 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-public class JobResultListenerTest {
+class JobResultListenerTest {
 
     JobResultListener jobResultListener = spy(new JobResultListener());
 
@@ -27,13 +27,13 @@ public class JobResultListenerTest {
     }
 
     @Test
-    public void beforeJobTest() {
+    void beforeJobTest() {
         jobResultListener.beforeJob(jobExecution);
         verify(jobResultListener, times(1)).beforeJob(jobExecution);
     }
 
     @Test
-    public void afterJobTest() {
+    void afterJobTest() {
         doNothing().when(archivalBlobService).executeArchiving();
         jobResultListener.afterJob(jobExecution);
         verify(jobResultListener, times(1)).afterJob(jobExecution);
