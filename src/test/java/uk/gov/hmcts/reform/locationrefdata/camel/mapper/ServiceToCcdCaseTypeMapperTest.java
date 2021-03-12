@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.locationrefdata.camel.mapper;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 
 import java.util.Map;

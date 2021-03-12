@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.locationrefdata.camel.listener;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobExecution;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.ArchivalBlobServiceImpl;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.IArchivalBlobService;
@@ -21,7 +21,7 @@ public class JobResultListenerTest {
 
     IArchivalBlobService archivalBlobService = mock(ArchivalBlobServiceImpl.class);
 
-    @Before
+    @BeforeEach
     public void init() {
         setField(jobResultListener, "archivalBlobService", archivalBlobService);
     }

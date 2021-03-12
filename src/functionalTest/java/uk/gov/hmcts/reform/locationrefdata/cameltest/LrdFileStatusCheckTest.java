@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.locationrefdata.cameltest;
 
-import org.apache.camel.test.spring.CamelTestContextBootstrapper;
-import org.apache.camel.test.spring.MockEndpoints;
+import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
+import org.apache.camel.test.spring.junit5.CamelTestContextBootstrapper;
+import org.apache.camel.test.spring.junit5.MockEndpoints;
 import org.javatuples.Pair;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -23,8 +23,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.reform.data.ingestion.configuration.AzureBlobConfig;
 import uk.gov.hmcts.reform.data.ingestion.configuration.BlobStorageCredentials;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.LrdIntegrationBaseTest;
-import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.RestartingSpringJUnit4ClassRunner;
-import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.SpringRestarter;
+import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.SpringStarter;
 import uk.gov.hmcts.reform.locationrefdata.config.LrdCamelConfig;
 import uk.gov.hmcts.reform.locationrefdata.configuration.BatchConfig;
 
@@ -41,7 +40,7 @@ import static uk.gov.hmcts.reform.data.ingestion.camel.util.MappingConstants.SCH
 
 @TestPropertySource(properties = {"spring.config.location=classpath:application-integration.yml,"
     + "classpath:application-leaf-integration.yml"})
-@RunWith(RestartingSpringJUnit4ClassRunner.class)
+@CamelSpringBootTest
 @MockEndpoints("log:*")
 @ContextConfiguration(classes = {LrdCamelConfig.class, CamelTestContextBootstrapper.class,
     JobLauncherTestUtils.class, BatchConfig.class, AzureBlobConfig.class, BlobStorageCredentials.class},
@@ -51,7 +50,7 @@ import static uk.gov.hmcts.reform.data.ingestion.camel.util.MappingConstants.SCH
 @EnableTransactionManagement
 @SqlConfig(dataSource = "dataSource", transactionManager = "txManager",
     transactionMode = SqlConfig.TransactionMode.ISOLATED)
-public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
+class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
 
     @Value("${truncate-audit}")
     protected String truncateAudit;
@@ -62,14 +61,14 @@ public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
     @Value("${select-dataload-scheduler-failure}")
     String lrdAuditSqlFailure;
 
-    @Before
+    @BeforeEach
     public void init() {
-        SpringRestarter.getInstance().restart();
+        SpringStarter.getInstance().restart();
     }
 
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
-    public void testTaskletStaleFileErrorDay2WithKeepingDay1Data() throws Exception {
+    void testTaskletStaleFileErrorDay2WithKeepingDay1Data() throws Exception {
 
         //Day 1 happy path
         uploadFiles(String.valueOf(new Date(System.currentTimeMillis()).getTime()));
@@ -109,7 +108,7 @@ public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
 
     @Test
     @Sql(scripts = {"/testData/truncate-lrd.sql"})
-    public void testTaskletNoFileErrorDay2WithKeepingDay1Data() throws Exception {
+    void testTaskletNoFileErrorDay2WithKeepingDay1Data() throws Exception {
         //Day 1 happy path
         uploadFiles(String.valueOf(new Date(System.currentTimeMillis()).getTime()));
 
@@ -145,7 +144,7 @@ public class LrdFileStatusCheckTest extends LrdIntegrationBaseTest {
     private void deleteAuditAndExceptionDataOfDay1() {
         jdbcTemplate.execute(truncateAudit);
         jdbcTemplate.execute(truncateException);
-        SpringRestarter.getInstance().restart();
+        SpringStarter.getInstance().restart();
     }
 
     private void uploadFiles(String time) throws Exception {

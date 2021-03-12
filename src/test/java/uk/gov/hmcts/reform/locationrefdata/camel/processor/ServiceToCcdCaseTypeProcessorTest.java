@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.DefaultExchange;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.camel.support.DefaultExchange;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.data.ingestion.camel.exception.RouteFailedException;
 import uk.gov.hmcts.reform.data.ingestion.camel.validator.JsrValidatorInitializer;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @SuppressWarnings("unchecked")
-public class ServiceToCcdCaseTypeProcessorTest {
+class ServiceToCcdCaseTypeProcessorTest {
 
 
     ServiceToCcdCaseTypeProcessor serviceToCcdCaseTypeProcessor = spy(new ServiceToCcdCaseTypeProcessor());
@@ -38,7 +38,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
     JsrValidatorInitializer<ServiceToCcdCaseType> serviceToCcdServiceJsrValidatorInitializer
         = new JsrValidatorInitializer<>();
 
-    @Before
+    @BeforeEach
     public void init() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
@@ -52,7 +52,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
     }
 
     @Test
-    public void testProcess() throws Exception {
+    void testProcess() throws Exception {
 
         List<ServiceToCcdCaseType> serviceToCcdCaseTypes = new ArrayList<>();
         serviceToCcdCaseTypes.add(ServiceToCcdCaseType.builder().ccdCaseType("service1,service2")
@@ -80,7 +80,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
     }
 
     @Test
-    public void testProcessSingleElement() throws Exception {
+    void testProcessSingleElement() throws Exception {
 
         ServiceToCcdCaseType serviceToCcdCaseType = ServiceToCcdCaseType.builder().ccdCaseType("service1,service2")
             .ccdServiceName("service1 Jurisdiction").serviceCode("1111").build();
@@ -104,7 +104,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
     }
 
     @Test
-    public void testProcessOneValidAndOneInvalidServiceCode() throws Exception {
+    void testProcessOneValidAndOneInvalidServiceCode() throws Exception {
         List<ServiceToCcdCaseType> serviceToCcdCaseTypes = new ArrayList<>();
         serviceToCcdCaseTypes.add(ServiceToCcdCaseType.builder().serviceCode("1111").build());
         serviceToCcdCaseTypes.add(ServiceToCcdCaseType.builder().ccdCaseType("service1")
@@ -126,7 +126,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
     }
 
     @Test
-    public void testProcessSingleInvalidServiceName() throws Exception {
+    void testProcessSingleInvalidServiceName() throws Exception {
         exchange.getIn().setBody(ServiceToCcdCaseType.builder().serviceCode("1111")
                                      .ccdServiceName("service1 Jurisdiction").build());
         doNothing().when(serviceToCcdCaseTypeProcessor).audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
@@ -144,7 +144,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
     }
 
     @Test
-    public void testProcessSingleInvalidCaseName() throws Exception {
+    void testProcessSingleInvalidCaseName() throws Exception {
         exchange.getIn().setBody(ServiceToCcdCaseType.builder().serviceCode("1111")
                                      .ccdCaseType("service1").build());
         doNothing().when(serviceToCcdCaseTypeProcessor).audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
@@ -162,7 +162,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
     }
 
     @Test
-    public void testProcessWithOnlyServiceCode() throws Exception {
+    void testProcessWithOnlyServiceCode() throws Exception {
         exchange.getIn().setBody(ServiceToCcdCaseType.builder().serviceCode("1111").build());
         doNothing().when(serviceToCcdCaseTypeProcessor).audit(serviceToCcdServiceJsrValidatorInitializer, exchange);
         assertThrows(RouteFailedException.class, () -> serviceToCcdCaseTypeProcessor.process(exchange));
@@ -170,7 +170,7 @@ public class ServiceToCcdCaseTypeProcessorTest {
     }
 
     @Test
-    public void testProcessInvalidServiceCodeElementWithException() throws Exception {
+    void testProcessInvalidServiceCodeElementWithException() throws Exception {
 
         ServiceToCcdCaseType serviceToCcdCaseType = ServiceToCcdCaseType.builder().ccdCaseType("test")
             .ccdServiceName("service1 Jurisdiction").serviceCode("").build();
