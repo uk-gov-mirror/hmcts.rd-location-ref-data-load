@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.locationrefdata.camel.util;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.AuditServiceImpl;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -17,8 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-@RunWith(SpringRunner.class)
-public class LrdExecutorTest {
+@ExtendWith(SpringExtension.class)
+class LrdExecutorTest {
 
     LrdExecutor lrdExecutor = new LrdExecutor();
 
@@ -30,13 +30,13 @@ public class LrdExecutorTest {
 
     ProducerTemplate producerTemplate = mock(ProducerTemplate.class);
 
-    @Before
+    @BeforeEach
     public void init() {
         setField(lrdExecutorSpy, "auditService", auditService);
     }
 
     @Test
-    public void testExecute() {
+    void testExecute() {
         doNothing().when(producerTemplate).sendBody(any());
         doNothing().when(auditService).auditSchedulerStatus(camelContext);
         lrdExecutorSpy.execute(camelContext, "test", "test");
@@ -44,7 +44,7 @@ public class LrdExecutorTest {
     }
 
     @Test
-    public void testExecuteException() {
+    void testExecuteException() {
         doNothing().when(auditService).auditSchedulerStatus(camelContext);
         lrdExecutorSpy.execute(camelContext, "test", "test");
         verify(lrdExecutorSpy, times(1)).execute(camelContext, "test", "test");

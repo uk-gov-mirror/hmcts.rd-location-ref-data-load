@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.locationrefdata.camel.task;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.repeat.RepeatStatus;
 import uk.gov.hmcts.reform.data.ingestion.camel.route.DataLoadRoute;
 import uk.gov.hmcts.reform.locationrefdata.camel.util.LrdExecutor;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-public class LrdRouteTaskTest {
+class LrdRouteTaskTest {
 
     LrdRouteTask lrdRouteTask = spy(new LrdRouteTask());
 
@@ -26,7 +26,7 @@ public class LrdRouteTaskTest {
 
     LrdExecutor lrdExecutor = mock(LrdExecutor.class);
 
-    @Before
+    @BeforeEach
     public void init() {
         setField(lrdRouteTask, "logComponentName", "testlogger");
         setField(lrdRouteTask, "dataLoadRoute", dataLoadRoute);
@@ -34,7 +34,7 @@ public class LrdRouteTaskTest {
     }
 
     @Test
-    public void testExecute() throws Exception {
+    void testExecute() throws Exception {
         doNothing().when(dataLoadRoute).startRoute(anyString(), anyList());
         when(lrdExecutor.execute(any(), any(), any())).thenReturn("success");
         assertEquals(RepeatStatus.FINISHED, lrdRouteTask.execute(any(), any()));
