@@ -5,7 +5,7 @@ spring:
       paths: /mnt/secrets/rd
       aliases:
         location-ref-api-POSTGRES-PASS: spring.datasource.password
-        AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
+        ApplicationInsightsInstrumentationKey: azure.application-insights.instrumentation-key
         rd-location-storage-account-name: ACCOUNT_NAME
         rd-location-storage-account-primary-key: ACCOUNT_KEY
         CONTAINER-NAME: CONTAINER_NAME

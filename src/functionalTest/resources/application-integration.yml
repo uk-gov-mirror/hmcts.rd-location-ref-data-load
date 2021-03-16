@@ -67,7 +67,11 @@ exception-select-query: select * from  dataload_exception_records
 
 select-dataload-scheduler: select *  from dataload_schedular_audit
 
+select-dataload-scheduler-failure: select *  from dataload_schedular_audit where status='Failure'
+
 truncate-audit: truncate dataload_schedular_audit
+
+truncate-exception: truncate dataload_exception_records
 
 get-ccd-case-time: select created_date from SERVICE_TO_CCD_CASE_TYPE_ASSOC where service_code = ? and ccd_case_type = ?
 

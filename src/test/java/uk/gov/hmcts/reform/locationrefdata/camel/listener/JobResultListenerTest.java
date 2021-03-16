@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.locationrefdata.camel.listener;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobExecution;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.ArchivalBlobServiceImpl;
 import uk.gov.hmcts.reform.data.ingestion.camel.service.IArchivalBlobService;
@@ -13,7 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-public class JobResultListenerTest {
+class JobResultListenerTest {
 
     JobResultListener jobResultListener = spy(new JobResultListener());
 
@@ -21,19 +21,19 @@ public class JobResultListenerTest {
 
     IArchivalBlobService archivalBlobService = mock(ArchivalBlobServiceImpl.class);
 
-    @Before
+    @BeforeEach
     public void init() {
         setField(jobResultListener, "archivalBlobService", archivalBlobService);
     }
 
     @Test
-    public void beforeJobTest() {
+    void beforeJobTest() {
         jobResultListener.beforeJob(jobExecution);
         verify(jobResultListener, times(1)).beforeJob(jobExecution);
     }
 
     @Test
-    public void afterJobTest() {
+    void afterJobTest() {
         doNothing().when(archivalBlobService).executeArchiving();
         jobResultListener.afterJob(jobExecution);
         verify(jobResultListener, times(1)).afterJob(jobExecution);
