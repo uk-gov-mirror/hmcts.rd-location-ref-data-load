@@ -188,7 +188,7 @@ repositories {
   jcenter()
   mavenCentral()
   maven {
-    url "https://dl.bintray.com/hmcts/hmcts-maven"
+    url 'https://jitpack.io'
   }
 }
 
@@ -237,39 +237,12 @@ dependencies {
 
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
 
-  compile group: 'uk.gov.hmcts.reform', name: 'data-ingestion-lib', version: '0.4.3.0'
+  implementation 'com.github.hmcts:data-ingestion-lib:0.4.4.0'
   compile group: 'org.apache.camel', name: 'camel-bom', version: versions.camel, ext: 'pom'
   compile group: 'org.apache.camel.springboot', name: 'camel-spring-boot-dependencies', version: versions.camel
 
   compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-  // Fix for CVE-2021-21295
-  implementation('io.netty:netty-buffer:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
-  implementation('io.netty:netty-codec:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
-  implementation('io.netty:netty-codec-http:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
-  implementation('io.netty:netty-common:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
-  implementation('io.netty:netty-handler:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
-  implementation('io.netty:netty-resolver:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
-  implementation('io.netty:netty-transport:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
-  implementation('io.netty:netty-codec-socks:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
-  implementation('io.netty:netty-handler-proxy:4.1.63.Final') {
-    because 'In Netty before version 4.1.60.Final there is a vulnerability that enables request smuggling.'
-  }
+
   compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
@@ -339,6 +312,15 @@ bootJar {
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
+}
+
+// Fix for CVE-2021-21295 & need to be removed with new Azure blob version
+configurations.all {
+  resolutionStrategy.eachDependency { details ->
+    if (details.requested.group == 'io.netty') {
+      details.useVersion "4.1.63.Final"
+    }
+  }
 }
 
 test {
