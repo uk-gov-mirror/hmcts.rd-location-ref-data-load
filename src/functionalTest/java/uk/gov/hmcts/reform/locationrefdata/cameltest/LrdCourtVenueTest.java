@@ -53,6 +53,8 @@ import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadCon
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.INVALID_EPIMS_ID;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.REGION_ID;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.REGION_ID_NOT_EXISTS;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.SERVICE_CODE;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.SERVICE_CODE_NOT_EXISTS;
 
 @TestPropertySource(properties = "spring.config.location=classpath:application-integration.yml")
 @CamelSpringBootTest
@@ -376,6 +378,31 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess", UPLOAD_COURT_FILE_NAME);
         Quartet<String, String, String, Long> quartet =
             with(EPIMMS_ID, EPIMMS_ID_NOT_EXISTS, "a123456", 3L);
+        validateLrdServiceFileJsrException(jdbcTemplate, orderedExceptionQuery, 3,
+                                           COURT_VENUE_TABLE_NAME, quartet);
+    }
+
+    @Test
+    @Sql(scripts = {"/testData/truncate-lrd-court-venue.sql", "/testData/insert-building-location.sql"})
+    void testTasklet_NonexistentServiceCode_PartialSuccess() throws Exception {
+        lrdBlobSupport.uploadFile(
+            UPLOAD_COURT_FILE_NAME,
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/courtVenues/court-venue-test-partial-success-non-existent-service-code.csv"))
+        );
+
+        jobLauncherTestUtils.launchJob();
+        //Validate Success Result
+        validateLrdCourtVenueFile(jdbcTemplate, lrdCourtVenueSelectData, List.of(
+            CourtVenue.builder().epimmsId("123456").siteName("A Tribunal Hearing Centre")
+                .courtName("A TRIBUNAL HEARING CENTRE").courtStatus("Open").regionId("7").courtTypeId("17")
+                .openForPublic("Yes").courtAddress("AB1,48 COURT STREET,LONDON").postcode("AB12 3AB")
+                .serviceCode("AAA1").build()
+        ), 1);
+        //Validates Success Audit
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess", UPLOAD_COURT_FILE_NAME);
+        Quartet<String, String, String, Long> quartet =
+            with(SERVICE_CODE, SERVICE_CODE_NOT_EXISTS, "AAA9", 3L);
         validateLrdServiceFileJsrException(jdbcTemplate, orderedExceptionQuery, 3,
                                            COURT_VENUE_TABLE_NAME, quartet);
     }
