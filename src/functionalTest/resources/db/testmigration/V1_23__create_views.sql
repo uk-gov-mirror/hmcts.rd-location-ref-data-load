@@ -19,7 +19,7 @@
  closed_date,court_location_code,dx_address, welsh_site_name,welsh_court_address, court_status, court_open_date,
  court_name ,venue_name,is_case_management_location ,is_hearing_location,welsh_venue_name,is_temporary_location,
  is_nightingale_court,location_type,parent_location,welsh_court_name,uprn,venue_ou_code,mrd_building_location_id,
- mrd_venue_id,service_url,fact_url from court_venue;
+ mrd_venue_id,service_url,fact_url,service_code from court_venue;
 
  -- view creation for court_type_service_assoc
 create view rdlocationreport.vw_court_type_service_assoc as
