@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '7.2.3.7755'
   id "org.flywaydb.flyway" version '9.22.3'
   id 'info.solidsoft.pitest' version '1.15.0'
-  id 'uk.gov.hmcts.java' version '0.12.68'
+  id 'uk.gov.hmcts.java' version '0.12.70'
 }
 
 group = 'uk.gov.hmcts.reform.rd'
