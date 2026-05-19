@@ -38,7 +38,7 @@ compileJava {
 def versions = [
   junit               : '6.0.3',
   junitPlatform       : '6.0.3',
-  reformLogging       : '6.1.9',
+  reformLogging       : '8.0.0',
   springBoot          : '3.4.1',
   springfoxSwagger    : '2.10.5',
   lombok              : '1.18.44',
@@ -260,7 +260,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
 
   implementation "com.github.hmcts.java-logging:logging:${versions.reformLogging}"
-  implementation "com.github.hmcts.java-logging:logging-appinsights:${versions.reformLogging}"
+  implementation "com.github.hmcts.java-logging:logging-appinsights:6.1.9"
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-batch'
