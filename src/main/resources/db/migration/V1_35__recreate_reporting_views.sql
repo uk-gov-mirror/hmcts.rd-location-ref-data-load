@@ -18,7 +18,7 @@ select site_name, region_id, court_type_id, cluster_id, open_for_public, court_a
        court_open_date, court_name, venue_name, is_case_management_location, is_hearing_location,
        welsh_venue_name, is_temporary_location, is_nightingale_court, location_type, parent_location,
        welsh_court_name, uprn, venue_ou_code, mrd_building_location_id, mrd_venue_id, service_url, fact_url,
-       service_code
+       short_court_name,external_short_name,service_code
 from locrefdata.court_venue;
 
 create or replace view rdlocationreport.vw_court_type_service_assoc as

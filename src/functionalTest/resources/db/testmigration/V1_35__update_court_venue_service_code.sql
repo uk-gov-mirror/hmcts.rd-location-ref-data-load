@@ -3,7 +3,7 @@ BEGIN
     IF EXISTS (
         SELECT 1
         FROM information_schema.columns
-        WHERE table_schema = 'locrefdata'
+        WHERE table_schema = current_schema()
           AND table_name = 'court_venue'
           AND column_name = 'service_code'
     ) THEN
