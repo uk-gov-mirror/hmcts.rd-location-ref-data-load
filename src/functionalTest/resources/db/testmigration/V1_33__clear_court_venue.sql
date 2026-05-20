@@ -17,6 +17,6 @@ BEGIN
           AND table_name = 'court_venue'
           AND column_name = 'service_code'
     ) THEN
- TRUNCATE TABLE court_venue CASCADE;
-END IF;
+        DELETE FROM court_venue;
+    END IF;
 END $$;
