@@ -99,7 +99,7 @@ route:
       :#is_hearing_location, :#welsh_venue_name, :#is_temporary_location, :#is_nightingale_court, :#location_type, :#parent_location,
       :#welsh_court_name, :#uprn, :#venue_ou_code, :#mrd_building_location_id, :#mrd_venue_id, :#service_url, :#fact_url,
       :#mrd_created_time, :#mrd_updated_time, :#mrd_deleted_time, :#external_short_name, :#welsh_external_short_name,:#service_code, NOW() AT TIME ZONE 'utc', NOW() AT TIME ZONE 'utc')
-      ON CONFLICT (epimms_id,court_type_id) do update set epimms_id = :#epimms_id, site_name = :#site_name, court_name = :#court_name,
+      ON CONFLICT (epimms_id,service_code) do update set epimms_id = :#epimms_id, site_name = :#site_name, court_name = :#court_name,
       court_status = :#court_status, court_open_date = TO_DATE(NULLIF(:#court_open_date,''), 'dd/MM/yyyy'),
       region_id = :#region_id, court_type_id = :#court_type_id, cluster_id = :#cluster_id, open_for_public = :#open_for_public::boolean, court_address = :#court_address,
       postcode = :#postcode, phone_number = :#phone_number, closed_date = TO_DATE(NULLIF(:#closed_date,''), 'dd/MM/yyyy'),
@@ -153,7 +153,6 @@ mail:
 idempotent-flag-ingestion: true
 
 CONTAINER_NAME: lrd-ref-data
-
 zero-byte-characters: >
   \u200B,
    
