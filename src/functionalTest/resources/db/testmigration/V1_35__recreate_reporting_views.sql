@@ -5,4 +5,4 @@ select site_name, region_id, court_type_id, cluster_id, open_for_public, court_a
        welsh_venue_name, is_temporary_location, is_nightingale_court, location_type, parent_location,
        welsh_court_name, uprn, venue_ou_code, mrd_building_location_id, mrd_venue_id, service_url, fact_url,
        external_short_name, welsh_external_short_name, service_code
-from locrefdata.court_venue;
+from court_venue;
