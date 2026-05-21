@@ -411,7 +411,7 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess", UPLOAD_COURT_FILE_NAME);
         Quartet<String, String, String, Long> quartet =
-            with(SERVICE_CODE, SERVICE_CODE_NOT_EXISTS, "AAA9", 3L);
+            with(SERVICE_CODE, SERVICE_CODE_NOT_EXISTS, "123456", 3L);
         validateLrdServiceFileJsrException(jdbcTemplate, orderedExceptionQuery, 3,
                                            COURT_VENUE_TABLE_NAME, quartet);
     }
