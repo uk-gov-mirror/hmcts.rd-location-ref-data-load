@@ -40,6 +40,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 import static uk.gov.hmcts.reform.data.ingestion.camel.util.MappingConstants.ROUTE_DETAILS;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID_AND_SERVICE_CODE;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID_AND_SERVICE_CODE_DUPLICATE;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
@@ -73,6 +75,8 @@ class CourtVenueProcessorTest {
     private static final List<Pair<String, Long>> ZERO_BYTE_CHARACTER_RECORDS = List.of(
         Pair.of("123::123", null),
         Pair.of("2::2", null));
+    private static final List<Pair<String, Long>> DUPLICATE_COMPOSITE_KEY_RECORDS = List.of(
+        Pair.of("1::AAA1", 3L));
 
     private static final List<String> ZERO_BYTE_CHARACTERS = List.of("\u200B", " ");
 
@@ -340,6 +344,71 @@ class CourtVenueProcessorTest {
         assertThat(actualCourtVenues)
             .hasSize(2)
             .hasSameElementsAs(getValidCourtVenues());
+    }
+
+    @Test
+    void testProcessWithDuplicateEpimmsIdAndServiceCode() throws Exception {
+        CourtVenue firstCourtVenue = CourtVenue.builder()
+            .epimmsId("1")
+            .siteName("Test Site")
+            .courtName("Test Court Name")
+            .courtStatus("Open")
+            .courtOpenDate("12/12/12")
+            .regionId("1")
+            .courtTypeId("2")
+            .clusterId("3")
+            .openForPublic("Yes")
+            .courtAddress("Test Court Address")
+            .postcode("ABC 123")
+            .phoneNumber("12343434")
+            .closedDate("12/03/21")
+            .courtLocationCode("12AB")
+            .dxAddress("Test Dx Address")
+            .serviceCode("AAA1")
+            .welshSiteName("Test Welsh Site Name")
+            .welshCourtAddress("Test Welsh Court Address")
+            .build();
+        firstCourtVenue.setRowId(2L);
+
+        CourtVenue duplicateCourtVenue = CourtVenue.builder()
+            .epimmsId("1")
+            .siteName("Test Site Duplicate")
+            .courtName("Test Court Name Duplicate")
+            .courtStatus("Open")
+            .courtOpenDate("12/12/12")
+            .regionId("1")
+            .courtTypeId("4")
+            .clusterId("3")
+            .openForPublic("Yes")
+            .courtAddress("Test Court Address Duplicate")
+            .postcode("ABC 123")
+            .phoneNumber("12343434")
+            .closedDate("12/03/21")
+            .courtLocationCode("12AB")
+            .dxAddress("Test Dx Address")
+            .serviceCode("AAA1")
+            .welshSiteName("Test Welsh Site Name")
+            .welshCourtAddress("Test Welsh Court Address")
+            .build();
+        duplicateCourtVenue.setRowId(3L);
+
+        exchange.getIn().setBody(List.of(firstCourtVenue, duplicateCourtVenue));
+        doNothing().when(processor).audit(courtVenueJsrValidatorInitializer, exchange);
+        setJdbcTemplateResponse();
+        when((applicationContext).getBeanFactory()).thenReturn(configurableListableBeanFactory);
+
+        processor.process(exchange);
+
+        List<CourtVenue> actualCourtVenues = (List<CourtVenue>) exchange.getMessage().getBody();
+
+        assertThat(actualCourtVenues)
+            .hasSize(1)
+            .containsExactly(firstCourtVenue);
+        verify(courtVenueJsrValidatorInitializer, times(1))
+            .auditJsrExceptions(eq(DUPLICATE_COMPOSITE_KEY_RECORDS),
+                eq(EPIMMS_ID_AND_SERVICE_CODE),
+                eq(EPIMMS_ID_AND_SERVICE_CODE_DUPLICATE),
+                eq(exchange));
     }
 
     @Test
@@ -658,4 +727,3 @@ class CourtVenueProcessorTest {
     }
 
 }
-

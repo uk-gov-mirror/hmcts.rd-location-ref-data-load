@@ -48,6 +48,8 @@ import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadCon
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.CLUSTER_ID_NOT_EXISTS;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.COURT_TYPE_ID;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.COURT_TYPE_ID_NOT_EXISTS;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID_AND_SERVICE_CODE;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID_AND_SERVICE_CODE_DUPLICATE;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID_NOT_EXISTS;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.INVALID_EPIMS_ID;
@@ -412,6 +414,41 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess", UPLOAD_COURT_FILE_NAME);
         Quartet<String, String, String, Long> quartet =
             with(SERVICE_CODE, SERVICE_CODE_NOT_EXISTS, "123456", 3L);
+        validateLrdServiceFileJsrException(jdbcTemplate, orderedExceptionQuery, 3,
+                                           COURT_VENUE_TABLE_NAME, quartet);
+    }
+
+    @Test
+    @Sql(scripts = {"/testData/truncate-lrd-court-venue.sql", "/testData/insert-building-location.sql"})
+    void testTasklet_DuplicateEpimmsIdAndServiceCode_PartialSuccess() throws Exception {
+        lrdBlobSupport.uploadFile(
+            UPLOAD_COURT_FILE_NAME,
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/courtVenues/"
+                    + "court-venue-test-partial-success-duplicate-epimms-service-code.csv"))
+        );
+
+        jobLauncherTestUtils.launchJob();
+
+        validateLrdCourtVenueFile(jdbcTemplate, lrdCourtVenueSelectData, List.of(
+            CourtVenue.builder().epimmsId("123456").siteName("A Tribunal Hearing Centre")
+                .courtName("A TRIBUNAL HEARING CENTRE").courtStatus("Open").regionId("7").courtTypeId("17")
+                .openForPublic("Yes").courtAddress("AB1,48 COURT STREET,LONDON").postcode("AB12 3AB")
+                .phoneNumber("").closedDate(null).courtLocationCode("").dxAddress("").welshSiteName("")
+                .welshCourtAddress("").venueName("").isCaseManagementLocation("").isHearingLocation("")
+                .welshVenueName("testVenue1").isTemporaryLocation("N").isNightingaleCourt("N")
+                .locationType("Court").parentLocation("366559").welshCourtName("testWelshCourtName")
+                .uprn("uprn123").venueOuCode("venueOuCode1").mrdBuildingLocationId("mrdBId1")
+                .mrdVenueId("mrdVenueId1").serviceUrl("serviceUrl1").factUrl("factUrl1")
+                .mrdCreatedTime("2022-04-01 02:00:01").mrdUpdatedTime("2022-04-01 02:00:02")
+                .mrdDeletedTime("2022-04-01 02:00:03").externalShortName("External Short Name")
+                .welshExternalShortName("Welsh External Short Name")
+                .serviceCode("AAA1").build()
+        ), 1);
+
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess", UPLOAD_COURT_FILE_NAME);
+        Quartet<String, String, String, Long> quartet =
+            with(EPIMMS_ID_AND_SERVICE_CODE, EPIMMS_ID_AND_SERVICE_CODE_DUPLICATE, "123456::AAA1", 3L);
         validateLrdServiceFileJsrException(jdbcTemplate, orderedExceptionQuery, 3,
                                            COURT_VENUE_TABLE_NAME, quartet);
     }

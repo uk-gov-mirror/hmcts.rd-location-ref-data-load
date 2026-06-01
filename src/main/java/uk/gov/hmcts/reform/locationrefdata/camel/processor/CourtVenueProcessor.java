@@ -15,7 +15,9 @@ import uk.gov.hmcts.reform.locationrefdata.camel.util.LogDto;
 import uk.gov.hmcts.reform.locationrefdata.configuration.DataQualityCheckConfiguration;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
@@ -26,6 +28,8 @@ import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadCon
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.CLUSTER_ID_NOT_EXISTS;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.COURT_TYPE_ID;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.COURT_TYPE_ID_NOT_EXISTS;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID_AND_SERVICE_CODE;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID_AND_SERVICE_CODE_DUPLICATE;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.EPIMMS_ID_NOT_EXISTS;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.REGION_ID;
@@ -33,6 +37,7 @@ import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadCon
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.SERVICE_CODE;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.SERVICE_CODE_NOT_EXISTS;
 import static uk.gov.hmcts.reform.locationrefdata.camel.util.LrdLoadUtils.checkIfValueNotInListIfPresent;
+import static uk.gov.hmcts.reform.locationrefdata.camel.util.LrdLoadUtils.trim;
 
 @Slf4j
 @Component
@@ -94,6 +99,7 @@ public class CourtVenueProcessor extends JsrValidationBaseProcessor<CourtVenue>
         );
 
         filterCourtVenuesForForeignKeyViolations(filteredCourtVenues, exchange);
+        filterCourtVenuesForDuplicateCompositeKeys(filteredCourtVenues, exchange);
 
         audit(courtVenueJsrValidatorInitializer, exchange);
 
@@ -112,6 +118,44 @@ public class CourtVenueProcessor extends JsrValidationBaseProcessor<CourtVenue>
 
         exchange.getMessage().setBody(filteredCourtVenues);
 
+    }
+
+    private void filterCourtVenuesForDuplicateCompositeKeys(List<CourtVenue> validatedCourtVenues,
+                                                            Exchange exchange) {
+        if (validatedCourtVenues.isEmpty()) {
+            return;
+        }
+
+        Set<String> compositeKeys = new HashSet<>();
+        List<Pair<String, Long>> duplicateCourtVenueRecords = new ArrayList<>();
+
+        validatedCourtVenues.removeIf(courtVenue -> {
+            String compositeKey = getCompositeKey(courtVenue);
+            if (compositeKey == null || compositeKeys.add(compositeKey)) {
+                return false;
+            }
+
+            duplicateCourtVenueRecords.add(Pair.of(compositeKey, courtVenue.getRowId()));
+            return true;
+        });
+
+        if (!duplicateCourtVenueRecords.isEmpty()) {
+            setFileStatus(exchange, applicationContext,PARTIAL_SUCCESS);
+            courtVenueJsrValidatorInitializer.auditJsrExceptions(
+                duplicateCourtVenueRecords,
+                EPIMMS_ID_AND_SERVICE_CODE,
+                EPIMMS_ID_AND_SERVICE_CODE_DUPLICATE,
+                exchange
+            );
+        }
+    }
+
+    private String getCompositeKey(CourtVenue courtVenue) {
+        String serviceCode = trim(courtVenue.getServiceCode());
+        if (serviceCode == null) {
+            return null;
+        }
+        return trim(courtVenue.getEpimmsId()) + "::" + serviceCode;
     }
 
 
