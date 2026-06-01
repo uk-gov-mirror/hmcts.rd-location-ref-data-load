@@ -377,7 +377,7 @@ class CourtVenueProcessorTest {
             .courtStatus("Open")
             .courtOpenDate("12/12/12")
             .regionId("1")
-            .courtTypeId("4")
+            .courtTypeId("2")
             .clusterId("3")
             .openForPublic("Yes")
             .courtAddress("Test Court Address Duplicate")
