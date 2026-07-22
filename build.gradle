@@ -49,7 +49,7 @@ def versions = [
   sonarPitest         : '0.5',
   junitPitest         : '1.2.1',
   jackson             : '2.19.2',
-  log4j               : '2.26.0',
+  log4j               : '2.26.1',
   logback             : '1.5.32',
   bouncycastle        : '1.83',
   testcontainers      : '1.21.4',
