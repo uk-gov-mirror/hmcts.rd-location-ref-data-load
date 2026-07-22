@@ -21,3 +21,4 @@ region-query: SELECT region_id FROM region
 cluster-query: SELECT cluster_id FROM cluster
 epimms-id-query: SELECT epimms_id FROM building_location
 court-type-id-query: SELECT court_type_id FROM court_type
+service-code-query: SELECT service_code FROM service
