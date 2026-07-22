@@ -51,6 +51,7 @@ class CourtVenueMapperTest {
             .factUrl("factUrl1")
             .externalShortName("External Court")
             .welshExternalShortName("WelshExternalShortName")
+            .serviceCode("serviceCode1")
             .build();
 
         var expectedMap = new HashMap<String, Object>();
@@ -91,7 +92,7 @@ class CourtVenueMapperTest {
         expectedMap.put("mrd_deleted_time",null);
         expectedMap.put("external_short_name","External Court");
         expectedMap.put("welsh_external_short_name","WelshExternalShortName");
-
+        expectedMap.put("service_code","serviceCode1");
         var actualMap = courtVenueMapper.getMap(courtVenue);
 
         assertEquals(actualMap, expectedMap);
