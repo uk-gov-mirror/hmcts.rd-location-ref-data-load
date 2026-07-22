@@ -49,7 +49,7 @@ def versions = [
   sonarPitest         : '0.5',
   junitPitest         : '1.2.1',
   jackson             : '2.19.2',
-  log4j               : '2.25.3',
+  log4j               : '2.26.1',
   logback             : '1.5.32',
   bouncycastle        : '1.83',
   testcontainers      : '1.21.4',
@@ -278,7 +278,7 @@ dependencies {
   implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: versions.log4j
   implementation group: 'org.apache.logging.log4j', name: 'log4j', version: versions.log4j
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.log4j
-  implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.10'
+  implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.13'
   implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jackson
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jackson
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
@@ -340,7 +340,7 @@ dependencies {
   testImplementation group: 'org.springframework.batch', name: 'spring-batch-test'
   testImplementation group: 'org.javatuples', name: 'javatuples', version: '1.2'
 
-  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.10'
+  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.13'
   testImplementation 'com.github.hmcts:fortify-client:1.4.10:all'
 
   smokeTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
@@ -354,6 +354,49 @@ dependencies {
 dependencyManagement {
   imports {
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+  }
+  dependencies {
+    dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.57') {
+      entry 'tomcat-embed-core'
+      entry 'tomcat-embed-el'
+      entry 'tomcat-embed-websocket'
+    }
+    dependencySet(group: 'io.netty', version: '4.1.135.Final') {
+      entry 'netty-buffer'
+      entry 'netty-codec'
+      entry 'netty-codec-dns'
+      entry 'netty-codec-http'
+      entry 'netty-codec-http2'
+      entry 'netty-codec-socks'
+      entry 'netty-common'
+      entry 'netty-handler'
+      entry 'netty-handler-proxy'
+      entry 'netty-resolver'
+      entry 'netty-resolver-dns'
+      entry 'netty-resolver-dns-classes-macos'
+      entry 'netty-resolver-dns-native-macos'
+      entry 'netty-transport'
+      entry 'netty-transport-classes-epoll'
+      entry 'netty-transport-classes-kqueue'
+      entry 'netty-transport-native-epoll'
+      entry 'netty-transport-native-kqueue'
+      entry 'netty-transport-native-unix-common'
+    }
+    dependencySet(group: 'org.springframework', version: '6.2.19') {
+      entry 'spring-aop'
+      entry 'spring-aspects'
+      entry 'spring-beans'
+      entry 'spring-context'
+      entry 'spring-context-support'
+      entry 'spring-core'
+      entry 'spring-expression'
+      entry 'spring-jcl'
+      entry 'spring-jdbc'
+      entry 'spring-orm'
+      entry 'spring-tx'
+      entry 'spring-web'
+      entry 'spring-webmvc'
+    }
   }
 }
 
