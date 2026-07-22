@@ -155,5 +155,6 @@ public class CourtVenue extends CommonCsvField {
     @DataField(pos = 37, columnName = "Welsh_External_Short_Name")
     String welshExternalShortName;
 
-
+    @DataField(pos = 38, columnName = "ServiceID")
+    String serviceCode;
 }
