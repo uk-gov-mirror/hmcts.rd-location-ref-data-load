@@ -61,4 +61,4 @@ REFERENCES DISTRICT_CIVIL_JURISDICTION (district_civil_jurisdiction_id);
 
 alter table court_venue drop CONSTRAINT court_location_code_uq;
 
-alter table court_venue add CONSTRAINT court_location_uq UNIQUE (epimms_id,site_name,court_type_id);
+alter table court_venue add CONSTRAINT court_location_uq UNIQUE (epimms_id,site_name,court_type_id)
