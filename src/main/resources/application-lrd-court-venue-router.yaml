@@ -10,14 +10,14 @@ route:
       sql:INSERT INTO court_venue (epimms_id, site_name, court_name, court_status, court_open_date, region_id, court_type_id, cluster_id, open_for_public,
       court_address, postcode, phone_number, closed_date, court_location_code, dx_address, welsh_site_name, welsh_court_address, venue_name, is_case_management_location,
       is_hearing_location, welsh_venue_name, is_temporary_location, is_nightingale_court, location_type, parent_location, welsh_court_name, uprn,
-      venue_ou_code, mrd_building_location_id, mrd_venue_id, service_url, fact_url, mrd_created_time, mrd_updated_time, mrd_deleted_time, external_short_name,welsh_external_short_name, created_time, updated_time)
+      venue_ou_code, mrd_building_location_id, mrd_venue_id, service_url, fact_url, mrd_created_time, mrd_updated_time, mrd_deleted_time, external_short_name,welsh_external_short_name, service_code, created_time, updated_time)
       VALUES (:#epimms_id, :#site_name, :#court_name, :#court_status, TO_DATE(NULLIF(:#court_open_date,''), 'dd/MM/yyyy'), :#region_id, :#court_type_id,
       :#cluster_id, :#open_for_public::boolean, :#court_address, :#postcode, :#phone_number, TO_DATE(NULLIF(:#closed_date,''), 'dd/MM/yyyy'),
       :#court_location_code, :#dx_address, :#welsh_site_name, :#welsh_court_address, :#venue_name, :#is_case_management_location,
       :#is_hearing_location, :#welsh_venue_name, :#is_temporary_location, :#is_nightingale_court, :#location_type, :#parent_location,
       :#welsh_court_name, :#uprn, :#venue_ou_code, :#mrd_building_location_id, :#mrd_venue_id, :#service_url, :#fact_url,
-      :#mrd_created_time, :#mrd_updated_time, :#mrd_deleted_time, :#external_short_name, :#welsh_external_short_name, NOW() AT TIME ZONE 'utc', NOW() AT TIME ZONE 'utc')
-      ON CONFLICT (epimms_id,court_type_id) do update set epimms_id = :#epimms_id, site_name = :#site_name, court_name = :#court_name,
+      :#mrd_created_time, :#mrd_updated_time, :#mrd_deleted_time, :#external_short_name, :#welsh_external_short_name,:#service_code, NOW() AT TIME ZONE 'utc', NOW() AT TIME ZONE 'utc')
+      ON CONFLICT (epimms_id,service_code) do update set epimms_id = :#epimms_id, site_name = :#site_name, court_name = :#court_name,
       court_status = :#court_status, court_open_date = TO_DATE(NULLIF(:#court_open_date,''), 'dd/MM/yyyy'),
       region_id = :#region_id, court_type_id = :#court_type_id, cluster_id = :#cluster_id, open_for_public = :#open_for_public::boolean, court_address = :#court_address,
       postcode = :#postcode, phone_number = :#phone_number, closed_date = TO_DATE(NULLIF(:#closed_date,''), 'dd/MM/yyyy'),
@@ -27,12 +27,11 @@ route:
       welsh_court_name = :#welsh_court_name, uprn = :#uprn, venue_ou_code = :#venue_ou_code, mrd_building_location_id = :#mrd_building_location_id,
       mrd_venue_id = :#mrd_venue_id, service_url = :#service_url, fact_url = :#fact_url,
       mrd_created_time = :#mrd_created_time, mrd_updated_time = :#mrd_updated_time, mrd_deleted_time = :#mrd_deleted_time,
-      external_short_name = :#external_short_name, welsh_external_short_name = :#welsh_external_short_name ,updated_time = NOW() AT TIME ZONE 'utc'?dataSource=#dataSource
+      external_short_name = :#external_short_name, welsh_external_short_name = :#welsh_external_short_name ,service_code = :#service_code, updated_time = NOW() AT TIME ZONE 'utc'?dataSource=#dataSource
     blob-path:
       azure-storage-blob://${azure.storage.account-name}/lrd-ref-data?credentials=#credsreg&operation=uploadBlockBlob&blobName=CourtVenue.csv
     processor-class: courtVenueProcessor
     mapper-class: courtVenueMapper
     csv-binder-object: courtVenue
-    csv-headers-expected: ePIMS_ID,Site_Name,Court_Name,Court_Status,Court_Open_Date,Region_ID,Court_Type_ID,Cluster_ID,Open_For_Public,Court_Address,Postcode,Phone_Number,Closed_Date,Court_Location_Code,Dx_Address,Welsh_Site_Name,Welsh_Court_Address,Venue_Name,Is_Case_Management_Location,Is_Hearing_Location,Welsh_Venue_Name,Is_Temporary_Location,Is_Nightingale_Court,Location_Type,Parent_Location,Welsh_Court_Name,UPRN,Venue_OU_Code,MRD_Building_Location_ID,MRD_Venue_ID,Service_URL,FACT_URL,MRD_Created_Time,MRD_Updated_Time,MRD_Deleted_Time,External_Short_Name,Welsh_External_Short_Name
+    csv-headers-expected: ePIMS_ID,Site_Name,Court_Name,Court_Status,Court_Open_Date,Region_ID,Court_Type_ID,Cluster_ID,Open_For_Public,Court_Address,Postcode,Phone_Number,Closed_Date,Court_Location_Code,Dx_Address,Welsh_Site_Name,Welsh_Court_Address,Venue_Name,Is_Case_Management_Location,Is_Hearing_Location,Welsh_Venue_Name,Is_Temporary_Location,Is_Nightingale_Court,Location_Type,Parent_Location,Welsh_Court_Name,UPRN,Venue_OU_Code,MRD_Building_Location_ID,MRD_Venue_ID,Service_URL,FACT_URL,MRD_Created_Time,MRD_Updated_Time,MRD_Deleted_Time,External_Short_Name,Welsh_External_Short_Name,ServiceID
     header-validation-enabled: true
-
