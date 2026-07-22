@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -95,6 +96,7 @@ class CourtVenueProcessorTest {
         setField(processor, "clusterQuery", "ids");
         setField(processor, "epimmsIdQuery", "ids");
         setField(processor, "courtTypeIdQuery", "ids");
+        setField(processor, "serviceCodeQuery", "serviceCodes");
         setField(processor, "applicationContext", applicationContext);
         RouteProperties routeProperties = new RouteProperties();
         routeProperties.setFileName("test");
@@ -299,6 +301,48 @@ class CourtVenueProcessorTest {
     }
 
     @Test
+    void testProcessWithValidAndInvalidCourtVenues_InvalidServiceCode() throws Exception {
+        List<CourtVenue> courtVenues = new ArrayList<>();
+        courtVenues.add(
+            CourtVenue.builder()
+                .epimmsId("1")
+                .courtName("Test Court Name")
+                .courtStatus("Open")
+                .courtOpenDate("12/12/12")
+                .regionId("123")
+                .courtTypeId("2")
+                .clusterId("1")
+                .serviceCode("AAA9")
+                .openForPublic("Yes")
+                .courtAddress("Test Court Address")
+                .postcode("ABC 123")
+                .phoneNumber("12343434")
+                .closedDate("12/03/21")
+                .courtLocationCode("12AB")
+                .dxAddress("Test Dx Address")
+                .welshSiteName("Test Welsh Site Name")
+                .welshCourtAddress("Test Welsh Court Address")
+                .siteName("test site")
+                .build()
+        );
+        courtVenues.addAll(getValidCourtVenues());
+
+        exchange.getIn().setBody(courtVenues);
+        doNothing().when(processor).audit(courtVenueJsrValidatorInitializer, exchange);
+        setJdbcTemplateResponse();
+        when((applicationContext).getBeanFactory()).thenReturn(configurableListableBeanFactory);
+        processor.process(exchange);
+        verify(processor, times(1)).process(exchange);
+        verify(jdbcTemplate, times(1)).queryForList("serviceCodes", String.class);
+
+        List<CourtVenue> actualCourtVenues = (List<CourtVenue>) exchange.getMessage().getBody();
+
+        assertThat(actualCourtVenues)
+            .hasSize(2)
+            .hasSameElementsAs(getValidCourtVenues());
+    }
+
+    @Test
     void testProcessWithInvalidCourtVenues() throws Exception {
         List<CourtVenue> courtVenues = getInvalidCourtVenues();
 
@@ -463,6 +507,39 @@ class CourtVenueProcessorTest {
         verify(processor, times(1)).process(exchange);
     }
 
+    @Test
+    void testProcessWithSingleInvalidCourtVenue_InvalidServiceCode() throws Exception {
+        List<CourtVenue> courtVenues = ImmutableList.of(
+            CourtVenue.builder()
+                .epimmsId("1")
+                .courtName("Test Court Name")
+                .courtStatus("Open")
+                .courtOpenDate("12/12/12")
+                .regionId("1")
+                .courtTypeId("2")
+                .clusterId("1")
+                .serviceCode("AAA9")
+                .openForPublic("Yes")
+                .courtAddress("Test Court Address")
+                .postcode("ABC 123")
+                .phoneNumber("12343434")
+                .closedDate("12/03/21")
+                .courtLocationCode("12AB")
+                .dxAddress("Test Dx Address")
+                .welshSiteName("Test Welsh Site Name")
+                .welshCourtAddress("Test Welsh Court Address")
+                .siteName("test site")
+                .build());
+
+        exchange.getIn().setBody(courtVenues);
+        doNothing().when(processor).audit(courtVenueJsrValidatorInitializer, exchange);
+        setJdbcTemplateResponse();
+        assertThrows(RouteFailedException.class, () -> processor.process(exchange));
+
+        verify(processor, times(1)).process(exchange);
+        verify(jdbcTemplate, times(1)).queryForList("serviceCodes", String.class);
+    }
+
     private List<CourtVenue> getInvalidCourtVenues() {
         return ImmutableList.of(
             CourtVenue.builder()
@@ -504,6 +581,7 @@ class CourtVenueProcessorTest {
                 .closedDate("12/03/21")
                 .courtLocationCode("12AB")
                 .dxAddress("Test Dx Address")
+                .serviceCode("AAA1")
                 .welshSiteName("Test Welsh Site Name")
                 .welshCourtAddress("Test Welsh Court Address")
                 .build(),
@@ -523,6 +601,7 @@ class CourtVenueProcessorTest {
                 .closedDate("12/03/22")
                 .courtLocationCode("12AC")
                 .dxAddress("Test Dx Address1")
+                .serviceCode("AAA2")
                 .welshSiteName("Test Welsh Site Name1")
                 .welshCourtAddress("Test Welsh Court Address1")
                 .build()
@@ -574,6 +653,8 @@ class CourtVenueProcessorTest {
 
     private void setJdbcTemplateResponse() {
         when(jdbcTemplate.queryForList("ids", String.class)).thenReturn(ImmutableList.of("1", "2", "3"));
+        lenient().when(jdbcTemplate.queryForList("serviceCodes", String.class))
+            .thenReturn(ImmutableList.of("AAA1", "AAA2"));
     }
 
 }
