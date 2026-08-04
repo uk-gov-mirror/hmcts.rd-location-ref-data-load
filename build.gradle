@@ -16,11 +16,6 @@ plugins {
 group = 'uk.gov.hmcts.reform.rd'
 version = '0.0.1'
 
-// Required by cnp-jenkins-library GradleBuilder.addVersionInfo() (:printVersionInit)
-tasks.register('printVersionInit') {
-  doLast { println project.version }
-}
-
 java {
   toolchain {
     languageVersion = JavaLanguageVersion.of(21)
@@ -361,7 +356,7 @@ dependencyManagement {
       entry 'tomcat-embed-el'
       entry 'tomcat-embed-websocket'
     }
-    dependencySet(group: 'io.netty', version: '4.1.135.Final') {
+    dependencySet(group: 'io.netty', version: '4.2.16.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
