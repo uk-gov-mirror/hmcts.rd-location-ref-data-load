@@ -16,11 +16,6 @@ plugins {
 group = 'uk.gov.hmcts.reform.rd'
 version = '0.0.1'
 
-// Required by cnp-jenkins-library GradleBuilder.addVersionInfo() (:printVersionInit)
-tasks.register('printVersionInit') {
-  doLast { println project.version }
-}
-
 java {
   toolchain {
     languageVersion = JavaLanguageVersion.of(21)
