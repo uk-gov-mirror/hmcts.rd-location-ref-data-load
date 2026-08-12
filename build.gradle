@@ -34,7 +34,7 @@ def versions = [
   junit               : '6.0.3',
   junitPlatform       : '6.0.3',
   reformLogging       : '8.0.0',
-  springBoot          : '3.4.1',
+  springBoot          : '3.5.16',
   springfoxSwagger    : '2.10.5',
   lombok              : '1.18.44',
   flyway              : '9.22.3',
@@ -235,7 +235,7 @@ repositories {
 }
 
 ext {
-  springCloudVersion = '2024.0.3'
+  springCloudVersion = '2025.0.2'
 }
 
 ext.libraries = [
