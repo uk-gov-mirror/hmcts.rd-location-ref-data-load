@@ -446,6 +446,10 @@ dependencyManagement {
     dependencySet(group: 'org.apache.commons', version: '2.10.0') {
       entry 'commons-vfs2'
     }
+    dependencySet(group: 'org.apache.httpcomponents.core5', version: '5.4.3') {
+      entry 'httpcore5'
+      entry 'httpcore5-h2'
+    }
   }
 }
 
