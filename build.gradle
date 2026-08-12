@@ -427,6 +427,22 @@ dependencyManagement {
       entry 'feign-jackson'
       entry 'feign-slf4j'
     }
+    dependencySet(group: 'com.fasterxml.jackson.core', version: versions.jackson) {
+      entry 'jackson-core'
+      entry 'jackson-databind'
+    }
+    dependencySet(group: 'com.fasterxml.jackson.datatype', version: versions.jackson) {
+      entry 'jackson-datatype-jsr310'
+      entry 'jackson-datatype-jdk8'
+    }
+    dependencySet(group: 'com.fasterxml.jackson.dataformat', version: versions.jackson) {
+      entry 'jackson-dataformat-toml'
+      entry 'jackson-dataformat-xml'
+      entry 'jackson-dataformat-yaml'
+    }
+    dependencySet(group: 'com.fasterxml.jackson.module', version: versions.jackson) {
+      entry 'jackson-module-parameter-names'
+    }
   }
 }
 
