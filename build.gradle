@@ -391,6 +391,34 @@ dependencyManagement {
       entry 'spring-web'
       entry 'spring-webmvc'
     }
+    dependencySet(group: 'org.apache.camel.springboot', version: versions.camel) {
+      entry 'camel-azure-storage-blob-starter'
+      entry 'camel-bindy-starter'
+      entry 'camel-jdbc-starter'
+    }
+    dependencySet(group: 'org.springframework.cloud', version: '4.3.3') {
+      entry 'spring-cloud-commons'
+      entry 'spring-cloud-config-client'
+      entry 'spring-cloud-context'
+      entry 'spring-cloud-starter'
+      entry 'spring-cloud-starter-openfeign'
+    }
+    dependencySet(group: 'org.apache.camel', version: versions.camel) {
+      entry 'camel-azure-storage-blob'
+      entry 'camel-bean-validator'
+      entry 'camel-bindy'
+      entry 'camel-core-catalog'
+      entry 'camel-core'
+      entry 'camel-csv'
+      entry 'camel-jdbc'
+      entry 'camel-spring-batch'
+      entry 'camel-sql'
+      entry 'camel-tooling-model'
+      entry 'camel-xml-io'
+      entry 'camel-xml-jaxb'
+      entry 'camel-yaml-io'
+      entry 'spi-annotations'
+    }
   }
 }
 
