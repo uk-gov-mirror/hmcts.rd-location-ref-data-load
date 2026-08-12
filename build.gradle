@@ -443,6 +443,9 @@ dependencyManagement {
     dependencySet(group: 'com.fasterxml.jackson.module', version: versions.jackson) {
       entry 'jackson-module-parameter-names'
     }
+    dependencySet(group: 'org.apache.commons', version: '2.10.0') {
+      entry 'commons-vfs2'
+    }
   }
 }
 
