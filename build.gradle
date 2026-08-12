@@ -295,7 +295,7 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: versions.logback
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '8.1'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-config-server', version: '4.3.4'
-  implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '13.11'
+  implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '13.13'
   compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   testImplementation libraries.junit5
@@ -418,6 +418,14 @@ dependencyManagement {
       entry 'camel-xml-jaxb'
       entry 'camel-yaml-io'
       entry 'spi-annotations'
+    }
+    dependencySet(group: 'io.github.openfeign', version: '13.13') {
+      entry 'feign-core'
+      entry 'feign-form'
+      entry 'feign-form-spring'
+      entry 'feign-httpclient'
+      entry 'feign-jackson'
+      entry 'feign-slf4j'
     }
   }
 }
