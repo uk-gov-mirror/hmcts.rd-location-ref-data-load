@@ -65,13 +65,4 @@
     <cve>CVE-2022-30187</cve>
     <cve>CVE-2024-35255</cve>
   </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-        Temporary suppression
-      ]]>
-    </notes>
-    <cve>CVE-2025-27553</cve>
-    <cve>CVE-2025-30474</cve>
-  </suppress>
 </suppressions>
