@@ -38,7 +38,7 @@ def versions = [
   springfoxSwagger    : '2.10.5',
   lombok              : '1.18.44',
   flyway              : '9.22.3',
-  camel               : '4.21.0',
+  camel               : '4.22.0',
   gradlePitest        : '1.15.0',
   pitest              : '1.17.0',
   sonarPitest         : '0.5',
