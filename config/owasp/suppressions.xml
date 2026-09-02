@@ -78,4 +78,11 @@
     </notes>
     <cve>CVE-2025-7962</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+           Spring framework 6.2.19 CVEs
+   ]]></notes>
+    <cve>CVE-2026-47892</cve>
+    <cve>CVE-2026-47893</cve>
+  </suppress>
 </suppressions>
