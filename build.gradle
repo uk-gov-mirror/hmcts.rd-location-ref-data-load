@@ -295,7 +295,7 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-core', version: versions.logback
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: versions.logback
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '8.1'
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-config-server', version: '4.3.2'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-config-server', version: '4.3.4'
   implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '13.11'
   compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
