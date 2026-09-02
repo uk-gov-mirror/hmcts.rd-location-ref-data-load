@@ -36,7 +36,7 @@ def versions = [
   reformLogging       : '8.0.0',
   springBoot          : '3.5.16',
   springfoxSwagger    : '2.10.5',
-  lombok              : '1.18.44',
+  lombok              : '1.18.48',
   flyway              : '9.22.3',
   camel               : '4.22.0',
   gradlePitest        : '1.15.0',
