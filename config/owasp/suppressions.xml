@@ -130,4 +130,9 @@
     <notes>https://tools.hmcts.net/jira/browse/DTSRD-6723 spring retry</notes>
     <cve>CVE-2026-41710</cve>
 </suppress>
+  <suppress>
+    <notes>TEMP - Suppress Camel 4.14.9</notes>
+    <cve>CVE-2026-49042</cve>
+    <cve>CVE-2026-66908</cve>
+  </suppress>
 </suppressions>
