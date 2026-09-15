@@ -103,9 +103,6 @@ class CourtVenueProcessorTest {
         exchange.getIn().setHeader(ROUTE_DETAILS, routeProperties);
     }
 
-
-
-
     @Test
     void testProcess() throws Exception {
         List<CourtVenue> expectedCourtVenues = getValidCourtVenues();
