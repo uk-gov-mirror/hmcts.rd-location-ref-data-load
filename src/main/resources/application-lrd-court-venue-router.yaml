@@ -15,7 +15,7 @@ route:
       :#cluster_id, :#open_for_public::boolean, :#court_address, :#postcode, :#phone_number, TO_DATE(NULLIF(:#closed_date,''), 'dd/MM/yyyy'),
       :#court_location_code, :#dx_address, :#welsh_site_name, :#welsh_court_address, :#venue_name, :#is_case_management_location,
       :#is_hearing_location, :#welsh_venue_name, :#is_temporary_location, :#is_nightingale_court, :#location_type, :#parent_location,
-      :#welsh_court_name, :#uprn, :#venue_ou_code, :#mrd_building_location_id, :#mrd_venue_id, :#service_url, :#fact_url,
+      :#welsh_court_name, :#uprn, :#venue_ou_code, :#mrd_building_location_id, NULLIF(:#mrd_venue_id, ''), :#service_url, :#fact_url,
       :#mrd_created_time, :#mrd_updated_time, :#mrd_deleted_time, :#external_short_name, :#welsh_external_short_name,:#service_code, NOW() AT TIME ZONE 'utc', NOW() AT TIME ZONE 'utc')
       ON CONFLICT (epimms_id,service_code) do update set epimms_id = :#epimms_id, site_name = :#site_name, court_name = :#court_name,
       court_status = :#court_status, court_open_date = TO_DATE(NULLIF(:#court_open_date,''), 'dd/MM/yyyy'),
@@ -25,9 +25,10 @@ route:
       is_case_management_location = :#is_case_management_location, is_hearing_location = :#is_hearing_location, welsh_venue_name = :#welsh_venue_name,
       is_temporary_location = :#is_temporary_location, is_nightingale_court = :#is_nightingale_court, location_type = :#location_type, parent_location = :#parent_location,
       welsh_court_name = :#welsh_court_name, uprn = :#uprn, venue_ou_code = :#venue_ou_code, mrd_building_location_id = :#mrd_building_location_id,
-      mrd_venue_id = :#mrd_venue_id, service_url = :#service_url, fact_url = :#fact_url,
+      mrd_venue_id = NULLIF(:#mrd_venue_id, ''), service_url = :#service_url, fact_url = :#fact_url,
       mrd_created_time = :#mrd_created_time, mrd_updated_time = :#mrd_updated_time, mrd_deleted_time = :#mrd_deleted_time,
       external_short_name = :#external_short_name, welsh_external_short_name = :#welsh_external_short_name ,service_code = :#service_code, updated_time = NOW() AT TIME ZONE 'utc'?dataSource=#dataSource
+    update-sql: bean:courtVenueChildTableSyncProcessor?method=process
     blob-path:
       azure-storage-blob://${azure.storage.account-name}/lrd-ref-data?credentials=#credsreg&operation=uploadBlockBlob&blobName=CourtVenue.csv
     processor-class: courtVenueProcessor

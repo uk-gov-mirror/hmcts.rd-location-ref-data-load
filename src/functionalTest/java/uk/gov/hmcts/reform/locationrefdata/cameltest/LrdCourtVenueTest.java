@@ -147,7 +147,7 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
             CourtVenue.builder().epimmsId("123456").siteName("A Tribunal Hearing Centre")
                 .courtName("A TRIBUNAL HEARING CENTRE").courtStatus("Open").regionId("7").courtTypeId("17")
                 .openForPublic("Yes").courtAddress("AB1,48 COURT STREET,LONDON").postcode("AB12 3AB")
-                .phoneNumber("").closedDate(null).courtLocationCode("").dxAddress("").welshSiteName("")
+                .phoneNumber("01234567890").closedDate(null).courtLocationCode("").dxAddress("").welshSiteName("")
                 .welshCourtAddress("").venueName("").isCaseManagementLocation("").isHearingLocation("")
                 .welshVenueName("testVenue1").isTemporaryLocation("N").isNightingaleCourt("N").locationType("Court")
                 .parentLocation("366559").welshCourtName("testWelshCourtName").uprn("uprn123")
@@ -163,10 +163,38 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
                 .welshVenueName("testVenue2").isTemporaryLocation("N").isNightingaleCourt("N").locationType("Court")
                 .parentLocation("372653").welshCourtName("testWelshCourtName").uprn("uprn123")
                 .venueOuCode("venueOuCode1").mrdBuildingLocationId("mrdBId1")
-                .mrdVenueId("mrdVenueId1").serviceUrl("serviceUrl1").factUrl("factUrl1").build()
+                .mrdVenueId("mrdVenueId2").serviceUrl("serviceUrl1").factUrl("factUrl1").build()
         ), 2);
+        validateCourtVenueChildTables();
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", UPLOAD_COURT_FILE_NAME);
+    }
+
+    private void validateCourtVenueChildTables() {
+        assertThat(jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM court_status WHERE court_status_code = 'OPEN' "
+                + "AND language_code = 'EN' AND court_status_desc = 'Open'",
+            Integer.class
+        )).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM contact_method WHERE contact_method_code = 'PHONE' "
+                + "AND language_code = 'EN' AND contact_method_desc = 'Phone'",
+            Integer.class
+        )).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM court_venue_name", Integer.class))
+            .isEqualTo(8);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM address", Integer.class))
+            .isEqualTo(2);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM contact_details", Integer.class))
+            .isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reference_codes", Integer.class))
+            .isEqualTo(2);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM court_venue_url", Integer.class))
+            .isEqualTo(4);
+        assertThat(jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM court_venue WHERE court_status_code = 'OPEN'",
+            Integer.class
+        )).isEqualTo(2);
     }
 
     private void testCourtVenueExternalCourtName() throws Exception {
@@ -187,7 +215,7 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
                 .welshVenueName("testVenue1").isTemporaryLocation("N").isNightingaleCourt("N").locationType("Court")
                 .parentLocation("366559").welshCourtName("testWelshCourtName").uprn("uprn123")
                 .venueOuCode("venueOuCode1").mrdBuildingLocationId("mrdBId1")
-                .mrdVenueId("mrdVenueId1").serviceUrl("serviceUrl1").factUrl("factUrl1")
+                .mrdVenueId("mrdVenueId2").serviceUrl("serviceUrl1").factUrl("factUrl1")
                 .mrdCreatedTime("2022-04-01 02:00:01").mrdUpdatedTime("2022-04-01 02:00:02")
                 .mrdDeletedTime("2022-04-01 02:00:03")
                 .externalShortName("A TRIBUNAL HEARING CENTRE External").build(),
