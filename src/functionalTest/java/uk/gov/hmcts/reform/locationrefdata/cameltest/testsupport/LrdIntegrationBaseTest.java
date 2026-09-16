@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport;
 import org.apache.camel.CamelContext;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.locationrefdata.camel.binder.ServiceToCcdCaseType;
 import uk.gov.hmcts.reform.locationrefdata.camel.task.LrdOrgServiceMappingRouteTask;
 
 import java.sql.Timestamp;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,6 +105,10 @@ public abstract class LrdIntegrationBaseTest {
 
     public static final String UPLOAD_ORG_SERVICE_FILE_NAME = "service-test.csv";
     public static final String UPLOAD_COURT_FILE_NAME = "court-venue-test.csv";
+    private static final String AZURE_STORAGE_ACCOUNT_KEY = "azure.storage.account-key";
+    private static final String AZURE_STORAGE_ACCOUNT_NAME = "azure.storage.account-name";
+    private static final String AZURE_STORAGE_CONTAINER_NAME = "azure.storage.container-name";
+    private static final String DEFAULT_CONTAINER_NAME = "lrd-ref-data";
 
     @BeforeEach
     public void setUpSpringContext() throws Exception {
@@ -115,15 +121,57 @@ public abstract class LrdIntegrationBaseTest {
 
     @BeforeAll
     public static void beforeAll() {
-        if ("preview".equalsIgnoreCase(System.getenv("execution_environment"))) {
-            System.setProperty("azure.storage.account-key", System.getenv("BLOB_ACCOUNT_KEY"));
-            System.setProperty("azure.storage.account-name", System.getenv("BLOB_ACCOUNT_NAME"));
-        } else {
-            System.setProperty("azure.storage.account-key", System.getenv("ACCOUNT_KEY"));
-            System.setProperty("azure.storage.account-name", System.getenv("ACCOUNT_NAME"));
-        }
-        System.setProperty("azure.storage.container-name", "lrd-ref-data");
+        String accountKeyEnvironmentVariable = getAccountKeyEnvironmentVariable();
+        String accountNameEnvironmentVariable = getAccountNameEnvironmentVariable();
+        String accountKey = System.getenv(accountKeyEnvironmentVariable);
+        String accountName = System.getenv(accountNameEnvironmentVariable);
 
+        Assumptions.assumeTrue(
+            hasText(accountKey) && hasText(accountName),
+            String.format(
+                "Functional tests require %s and %s environment variables",
+                accountNameEnvironmentVariable,
+                accountKeyEnvironmentVariable
+            )
+        );
+
+        validateBase64AccountKey(accountKeyEnvironmentVariable, accountKey);
+
+        System.setProperty(AZURE_STORAGE_ACCOUNT_KEY, accountKey);
+        System.setProperty(AZURE_STORAGE_ACCOUNT_NAME, accountName);
+        System.setProperty(AZURE_STORAGE_CONTAINER_NAME, DEFAULT_CONTAINER_NAME);
+
+    }
+
+    private static String getAccountKeyEnvironmentVariable() {
+        return isPreviewEnvironment() ? "BLOB_ACCOUNT_KEY" : "ACCOUNT_KEY";
+    }
+
+    private static String getAccountNameEnvironmentVariable() {
+        return isPreviewEnvironment() ? "BLOB_ACCOUNT_NAME" : "ACCOUNT_NAME";
+    }
+
+    private static boolean isPreviewEnvironment() {
+        return "preview".equalsIgnoreCase(System.getenv("execution_environment"));
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    private static void validateBase64AccountKey(String accountKeyEnvironmentVariable, String accountKey) {
+        try {
+            Base64.getDecoder().decode(accountKey);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException(
+                String.format(
+                    "%s must contain the Azure storage account key as Base64, not a placeholder "
+                        + "or connection string",
+                    accountKeyEnvironmentVariable
+                ),
+                exception
+            );
+        }
     }
 
     protected void validateLrdServiceFile(JdbcTemplate jdbcTemplate, String serviceSql,
