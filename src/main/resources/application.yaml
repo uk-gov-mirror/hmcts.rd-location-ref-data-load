@@ -42,9 +42,9 @@ spring:
     import: "optional:configtree:/mnt/secrets/rd/"
   datasource:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5458}/${POSTGRES_NAME:locrefdata}?currentSchema=locrefdata
-    username: ${POSTGRES_USERNAME:locrefdata}
-    password: ${POSTGRES_PASSWORD:locrefdata}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5448}/${POSTGRES_DB_NAME:dbrdlocationref}?currentSchema=locrefdata
+    username: ${POSTGRES_USERNAME:dbrdlocationref}
+    password: ${POSTGRES_PASSWORD:dbrdlocation}
     properties:
       charSet: UTF-8
     hikari:

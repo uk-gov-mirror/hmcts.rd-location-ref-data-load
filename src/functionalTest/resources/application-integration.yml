@@ -40,12 +40,12 @@ archival-cred: credentials=#credsreg&operation=uploadBlockBlob
 #archival-date-format keep in dd-MM-yyyy as to delete in testing
 archival-date-format: dd-MM-yyyy
 file-read-time-out: 2000
-scheduler-audit-select: SELECT COUNT(*) FROM dataload_schedular_audit WHERE date(scheduler_start_time) = current_date
-invalid-exception-sql: INSERT INTO dataload_exception_records(table_name,scheduler_start_time,scheduler_name,error_description,updated_timestamp) VALUES(?, ?, ?, ?, ?)
-invalid-jsr-sql: INSERT INTO dataload_exception_records(table_name,scheduler_start_time,scheduler_name,key,field_in_error,error_description,updated_timestamp, row_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+scheduler-audit-select: SELECT COUNT(*) FROM locrefdata.dataload_schedular_audit WHERE date(scheduler_start_time) = current_date
+invalid-exception-sql: INSERT INTO locrefdata.dataload_exception_records(table_name,scheduler_start_time,scheduler_name,error_description,updated_timestamp) VALUES(?, ?, ?, ?, ?)
+invalid-jsr-sql: INSERT INTO locrefdata.dataload_exception_records(table_name,scheduler_start_time,scheduler_name,key,field_in_error,error_description,updated_timestamp, row_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)
 jsr-threshold-limit: 5
 batchjob-name: LocationRefDataLoad
-scheduler-insert-sql: INSERT INTO dataload_schedular_audit (scheduler_name,file_name, scheduler_start_time,scheduler_end_time,status) VALUES(?,?,?,?,?)
+scheduler-insert-sql: INSERT INTO locrefdata.dataload_schedular_audit (scheduler_name,file_name, scheduler_start_time,scheduler_end_time,status) VALUES(?,?,?,?,?)
 audit-enable: true
 lrd-route-task: lrdRouteTask
 lrd-building-location-route-task: lrdBuildingLocationLoadTask
@@ -59,9 +59,9 @@ route:
     file-name: service-test.csv
     table-name: service_to_ccd_case_type_assoc
     truncate-sql:
-      sql:TRUNCATE service_to_ccd_case_type_assoc RESTART identity?dataSource=#dataSource
+      sql:TRUNCATE locrefdata.service_to_ccd_case_type_assoc RESTART identity?dataSource=#dataSource
     insert-sql:
-      sql:INSERT INTO service_to_ccd_case_type_assoc (service_code, ccd_service_name, ccd_case_type, created_date)
+      sql:INSERT INTO locrefdata.service_to_ccd_case_type_assoc (service_code, ccd_service_name, ccd_case_type, created_date)
       VALUES (:#service_code,:#ccd_service_name,:#ccd_case_type, NOW() AT TIME ZONE 'utc')
       ON CONFLICT (service_code, ccd_case_type) DO NOTHING ?dataSource=#dataSource
     blob-path:
@@ -74,7 +74,7 @@ route:
     file-name: building_location_test.csv
     table-name: building_location
     insert-sql:
-      sql:INSERT INTO building_location (epimms_id, building_location_name, building_location_status, area, region_id, cluster_id, court_finder_url, postcode, address, welsh_building_location_name, welsh_address, uprn, latitude, longitude, mrd_building_location_id,mrd_created_time,mrd_updated_time,mrd_deleted_time, created_time, updated_time)
+      sql:INSERT INTO locrefdata.building_location (epimms_id, building_location_name, building_location_status, area, region_id, cluster_id, court_finder_url, postcode, address, welsh_building_location_name, welsh_address, uprn, latitude, longitude, mrd_building_location_id,mrd_created_time,mrd_updated_time,mrd_deleted_time, created_time, updated_time)
       VALUES (:#epimms_id,:#building_location_name,:#building_location_status,:#area,:#region_id,:#cluster_id,:#court_finder_url,:#postcode,:#address,:#welsh_building_location_name,:#welsh_address,:#uprn,:#latitude,:#longitude,:#mrd_building_location_id,:#mrd_created_time,:#mrd_updated_time,:#mrd_deleted_time,NOW() AT TIME ZONE 'utc',NOW() AT TIME ZONE 'utc')
       ON CONFLICT (epimms_id) DO UPDATE SET building_location_name = :#building_location_name,building_location_status = :#building_location_status,area = :#area,region_id = :#region_id,cluster_id = :#cluster_id,
       court_finder_url = :#court_finder_url,postcode = :#postcode,address = :#address,welsh_building_location_name = :#welsh_building_location_name,welsh_address = :#welsh_address,uprn = :#uprn,latitude = :#latitude,longitude = :#longitude,mrd_building_location_id = :#mrd_building_location_id,mrd_created_time = :#mrd_created_time,mrd_updated_time = :#mrd_updated_time,mrd_deleted_time = :#mrd_deleted_time,updated_time = NOW() AT TIME ZONE 'utc'?dataSource=#dataSource
@@ -90,7 +90,7 @@ route:
     file-name: court-venue-test.csv
     table-name: court_venue
     insert-sql:
-      sql:INSERT INTO court_venue (epimms_id, site_name, court_name, court_status, court_open_date, region_id, court_type_id, cluster_id, open_for_public,
+      sql:INSERT INTO locrefdata.court_venue (epimms_id, site_name, court_name, court_status, court_open_date, region_id, court_type_id, cluster_id, open_for_public,
       court_address, postcode, phone_number, closed_date, court_location_code, dx_address, welsh_site_name, welsh_court_address, venue_name, is_case_management_location,
       is_hearing_location, welsh_venue_name, is_temporary_location, is_nightingale_court, location_type, parent_location, welsh_court_name, uprn,
       venue_ou_code, mrd_building_location_id, mrd_venue_id, service_url, fact_url, mrd_created_time, mrd_updated_time, mrd_deleted_time, external_short_name, welsh_external_short_name,service_code, created_time, updated_time)
@@ -120,29 +120,29 @@ route:
     csv-headers-expected: ePIMS_ID,Site_Name,Court_Name,Court_Status,Court_Open_Date,Region_ID,Court_Type_ID,Cluster_ID,Open_For_Public,Court_Address,Postcode,Phone_Number,Closed_Date,Court_Location_Code,Dx_Address,Welsh_Site_Name,Welsh_Court_Address,Venue_Name,Is_Case_Management_Location,Is_Hearing_Location,Welsh_Venue_Name,Is_Temporary_Location,Is_Nightingale_Court,Location_Type,Parent_Location,Welsh_Court_Name,UPRN,Venue_OU_Code,MRD_Building_Location_ID,MRD_Venue_ID,Service_URL,FACT_URL,MRD_Created_Time,MRD_Updated_Time,MRD_Deleted_Time,External_Short_Name,Welsh_External_Short_Name,ServiceID
     header-validation-enabled: true
 
-lrd-building-location-select-query: SELECT * FROM building_location
+lrd-building-location-select-query: SELECT * FROM locrefdata.building_location
 
-lrd-select-sql: SELECT * FROM service_to_ccd_case_type_assoc
-lrd-court-venue-select-sql: SELECT * FROM court_venue
+lrd-select-sql: SELECT * FROM locrefdata.service_to_ccd_case_type_assoc
+lrd-court-venue-select-sql: SELECT * FROM locrefdata.court_venue
 
-exception-select-query: SELECT * FROM  dataload_exception_records
-ordered-exception-select-query: SELECT * FROM  dataload_exception_records order by error_description
+exception-select-query: SELECT * FROM  locrefdata.dataload_exception_records
+ordered-exception-select-query: SELECT * FROM  locrefdata.dataload_exception_records order by error_description
 
-select-dataload-scheduler: SELECT *  FROM dataload_schedular_audit
+select-dataload-scheduler: SELECT *  FROM locrefdata.dataload_schedular_audit
 
-select-dataload-scheduler-failure: SELECT *  FROM dataload_schedular_audit WHERE status='Failure'
+select-dataload-scheduler-failure: SELECT *  FROM locrefdata.dataload_schedular_audit WHERE status='Failure'
 
-region-query: SELECT region_id FROM region
-cluster-query: SELECT cluster_id FROM cluster
-epimms-id-query: SELECT epimms_id FROM building_location
-court-type-id-query: SELECT court_type_id FROM court_type
-service-code-query: SELECT service_code FROM service
+region-query: SELECT region_id FROM locrefdata.region
+cluster-query: SELECT cluster_id FROM locrefdata.cluster
+epimms-id-query: SELECT epimms_id FROM locrefdata.building_location
+court-type-id-query: SELECT court_type_id FROM locrefdata.court_type
+service-code-query: SELECT service_code FROM locrefdata.service
 
-truncate-audit: TRUNCATE dataload_schedular_audit
+truncate-audit: TRUNCATE locrefdata.dataload_schedular_audit
 
-truncate-exception: TRUNCATE dataload_exception_records
+truncate-exception: TRUNCATE locrefdata.dataload_exception_records
 
-get-ccd-case-time: SELECT created_date FROM SERVICE_TO_CCD_CASE_TYPE_ASSOC WHERE service_code = ? and ccd_case_type = ?
+get-ccd-case-time: SELECT created_date FROM locrefdata.SERVICE_TO_CCD_CASE_TYPE_ASSOC WHERE service_code = ? and ccd_case_type = ?
 
 jdbc-batch-size: 10
 
