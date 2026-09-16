@@ -126,6 +126,7 @@ public class CourtVenue extends CommonCsvField {
     String mrdBuildingLocationId;
 
     @DataField(pos = 30, columnName = "MRD_Venue_ID")
+    @NotBlank
     String mrdVenueId;
 
     @DataField(pos = 31, columnName = "Service_URL")

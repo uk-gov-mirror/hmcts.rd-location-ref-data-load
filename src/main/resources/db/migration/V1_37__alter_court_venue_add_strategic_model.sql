@@ -25,15 +25,70 @@ WHERE open_date IS NULL
 
 DO $$
 BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM court_venue
+        WHERE mrd_venue_id IS NULL
+    ) THEN
+        RAISE EXCEPTION 'Cannot make mrd_venue_id primary key: null values exist';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM court_venue
+        GROUP BY mrd_venue_id
+        HAVING COUNT(*) > 1
+    ) THEN
+        RAISE EXCEPTION 'Cannot make mrd_venue_id primary key: duplicate values exist';
+    END IF;
+END $$;
+
+ALTER TABLE court_district_family_jurisdiction_assoc
+    DROP CONSTRAINT IF EXISTS dfj_court_location_id_fk;
+
+ALTER TABLE court_district_civil_jurisdiction_assoc
+    DROP CONSTRAINT IF EXISTS dcj_court_location_id_fk;
+
+ALTER TABLE court_venue
+    DROP CONSTRAINT IF EXISTS court_location_unique;
+
+ALTER TABLE court_venue
+    DROP CONSTRAINT IF EXISTS court_id_pk;
+
+ALTER TABLE court_venue
+    DROP CONSTRAINT IF EXISTS court_venue_pkey;
+
+ALTER TABLE court_venue
+    DROP CONSTRAINT IF EXISTS court_venue_pk;
+
+ALTER TABLE court_venue
+    ALTER COLUMN mrd_venue_id SET NOT NULL;
+
+DO $$
+BEGIN
     IF NOT EXISTS (
         SELECT 1
         FROM pg_constraint
-        WHERE conname = 'court_venue_mrd_venue_id_uq'
+        WHERE conname = 'court_venue_id_uq'
+          AND conrelid = 'court_venue'::regclass
     ) THEN
         ALTER TABLE court_venue
-            ADD CONSTRAINT court_venue_mrd_venue_id_uq UNIQUE (mrd_venue_id);
+            ADD CONSTRAINT court_venue_id_uq UNIQUE (court_venue_id);
     END IF;
 END $$;
+
+ALTER TABLE court_venue
+    ADD CONSTRAINT court_venue_pk PRIMARY KEY (mrd_venue_id);
+
+ALTER TABLE court_district_family_jurisdiction_assoc
+    ADD CONSTRAINT dfj_court_location_id_fk
+        FOREIGN KEY (court_location_id)
+            REFERENCES court_venue (court_venue_id);
+
+ALTER TABLE court_district_civil_jurisdiction_assoc
+    ADD CONSTRAINT dcj_court_location_id_fk
+        FOREIGN KEY (court_location_id)
+            REFERENCES court_venue (court_venue_id);
 
 DO $$
 BEGIN
