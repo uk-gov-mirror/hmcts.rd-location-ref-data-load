@@ -17,6 +17,8 @@ public final class LrdDataLoadConstants {
     public static final String EPIMMS_ID_NOT_EXISTS = "epimms_id does not exist";
     public static final String COURT_TYPE_ID = "court_type_id";
     public static final String COURT_TYPE_ID_NOT_EXISTS = "court_type_id does not exist";
+    public static final String SERVICE_CODE = "service_code";
+    public static final String SERVICE_CODE_NOT_EXISTS = "service_code does not exist";
     public static final String DATE_PATTERN = "\\d{2}-\\d{2}-\\d{4}\\s\\d{2}:\\d{2}:\\d{2}";
     public static final String DATE_TIME_FORMAT = "dd-MM-yyyy HH:mm:ss";
 
