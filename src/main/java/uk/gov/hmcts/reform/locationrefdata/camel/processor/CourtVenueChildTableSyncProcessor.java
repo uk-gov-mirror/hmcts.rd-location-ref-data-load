@@ -30,6 +30,9 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     private static final String LANGUAGE_CODE = "language_code";
     private static final String ENGLISH = "EN";
     private static final String WELSH = "CY";
+    private static final String CONTACT_METHOD_CODE = "contact_method_code";
+    private static final String CONTACT_TYPE_CODE = "contact_type_code";
+    private static final String CONTACT_VALUE = "contact_value";
 
     private static final ChildTableSyncDefinition COURT_STATUS = new ChildTableSyncDefinition(
         "court_status",
@@ -130,9 +133,17 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
         courtVenues.forEach(courtVenue -> {
             if (StringUtils.isNotBlank(trim(courtVenue.getPhoneNumber()))) {
                 rows.add(row(
-                    "contact_method_code", "PHONE",
+                    CONTACT_METHOD_CODE, "PHONE",
                     LANGUAGE_CODE, ENGLISH,
                     "contact_method_desc", "Phone"
+                ));
+            }
+            if (StringUtils.isNotBlank(trim(courtVenue.getContactEmail()))
+                || StringUtils.isNotBlank(trim(courtVenue.getBreathingSpaceEmail()))) {
+                rows.add(row(
+                    CONTACT_METHOD_CODE, "EMAIL",
+                    LANGUAGE_CODE, ENGLISH,
+                    "contact_method_desc", "Email"
                 ));
             }
         });
@@ -150,6 +161,34 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
             addCourtVenueName(rows, courtVenue, "VENUE", WELSH, courtVenue.getWelshVenueName());
             addCourtVenueName(rows, courtVenue, "EXTERNAL_SHORT", ENGLISH, courtVenue.getExternalShortName());
             addCourtVenueName(rows, courtVenue, "EXTERNAL_SHORT", WELSH, courtVenue.getWelshExternalShortName());
+            addCourtVenueName(
+                rows,
+                courtVenue,
+                "DISTRICT_REGISTRY_SITE",
+                ENGLISH,
+                courtVenue.getDistrictRegistrySiteName()
+            );
+            addCourtVenueName(
+                rows,
+                courtVenue,
+                "DISTRICT_REGISTRY_SITE",
+                WELSH,
+                courtVenue.getDistrictRegistryWelshSiteName()
+            );
+            addCourtVenueName(
+                rows,
+                courtVenue,
+                "DISTRICT_REGISTRY_EXTERNAL_SHORT",
+                ENGLISH,
+                courtVenue.getDistrictRegistryExternalShortName()
+            );
+            addCourtVenueName(
+                rows,
+                courtVenue,
+                "DISTRICT_REGISTRY_EXTERNAL_SHORT",
+                WELSH,
+                courtVenue.getDistrictRegistryWelshExternalShortName()
+            );
         });
         return rows;
     }
@@ -169,9 +208,25 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
             if (StringUtils.isNotBlank(trim(courtVenue.getPhoneNumber()))) {
                 rows.add(row(
                     MRD_VENUE_ID, trim(courtVenue.getMrdVenueId()),
-                    "contact_method_code", "PHONE",
-                    "contact_type_code", "CONTACT_SERVICE",
-                    "contact_value", trim(courtVenue.getPhoneNumber())
+                    CONTACT_METHOD_CODE, "PHONE",
+                    CONTACT_TYPE_CODE, "CONTACT_SERVICE",
+                    CONTACT_VALUE, trim(courtVenue.getPhoneNumber())
+                ));
+            }
+            if (StringUtils.isNotBlank(trim(courtVenue.getContactEmail()))) {
+                rows.add(row(
+                    MRD_VENUE_ID, trim(courtVenue.getMrdVenueId()),
+                    CONTACT_METHOD_CODE, "EMAIL",
+                    CONTACT_TYPE_CODE, "CONTACT_SERVICE",
+                    CONTACT_VALUE, trim(courtVenue.getContactEmail())
+                ));
+            }
+            if (StringUtils.isNotBlank(trim(courtVenue.getBreathingSpaceEmail()))) {
+                rows.add(row(
+                    MRD_VENUE_ID, trim(courtVenue.getMrdVenueId()),
+                    CONTACT_METHOD_CODE, "EMAIL",
+                    CONTACT_TYPE_CODE, "BREATHING_SPACE",
+                    CONTACT_VALUE, trim(courtVenue.getBreathingSpaceEmail())
                 ));
             }
         });
@@ -185,6 +240,8 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
             addUseMapping(rows, courtVenue, "HEARING", courtVenue.getIsHearingLocation());
             addUseMapping(rows, courtVenue, "TEMPORARY", courtVenue.getIsTemporaryLocation());
             addUseMapping(rows, courtVenue, "NIGHTINGALE", courtVenue.getIsNightingaleCourt());
+            addUseMapping(rows, courtVenue, "DISTRICT_REGISTRY", courtVenue.getIsDistrictRegistry());
+            addUseMapping(rows, courtVenue, "APPEAL_CENTRE", courtVenue.getIsAppealCentre());
         });
         return rows;
     }

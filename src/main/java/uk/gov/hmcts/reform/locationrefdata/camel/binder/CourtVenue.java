@@ -158,4 +158,34 @@ public class CourtVenue extends CommonCsvField {
 
     @DataField(pos = 38, columnName = "ServiceID")
     String serviceCode;
+
+    @DataField(pos = 39, columnName = "District_Registry_Site_Name")
+    String districtRegistrySiteName;
+
+    @DataField(pos = 40, columnName = "District_Registry_Welsh_Site_Name")
+    String districtRegistryWelshSiteName;
+
+    @DataField(pos = 41, columnName = "District_Registry_External_Short_Name")
+    String districtRegistryExternalShortName;
+
+    @DataField(pos = 42, columnName = "District_Registry_Welsh_External_Short_Name")
+    String districtRegistryWelshExternalShortName;
+
+    @DataField(pos = 43, columnName = "Contact_Email")
+    String contactEmail;
+
+    @DataField(pos = 44, columnName = "Breathing_Space_Email")
+    String breathingSpaceEmail;
+
+    @DataField(pos = 45, columnName = "Is_District_Registry")
+    String isDistrictRegistry;
+
+    @DataField(pos = 46, columnName = "Is_Appeal_Centre")
+    String isAppealCentre;
+
+    @DataField(pos = 47, columnName = "District_Registry_Venue_ID")
+    String districtRegistryVenueId;
+
+    @DataField(pos = 48, columnName = "Appeal_Centre_Venue_ID")
+    String appealCentreVenueId;
 }

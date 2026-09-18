@@ -55,6 +55,25 @@ public class CourtVenueMapper implements IMapper {
         courtVenueRow.put("external_short_name", trim(courtVenueType.getExternalShortName()));
         courtVenueRow.put("welsh_external_short_name", trim(courtVenueType.getWelshExternalShortName()));
         courtVenueRow.put("service_code", trim(courtVenueType.getServiceCode()));
+        courtVenueRow.put("district_registry_site_name", trim(courtVenueType.getDistrictRegistrySiteName()));
+        courtVenueRow.put(
+            "district_registry_welsh_site_name",
+            trim(courtVenueType.getDistrictRegistryWelshSiteName())
+        );
+        courtVenueRow.put(
+            "district_registry_external_short_name",
+            trim(courtVenueType.getDistrictRegistryExternalShortName())
+        );
+        courtVenueRow.put(
+            "district_registry_welsh_external_short_name",
+            trim(courtVenueType.getDistrictRegistryWelshExternalShortName())
+        );
+        courtVenueRow.put("contact_email", trim(courtVenueType.getContactEmail()));
+        courtVenueRow.put("breathing_space_email", trim(courtVenueType.getBreathingSpaceEmail()));
+        courtVenueRow.put("is_district_registry", trim(courtVenueType.getIsDistrictRegistry()));
+        courtVenueRow.put("is_appeal_centre", trim(courtVenueType.getIsAppealCentre()));
+        courtVenueRow.put("district_registry_venue_id", trim(courtVenueType.getDistrictRegistryVenueId()));
+        courtVenueRow.put("appeal_centre_venue_id", trim(courtVenueType.getAppealCentreVenueId()));
         return courtVenueRow;
     }
 }

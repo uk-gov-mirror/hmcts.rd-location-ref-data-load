@@ -4,7 +4,8 @@ VALUES
     ('COURT', 'Court'),
     ('VENUE', 'Venue'),
     ('EXTERNAL_SHORT', 'External Short'),
-    ('DISTRICT_REGISTRY_SITE', 'District Registry Site')
+    ('DISTRICT_REGISTRY_SITE', 'District Registry Site'),
+    ('DISTRICT_REGISTRY_EXTERNAL_SHORT', 'District Registry External Short')
 ON CONFLICT (court_name_type) DO UPDATE
 SET court_name_type_desc = EXCLUDED.court_name_type_desc;
 
@@ -48,7 +49,8 @@ VALUES
     ('HEARING', 'EN', 'Hearing Location'),
     ('TEMPORARY', 'EN', 'Temporary Location'),
     ('NIGHTINGALE', 'EN', 'Nightingale Court'),
-    ('DISTRICT_REGISTRY', 'EN', 'District Registry')
+    ('DISTRICT_REGISTRY', 'EN', 'District Registry'),
+    ('APPEAL_CENTRE', 'EN', 'Appeal Centre')
 ON CONFLICT (use_type_code) DO UPDATE
 SET language_code = EXCLUDED.language_code,
     use_type_desc = EXCLUDED.use_type_desc;

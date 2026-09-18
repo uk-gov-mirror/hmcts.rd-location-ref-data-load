@@ -80,6 +80,16 @@ class CourtVenueTest {
             .externalShortName("External Court")
             .welshExternalShortName("Welsh External Court")
             .serviceCode("serviceCode1")
+            .districtRegistrySiteName("districtRegistrySiteName")
+            .districtRegistryWelshSiteName("districtRegistryWelshSiteName")
+            .districtRegistryExternalShortName("districtRegistryExternalShortName")
+            .districtRegistryWelshExternalShortName("districtRegistryWelshExternalShortName")
+            .contactEmail("contact@example.com")
+            .breathingSpaceEmail("breathing@example.com")
+            .isDistrictRegistry("Y")
+            .isAppealCentre("N")
+            .districtRegistryVenueId("districtRegistryVenueId")
+            .appealCentreVenueId("appealCentreVenueId")
             .build();
 
         assertEquals("testVenue", courtVenue.getWelshVenueName());
@@ -100,6 +110,16 @@ class CourtVenueTest {
         assertEquals("External Court", courtVenue.getExternalShortName());
         assertEquals("Welsh External Court", courtVenue.getWelshExternalShortName());
         assertEquals("serviceCode1", courtVenue.getServiceCode());
+        assertEquals("districtRegistrySiteName", courtVenue.getDistrictRegistrySiteName());
+        assertEquals("districtRegistryWelshSiteName", courtVenue.getDistrictRegistryWelshSiteName());
+        assertEquals("districtRegistryExternalShortName", courtVenue.getDistrictRegistryExternalShortName());
+        assertEquals("districtRegistryWelshExternalShortName", courtVenue.getDistrictRegistryWelshExternalShortName());
+        assertEquals("contact@example.com", courtVenue.getContactEmail());
+        assertEquals("breathing@example.com", courtVenue.getBreathingSpaceEmail());
+        assertEquals("Y", courtVenue.getIsDistrictRegistry());
+        assertEquals("N", courtVenue.getIsAppealCentre());
+        assertEquals("districtRegistryVenueId", courtVenue.getDistrictRegistryVenueId());
+        assertEquals("appealCentreVenueId", courtVenue.getAppealCentreVenueId());
     }
 
 
@@ -142,6 +162,16 @@ class CourtVenueTest {
             .externalShortName("shortName")
             .welshExternalShortName("welshExternalShortName")
             .serviceCode("serviceCode1")
+            .districtRegistrySiteName("districtRegistrySiteName")
+            .districtRegistryWelshSiteName("districtRegistryWelshSiteName")
+            .districtRegistryExternalShortName("districtRegistryExternalShortName")
+            .districtRegistryWelshExternalShortName("districtRegistryWelshExternalShortName")
+            .contactEmail("contact@example.com")
+            .breathingSpaceEmail("breathing@example.com")
+            .isDistrictRegistry("Y")
+            .isAppealCentre("N")
+            .districtRegistryVenueId("districtRegistryVenueId")
+            .appealCentreVenueId("appealCentreVenueId")
             .toString();
 
         assertEquals("CourtVenue.CourtVenueBuilder(epimmsId=epimmsId, siteName=siteName, "
@@ -159,7 +189,15 @@ class CourtVenueTest {
                          + "mrdCreatedTime=null, mrdUpdatedTime=null, mrdDeletedTime=null, "
                          + "externalShortName=shortName, "
                          + "welshExternalShortName=welshExternalShortName, "
-                         + "serviceCode=serviceCode1)",
+                         + "serviceCode=serviceCode1, "
+                         + "districtRegistrySiteName=districtRegistrySiteName, "
+                         + "districtRegistryWelshSiteName=districtRegistryWelshSiteName, "
+                         + "districtRegistryExternalShortName=districtRegistryExternalShortName, "
+                         + "districtRegistryWelshExternalShortName=districtRegistryWelshExternalShortName, "
+                         + "contactEmail=contact@example.com, breathingSpaceEmail=breathing@example.com, "
+                         + "isDistrictRegistry=Y, isAppealCentre=N, "
+                         + "districtRegistryVenueId=districtRegistryVenueId, "
+                         + "appealCentreVenueId=appealCentreVenueId)",
                      courtVenueString);
 
     }
