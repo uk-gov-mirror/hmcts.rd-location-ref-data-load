@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.CourtVenue;
 import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableDataSyncService;
 import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableSyncDefinition;
@@ -87,6 +89,20 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
             return;
         }
 
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    syncChildTables(courtVenues);
+                }
+            });
+            return;
+        }
+
+        syncChildTables(courtVenues);
+    }
+
+    private void syncChildTables(List<CourtVenue> courtVenues) {
         clearCourtVenueStatusCodes();
         childTableDataSyncService.sync(CONTACT_DETAILS, List.of());
         childTableDataSyncService.sync(COURT_STATUS, courtStatusRows(courtVenues));

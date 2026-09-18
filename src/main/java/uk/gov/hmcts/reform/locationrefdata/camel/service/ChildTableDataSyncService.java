@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.locationrefdata.camel.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
@@ -19,7 +20,7 @@ public class ChildTableDataSyncService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sync(ChildTableSyncDefinition definition, List<Map<String, Object>> desiredRows) {
         validateDefinition(definition);
 

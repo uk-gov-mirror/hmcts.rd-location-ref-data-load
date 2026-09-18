@@ -11,6 +11,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.CourtVenue;
 import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableDataSyncService;
 import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableSyncDefinition;
@@ -21,6 +23,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -140,6 +143,33 @@ class CourtVenueChildTableSyncProcessorTest {
             .hasSize(2)
             .anySatisfy(row -> assertThat(row).containsEntry("url_type", "SERVICE"))
             .anySatisfy(row -> assertThat(row).containsEntry("url_type", "FACT"));
+    }
+
+    @Test
+    void processDefersSyncUntilTransactionCommits() {
+        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
+        TransactionSynchronizationManager.initSynchronization();
+
+        try {
+            processor.process(exchange);
+
+            verify(childTableDataSyncService, never()).sync(
+                any(ChildTableSyncDefinition.class),
+                anyList()
+            );
+            verify(jdbcTemplate, never()).update(anyString());
+
+            TransactionSynchronizationManager.getSynchronizations()
+                .forEach(TransactionSynchronization::afterCommit);
+
+            verify(childTableDataSyncService, times(9)).sync(
+                any(ChildTableSyncDefinition.class),
+                anyList()
+            );
+            verify(jdbcTemplate).update(anyString());
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
     }
 
     @Test
