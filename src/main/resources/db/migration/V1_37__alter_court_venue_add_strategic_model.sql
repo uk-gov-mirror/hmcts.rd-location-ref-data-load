@@ -19,27 +19,76 @@ SET mrd_venue_id = NULL
 WHERE mrd_venue_id = '';
 
 UPDATE court_venue
-SET court_status_code = upper(replace(trim(court_status), ' ', '_'))
-WHERE court_status_code IS NULL
-  AND court_status IS NOT NULL
-  AND trim(court_status) <> '';
-
-UPDATE court_venue
 SET open_date = court_open_date::date
 WHERE open_date IS NULL
   AND court_open_date IS NOT NULL;
 
 DO $$
 BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM court_venue
+        WHERE mrd_venue_id IS NULL
+    ) THEN
+        RAISE EXCEPTION 'Cannot make mrd_venue_id primary key: null values exist';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM court_venue
+        GROUP BY mrd_venue_id
+        HAVING COUNT(*) > 1
+    ) THEN
+        RAISE EXCEPTION 'Cannot make mrd_venue_id primary key: duplicate values exist';
+    END IF;
+END $$;
+
+ALTER TABLE court_district_family_jurisdiction_assoc
+    DROP CONSTRAINT IF EXISTS dfj_court_location_id_fk;
+
+ALTER TABLE court_district_civil_jurisdiction_assoc
+    DROP CONSTRAINT IF EXISTS dcj_court_location_id_fk;
+
+ALTER TABLE court_venue
+    DROP CONSTRAINT IF EXISTS court_location_unique;
+
+ALTER TABLE court_venue
+    DROP CONSTRAINT IF EXISTS court_id_pk;
+
+ALTER TABLE court_venue
+    DROP CONSTRAINT IF EXISTS court_venue_pkey;
+
+ALTER TABLE court_venue
+    DROP CONSTRAINT IF EXISTS court_venue_pk;
+
+ALTER TABLE court_venue
+    ALTER COLUMN mrd_venue_id SET NOT NULL;
+
+DO $$
+BEGIN
     IF NOT EXISTS (
         SELECT 1
         FROM pg_constraint
-        WHERE conname = 'court_venue_mrd_venue_id_uq'
+        WHERE conname = 'court_venue_id_uq'
+          AND conrelid = 'court_venue'::regclass
     ) THEN
         ALTER TABLE court_venue
-            ADD CONSTRAINT court_venue_mrd_venue_id_uq UNIQUE (mrd_venue_id);
+            ADD CONSTRAINT court_venue_id_uq UNIQUE (court_venue_id);
     END IF;
 END $$;
+
+ALTER TABLE court_venue
+    ADD CONSTRAINT court_venue_pk PRIMARY KEY (mrd_venue_id);
+
+ALTER TABLE court_district_family_jurisdiction_assoc
+    ADD CONSTRAINT dfj_court_location_id_fk
+        FOREIGN KEY (court_location_id)
+            REFERENCES court_venue (court_venue_id);
+
+ALTER TABLE court_district_civil_jurisdiction_assoc
+    ADD CONSTRAINT dcj_court_location_id_fk
+        FOREIGN KEY (court_location_id)
+            REFERENCES court_venue (court_venue_id);
 
 DO $$
 BEGIN
@@ -86,13 +135,6 @@ CREATE TABLE IF NOT EXISTS court_status (
     court_status_desc VARCHAR(256) NOT NULL,
     CONSTRAINT court_status_pk PRIMARY KEY (court_status_code)
 );
-
-INSERT INTO court_status (court_status_code, language_code, court_status_desc)
-SELECT DISTINCT court_status_code, 'EN', initcap(replace(court_status_code, '_', ' '))
-FROM court_venue
-WHERE court_status_code IS NOT NULL
-  AND trim(court_status_code) <> ''
-ON CONFLICT (court_status_code) DO NOTHING;
 
 DO $$
 BEGIN
@@ -199,248 +241,6 @@ CREATE TABLE IF NOT EXISTS court_use_mapping (
     CONSTRAINT court_use_mapping_type_fk FOREIGN KEY (use_type_code)
         REFERENCES use_type (use_type_code)
 );
-
-INSERT INTO court_name_type (court_name_type, court_name_type_desc)
-VALUES
-    ('SITE', 'Site'),
-    ('COURT', 'Court'),
-    ('VENUE', 'Venue'),
-    ('EXTERNAL_SHORT', 'External Short'),
-    ('DISTRICT_REGISTRY_SITE', 'District Registry Site'),
-    ('DISTRICT_REGISTRY_EXTERNAL_SHORT', 'District Registry External Short')
-ON CONFLICT (court_name_type) DO NOTHING;
-
-INSERT INTO contact_method (contact_method_code, language_code, contact_method_desc)
-VALUES
-    ('PHONE', 'EN', 'Phone'),
-    ('EMAIL', 'EN', 'Email')
-ON CONFLICT (contact_method_code) DO NOTHING;
-
-INSERT INTO contact_type (contact_type_code, language_code, contact_type_desc)
-VALUES
-    ('CONTACT_SERVICE', 'EN', 'Contact Service'),
-    ('BREATHING_SPACE', 'EN', 'Breathing Space')
-ON CONFLICT (contact_type_code) DO NOTHING;
-
-INSERT INTO use_type (use_type_code, language_code, use_type_desc)
-VALUES
-    ('CASE_MANAGEMENT', 'EN', 'Case Management Location'),
-    ('HEARING', 'EN', 'Hearing Location'),
-    ('TEMPORARY', 'EN', 'Temporary Location'),
-    ('NIGHTINGALE', 'EN', 'Nightingale Court'),
-    ('DISTRICT_REGISTRY', 'EN', 'District Registry'),
-    ('APPEAL_CENTRE', 'EN', 'Appeal Centre')
-ON CONFLICT (use_type_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'SITE', 'EN', site_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND site_name IS NOT NULL
-  AND trim(site_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'COURT', 'EN', court_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND court_name IS NOT NULL
-  AND trim(court_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'VENUE', 'EN', venue_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND venue_name IS NOT NULL
-  AND trim(venue_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'SITE', 'CY', welsh_site_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND welsh_site_name IS NOT NULL
-  AND trim(welsh_site_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'COURT', 'CY', welsh_court_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND welsh_court_name IS NOT NULL
-  AND trim(welsh_court_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'VENUE', 'CY', welsh_venue_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND welsh_venue_name IS NOT NULL
-  AND trim(welsh_venue_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'EXTERNAL_SHORT', 'EN', external_short_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND external_short_name IS NOT NULL
-  AND trim(external_short_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'EXTERNAL_SHORT', 'CY', welsh_external_short_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND welsh_external_short_name IS NOT NULL
-  AND trim(welsh_external_short_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'DISTRICT_REGISTRY_SITE', 'EN', district_registry_site_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND district_registry_site_name IS NOT NULL
-  AND trim(district_registry_site_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'DISTRICT_REGISTRY_SITE', 'CY', district_registry_welsh_site_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND district_registry_welsh_site_name IS NOT NULL
-  AND trim(district_registry_welsh_site_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'DISTRICT_REGISTRY_EXTERNAL_SHORT', 'EN', district_registry_external_short_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND district_registry_external_short_name IS NOT NULL
-  AND trim(district_registry_external_short_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO court_venue_name (mrd_venue_id, court_name_type, language_code, name_desc)
-SELECT mrd_venue_id, 'DISTRICT_REGISTRY_EXTERNAL_SHORT', 'CY', district_registry_welsh_external_short_name
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND district_registry_welsh_external_short_name IS NOT NULL
-  AND trim(district_registry_welsh_external_short_name) <> ''
-ON CONFLICT (mrd_venue_id, court_name_type, language_code) DO NOTHING;
-
-INSERT INTO address (mrd_venue_id, address_type, language_code, address, post_code, uprn)
-SELECT mrd_venue_id, 'MAILING', 'EN', court_address, postcode, uprn
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND court_address IS NOT NULL
-  AND trim(court_address) <> ''
-ON CONFLICT (mrd_venue_id, address_type, language_code) DO NOTHING;
-
-INSERT INTO address (mrd_venue_id, address_type, language_code, address, post_code, uprn)
-SELECT mrd_venue_id, 'MAILING', 'CY', welsh_court_address, postcode, uprn
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND welsh_court_address IS NOT NULL
-  AND trim(welsh_court_address) <> ''
-ON CONFLICT (mrd_venue_id, address_type, language_code) DO NOTHING;
-
-INSERT INTO contact_details (mrd_venue_id, contact_method_code, contact_type_code, contact_value)
-SELECT mrd_venue_id, 'PHONE', 'CONTACT_SERVICE', phone_number
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND phone_number IS NOT NULL
-  AND trim(phone_number) <> ''
-ON CONFLICT (mrd_venue_id, contact_method_code, contact_type_code) DO NOTHING;
-
-INSERT INTO contact_details (mrd_venue_id, contact_method_code, contact_type_code, contact_value)
-SELECT mrd_venue_id, 'EMAIL', 'CONTACT_SERVICE', contact_email
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND contact_email IS NOT NULL
-  AND trim(contact_email) <> ''
-ON CONFLICT (mrd_venue_id, contact_method_code, contact_type_code) DO NOTHING;
-
-INSERT INTO contact_details (mrd_venue_id, contact_method_code, contact_type_code, contact_value)
-SELECT mrd_venue_id, 'EMAIL', 'BREATHING_SPACE', breathing_space_email
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND breathing_space_email IS NOT NULL
-  AND trim(breathing_space_email) <> ''
-ON CONFLICT (mrd_venue_id, contact_method_code, contact_type_code) DO NOTHING;
-
-INSERT INTO court_use_mapping (mrd_venue_id, use_type_code)
-SELECT mrd_venue_id, 'CASE_MANAGEMENT'
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND upper(is_case_management_location) = 'Y'
-ON CONFLICT (mrd_venue_id, use_type_code) DO NOTHING;
-
-INSERT INTO court_use_mapping (mrd_venue_id, use_type_code)
-SELECT mrd_venue_id, 'HEARING'
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND upper(is_hearing_location) = 'Y'
-ON CONFLICT (mrd_venue_id, use_type_code) DO NOTHING;
-
-INSERT INTO court_use_mapping (mrd_venue_id, use_type_code)
-SELECT mrd_venue_id, 'TEMPORARY'
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND upper(is_temporary_location) = 'Y'
-ON CONFLICT (mrd_venue_id, use_type_code) DO NOTHING;
-
-INSERT INTO court_use_mapping (mrd_venue_id, use_type_code)
-SELECT mrd_venue_id, 'NIGHTINGALE'
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND upper(is_nightingale_court) = 'Y'
-ON CONFLICT (mrd_venue_id, use_type_code) DO NOTHING;
-
-INSERT INTO court_use_mapping (mrd_venue_id, use_type_code)
-SELECT mrd_venue_id, 'DISTRICT_REGISTRY'
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND upper(is_district_registry) = 'Y'
-ON CONFLICT (mrd_venue_id, use_type_code) DO NOTHING;
-
-INSERT INTO court_use_mapping (mrd_venue_id, use_type_code)
-SELECT mrd_venue_id, 'APPEAL_CENTRE'
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND upper(is_appeal_centre) = 'Y'
-ON CONFLICT (mrd_venue_id, use_type_code) DO NOTHING;
-
-INSERT INTO reference_codes (mrd_venue_id, reference_code_type, reference_code)
-SELECT mrd_venue_id, 'COURT_LOCATION_CODE', court_location_code
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND court_location_code IS NOT NULL
-  AND trim(court_location_code) <> ''
-ON CONFLICT (mrd_venue_id, reference_code_type, reference_code) DO NOTHING;
-
-INSERT INTO reference_codes (mrd_venue_id, reference_code_type, reference_code)
-SELECT mrd_venue_id, 'VENUE_OU_CODE', venue_ou_code
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND venue_ou_code IS NOT NULL
-  AND trim(venue_ou_code) <> ''
-ON CONFLICT (mrd_venue_id, reference_code_type, reference_code) DO NOTHING;
-
-INSERT INTO court_venue_url (mrd_venue_id, url_type, url)
-SELECT mrd_venue_id, 'SERVICE', service_url
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND service_url IS NOT NULL
-  AND trim(service_url) <> ''
-ON CONFLICT (mrd_venue_id, url_type) DO NOTHING;
-
-INSERT INTO court_venue_url (mrd_venue_id, url_type, url)
-SELECT mrd_venue_id, 'FACT', fact_url
-FROM court_venue
-WHERE mrd_venue_id IS NOT NULL
-  AND fact_url IS NOT NULL
-  AND trim(fact_url) <> ''
-ON CONFLICT (mrd_venue_id, url_type) DO NOTHING;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_status AS
 SELECT court_status_code, language_code, court_status_desc
