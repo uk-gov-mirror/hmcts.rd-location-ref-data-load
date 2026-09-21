@@ -37,8 +37,10 @@ import uk.gov.hmcts.reform.locationrefdata.camel.mapper.BuildingLocationMapper;
 import uk.gov.hmcts.reform.locationrefdata.camel.mapper.CourtVenueMapper;
 import uk.gov.hmcts.reform.locationrefdata.camel.mapper.ServiceToCcdCaseTypeMapper;
 import uk.gov.hmcts.reform.locationrefdata.camel.processor.BuildingLocationProcessor;
+import uk.gov.hmcts.reform.locationrefdata.camel.processor.CourtVenueChildTableSyncProcessor;
 import uk.gov.hmcts.reform.locationrefdata.camel.processor.CourtVenueProcessor;
 import uk.gov.hmcts.reform.locationrefdata.camel.processor.ServiceToCcdCaseTypeProcessor;
+import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableDataSyncService;
 import uk.gov.hmcts.reform.locationrefdata.camel.task.LrdBuildingLocationRouteTask;
 import uk.gov.hmcts.reform.locationrefdata.camel.task.LrdCourtVenueRouteTask;
 import uk.gov.hmcts.reform.locationrefdata.camel.task.LrdOrgServiceMappingRouteTask;
@@ -82,6 +84,16 @@ public class LrdCamelConfig {
     @Bean
     public CourtVenueProcessor courtVenueProcessor() {
         return new CourtVenueProcessor();
+    }
+
+    @Bean
+    public ChildTableDataSyncService childTableDataSyncService() {
+        return new ChildTableDataSyncService(springJdbcTemplate());
+    }
+
+    @Bean
+    public CourtVenueChildTableSyncProcessor courtVenueChildTableSyncProcessor() {
+        return new CourtVenueChildTableSyncProcessor(childTableDataSyncService(), springJdbcTemplate());
     }
 
     @Bean
