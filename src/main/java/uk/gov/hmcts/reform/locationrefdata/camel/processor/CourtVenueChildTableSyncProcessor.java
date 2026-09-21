@@ -15,9 +15,11 @@ import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableDataSyncServi
 import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableSyncDefinition;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static uk.gov.hmcts.reform.locationrefdata.camel.util.LrdLoadUtils.trim;
 
@@ -114,6 +116,7 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
         childTableDataSyncService.sync(COURT_USE_MAPPING, courtUseMappingRows(courtVenues));
         childTableDataSyncService.sync(REFERENCE_CODES, referenceCodeRows(courtVenues));
         childTableDataSyncService.sync(COURT_VENUE_URL, courtVenueUrlRows(courtVenues));
+        deleteCourtVenuesMissingFromFile(courtVenues);
     }
 
     private List<CourtVenue> getCourtVenues(Exchange exchange) {
@@ -388,5 +391,56 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
                 statusUpdates
             );
         }
+    }
+
+    private void deleteCourtVenuesMissingFromFile(List<CourtVenue> courtVenues) {
+        Set<String> desiredVenueIds = courtVenues.stream()
+            .map(CourtVenue::getMrdVenueId)
+            .map(this::trimVenueId)
+            .filter(StringUtils::isNotBlank)
+            .collect(HashSet::new, Set::add, Set::addAll);
+
+        List<Object[]> venueIdsToDelete = jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")
+            .stream()
+            .map(row -> trimVenueId((String) row.get(MRD_VENUE_ID)))
+            .filter(StringUtils::isNotBlank)
+            .filter(existingVenueId -> !desiredVenueIds.contains(existingVenueId))
+            .map(existingVenueId -> new Object[] {existingVenueId})
+            .toList();
+
+        if (!venueIdsToDelete.isEmpty()) {
+            deleteLegacyJurisdictionAssociations(venueIdsToDelete);
+            clearSelfReferencesToDeletedCourtVenues(venueIdsToDelete);
+            jdbcTemplate.batchUpdate("DELETE FROM court_venue WHERE mrd_venue_id = ?", venueIdsToDelete);
+        }
+    }
+
+    private void deleteLegacyJurisdictionAssociations(List<Object[]> venueIdsToDelete) {
+        jdbcTemplate.batchUpdate(
+            "DELETE FROM court_district_family_jurisdiction_assoc "
+                + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)",
+            venueIdsToDelete
+        );
+        jdbcTemplate.batchUpdate(
+            "DELETE FROM court_district_civil_jurisdiction_assoc "
+                + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)",
+            venueIdsToDelete
+        );
+    }
+
+    private void clearSelfReferencesToDeletedCourtVenues(List<Object[]> venueIdsToDelete) {
+        jdbcTemplate.batchUpdate("UPDATE court_venue SET parent_id = NULL WHERE parent_id = ?", venueIdsToDelete);
+        jdbcTemplate.batchUpdate(
+            "UPDATE court_venue SET district_registry_venue_id = NULL WHERE district_registry_venue_id = ?",
+            venueIdsToDelete
+        );
+        jdbcTemplate.batchUpdate(
+            "UPDATE court_venue SET appeal_centre_venue_id = NULL WHERE appeal_centre_venue_id = ?",
+            venueIdsToDelete
+        );
+    }
+
+    private String trimVenueId(String venueId) {
+        return trim(venueId);
     }
 }

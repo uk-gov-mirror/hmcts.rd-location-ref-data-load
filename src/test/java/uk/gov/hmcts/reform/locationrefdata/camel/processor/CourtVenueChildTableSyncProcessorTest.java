@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,8 +27,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
@@ -52,6 +55,7 @@ class CourtVenueChildTableSyncProcessorTest {
     @Test
     void processSyncsAllCourtVenueChildTables() {
         exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
 
         processor.process(exchange);
 
@@ -148,6 +152,7 @@ class CourtVenueChildTableSyncProcessorTest {
     @Test
     void processDefersSyncUntilTransactionCommits() {
         exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
         TransactionSynchronizationManager.initSynchronization();
 
         try {
@@ -184,6 +189,57 @@ class CourtVenueChildTableSyncProcessorTest {
             any(ChildTableSyncDefinition.class),
             anyList()
         );
+    }
+
+    @Test
+    void processDeletesCourtVenuesMissingFromFileAfterChildTables() {
+        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of(
+            Map.of("mrd_venue_id", "venue-1"),
+            Map.of("mrd_venue_id", "venue-2")
+        ));
+
+        processor.process(exchange);
+
+        ArgumentCaptor<List<Object[]>> venueIdsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(jdbcTemplate).batchUpdate(
+            eq("UPDATE court_venue SET parent_id = NULL WHERE parent_id = ?"),
+            venueIdsCaptor.capture()
+        );
+        assertThat(venueIdsCaptor.getValue())
+            .singleElement()
+            .satisfies(values -> assertThat(values).containsExactly("venue-2"));
+        verify(jdbcTemplate).batchUpdate(
+            eq("DELETE FROM court_district_family_jurisdiction_assoc "
+                   + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)"),
+            anyList()
+        );
+        verify(jdbcTemplate).batchUpdate(
+            eq("DELETE FROM court_district_civil_jurisdiction_assoc "
+                   + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)"),
+            anyList()
+        );
+        verify(jdbcTemplate).batchUpdate(
+            eq("UPDATE court_venue SET district_registry_venue_id = NULL WHERE district_registry_venue_id = ?"),
+            anyList()
+        );
+        verify(jdbcTemplate).batchUpdate(
+            eq("UPDATE court_venue SET appeal_centre_venue_id = NULL WHERE appeal_centre_venue_id = ?"),
+            anyList()
+        );
+
+        InOrder inOrder = inOrder(childTableDataSyncService, jdbcTemplate);
+        inOrder.verify(childTableDataSyncService, times(9)).sync(
+            any(ChildTableSyncDefinition.class),
+            anyList()
+        );
+        inOrder.verify(jdbcTemplate).batchUpdate(
+            eq("DELETE FROM court_venue WHERE mrd_venue_id = ?"),
+            venueIdsCaptor.capture()
+        );
+        assertThat(venueIdsCaptor.getValue())
+            .singleElement()
+            .satisfies(values -> assertThat(values).containsExactly("venue-2"));
     }
 
     private CourtVenue courtVenue() {
