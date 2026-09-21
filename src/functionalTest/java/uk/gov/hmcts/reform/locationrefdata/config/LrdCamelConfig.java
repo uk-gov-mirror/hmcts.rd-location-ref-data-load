@@ -183,7 +183,7 @@ public class LrdCamelConfig {
     private DataSourceBuilder getDataSourceBuilder() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName("org.postgresql.Driver");
-        dataSourceBuilder.url(getJdbcUrl());
+        dataSourceBuilder.url(testPostgres.getJdbcUrl());
         dataSourceBuilder.username(testPostgres.getUsername());
         dataSourceBuilder.password(testPostgres.getPassword());
         return dataSourceBuilder;
