@@ -36,15 +36,15 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     private static final String CONTACT_TYPE_CODE = "contact_type_code";
     private static final String CONTACT_VALUE = "contact_value";
 
+    private static final ChildTableSyncDefinition REFERENCE_CODES = new ChildTableSyncDefinition(
+        "reference_codes",
+        List.of(MRD_VENUE_ID, "reference_code_type", "reference_code"),
+        List.of()
+    );
     private static final ChildTableSyncDefinition COURT_STATUS = new ChildTableSyncDefinition(
         "court_status",
         List.of("court_status_code"),
         List.of(LANGUAGE_CODE, "court_status_desc")
-    );
-    private static final ChildTableSyncDefinition CONTACT_METHOD = new ChildTableSyncDefinition(
-        "contact_method",
-        List.of("contact_method_code"),
-        List.of(LANGUAGE_CODE, "contact_method_desc")
     );
     private static final ChildTableSyncDefinition COURT_VENUE_NAME = new ChildTableSyncDefinition(
         "court_venue_name",
@@ -61,14 +61,14 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
         List.of(MRD_VENUE_ID, "contact_method_code", "contact_type_code"),
         List.of("contact_value")
     );
+    private static final ChildTableSyncDefinition CONTACT_METHOD = new ChildTableSyncDefinition(
+        "contact_method",
+        List.of("contact_method_code"),
+        List.of(LANGUAGE_CODE, "contact_method_desc")
+    );
     private static final ChildTableSyncDefinition COURT_USE_MAPPING = new ChildTableSyncDefinition(
         "court_use_mapping",
         List.of(MRD_VENUE_ID, "use_type_code"),
-        List.of()
-    );
-    private static final ChildTableSyncDefinition REFERENCE_CODES = new ChildTableSyncDefinition(
-        "reference_codes",
-        List.of(MRD_VENUE_ID, "reference_code_type", "reference_code"),
         List.of()
     );
     private static final ChildTableSyncDefinition COURT_VENUE_URL = new ChildTableSyncDefinition(
