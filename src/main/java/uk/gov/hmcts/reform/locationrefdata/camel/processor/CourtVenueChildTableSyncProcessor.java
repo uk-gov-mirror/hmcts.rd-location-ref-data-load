@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,6 +83,9 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     private final ChildTableDataSyncService childTableDataSyncService;
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private CourtVenueFileDataStore courtVenueFileDataStore = new CourtVenueFileDataStore();
+
     @Override
     @Transactional
     public void process(Exchange exchange) {
@@ -120,16 +124,27 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     }
 
     private List<CourtVenue> getCourtVenues(Exchange exchange) {
+        List<CourtVenue> storedCourtVenues = courtVenueFileDataStore.remove(courtVenueFileDataStore.jobKey(exchange));
+        if (!storedCourtVenues.isEmpty()) {
+            return validCourtVenues(storedCourtVenues);
+        }
+
         Object courtVenues = exchange.getProperty(COURT_VENUES_EXCHANGE_PROPERTY);
         if (courtVenues instanceof List<?>) {
             List<?> values = (List<?>) courtVenues;
-            return values.stream()
+            List<CourtVenue> exchangeCourtVenues = values.stream()
                 .filter(CourtVenue.class::isInstance)
                 .map(CourtVenue.class::cast)
-                .filter(courtVenue -> StringUtils.isNotBlank(trim(courtVenue.getMrdVenueId())))
                 .toList();
+            return validCourtVenues(exchangeCourtVenues);
         }
         return List.of();
+    }
+
+    private List<CourtVenue> validCourtVenues(List<CourtVenue> courtVenues) {
+        return courtVenues.stream()
+            .filter(courtVenue -> StringUtils.isNotBlank(trim(courtVenue.getMrdVenueId())))
+            .toList();
     }
 
     private List<Map<String, Object>> courtStatusRows(List<CourtVenue> courtVenues) {

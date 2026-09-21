@@ -47,6 +47,7 @@ class CourtVenueChildTableSyncProcessorTest {
 
     @BeforeEach
     void setUp() {
+        new CourtVenueFileDataStore().reset("default");
         processor = new CourtVenueChildTableSyncProcessor(childTableDataSyncService, jdbcTemplate);
         CamelContext camelContext = new DefaultCamelContext();
         exchange = new DefaultExchange(camelContext);
@@ -186,6 +187,19 @@ class CourtVenueChildTableSyncProcessorTest {
         processor.process(exchange);
 
         verify(childTableDataSyncService, never()).sync(
+            any(ChildTableSyncDefinition.class),
+            anyList()
+        );
+    }
+
+    @Test
+    void processUsesStoredCourtVenuesWhenExchangePropertyIsNotAvailable() {
+        new CourtVenueFileDataStore().addAll("default", List.of(courtVenue()));
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
+
+        processor.process(exchange);
+
+        verify(childTableDataSyncService, times(9)).sync(
             any(ChildTableSyncDefinition.class),
             anyList()
         );

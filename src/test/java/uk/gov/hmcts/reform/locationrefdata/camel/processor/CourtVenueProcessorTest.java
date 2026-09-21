@@ -78,6 +78,7 @@ class CourtVenueProcessorTest {
 
     @BeforeEach
     public void init() {
+        new CourtVenueFileDataStore().reset("default");
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         setField(dataQualityCheckConfiguration, "zeroByteCharacters", ZERO_BYTE_CHARACTERS);
@@ -681,4 +682,3 @@ class CourtVenueProcessorTest {
     }
 
 }
-

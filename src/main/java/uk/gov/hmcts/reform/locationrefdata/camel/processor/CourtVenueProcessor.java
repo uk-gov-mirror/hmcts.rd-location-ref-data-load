@@ -70,6 +70,9 @@ public class CourtVenueProcessor extends JsrValidationBaseProcessor<CourtVenue>
     @Autowired
     DataQualityCheckConfiguration dataQualityCheckConfiguration;
 
+    @Autowired
+    private CourtVenueFileDataStore courtVenueFileDataStore = new CourtVenueFileDataStore();
+
 
     @Override
     @SuppressWarnings("unchecked")
@@ -113,7 +116,17 @@ public class CourtVenueProcessor extends JsrValidationBaseProcessor<CourtVenue>
 
         exchange.setProperty(COURT_VENUES_EXCHANGE_PROPERTY, List.copyOf(filteredCourtVenues));
         exchange.getMessage().setBody(filteredCourtVenues);
+        storeCourtVenuesForChildTableSync(exchange, filteredCourtVenues);
 
+    }
+
+    private void storeCourtVenuesForChildTableSync(Exchange exchange, List<CourtVenue> filteredCourtVenues) {
+        String jobKey = courtVenueFileDataStore.jobKey(exchange);
+        Integer splitIndex = exchange.getProperty(Exchange.SPLIT_INDEX, Integer.class);
+        if (splitIndex == null || splitIndex == 0) {
+            courtVenueFileDataStore.reset(jobKey);
+        }
+        courtVenueFileDataStore.addAll(jobKey, filteredCourtVenues);
     }
 
 
