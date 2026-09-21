@@ -70,7 +70,6 @@ public class CourtVenueProcessor extends JsrValidationBaseProcessor<CourtVenue>
     @Autowired
     DataQualityCheckConfiguration dataQualityCheckConfiguration;
 
-    @Autowired
     private CourtVenueFileDataStore courtVenueFileDataStore = new CourtVenueFileDataStore();
 
 
