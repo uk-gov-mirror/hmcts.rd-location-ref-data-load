@@ -54,8 +54,6 @@ import static org.mockito.Mockito.mock;
 @Configuration
 public class LrdCamelConfig {
 
-    private static final String CURRENT_SCHEMA = "currentSchema=locrefdata";
-
     @Bean
     LrdBlobSupport integrationTestSupport() {
         return new LrdBlobSupport();
@@ -189,11 +187,6 @@ public class LrdCamelConfig {
         dataSourceBuilder.username(testPostgres.getUsername());
         dataSourceBuilder.password(testPostgres.getPassword());
         return dataSourceBuilder;
-    }
-
-    private String getJdbcUrl() {
-        String jdbcUrl = testPostgres.getJdbcUrl();
-        return jdbcUrl.concat(jdbcUrl.contains("?") ? "&" : "?").concat(CURRENT_SCHEMA);
     }
 
     @Bean("springJdbcDataSource")
