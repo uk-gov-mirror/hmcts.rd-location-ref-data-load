@@ -26,6 +26,9 @@ import static java.util.Objects.isNull;
     AzureBlobConfig.class, BlobStorageCredentials.class}, initializers = ConfigDataApplicationContextInitializer.class)
 public class LrdBlobSupport {
 
+    private static final String ACTIVE_CONTAINER_NAME = "lrd-ref-data";
+    private static final String ARCHIVE_CONTAINER_NAME = "lrd-ref-data-archive";
+
     @Autowired
     private BlobServiceClientBuilder blobServiceClientBuilder;
 
@@ -37,6 +40,8 @@ public class LrdBlobSupport {
     BlobContainerClient cloudBlobContainer;
 
     BlobContainerClient cloudBlobArchContainer;
+
+    private boolean containersCreated;
 
     @Value("${archival-date-format}")
     private String archivalDateFormat;
@@ -50,16 +55,18 @@ public class LrdBlobSupport {
             .endpoint(uri)
             .credential(credential)
             .buildClient();
-        cloudBlobContainer = cloudBlobClient.createBlobContainerIfNotExists("lrd-ref-data");
-        cloudBlobArchContainer = cloudBlobClient.createBlobContainerIfNotExists("lrd-ref-data-archive");
+        cloudBlobContainer = cloudBlobClient.getBlobContainerClient(ACTIVE_CONTAINER_NAME);
+        cloudBlobArchContainer = cloudBlobClient.getBlobContainerClient(ARCHIVE_CONTAINER_NAME);
     }
 
     public void uploadFile(String blob, InputStream sourceFile) throws Exception {
+        createContainersIfRequired();
         BlobClient cloudBlockBlob = cloudBlobContainer.getBlobClient(blob);
         cloudBlockBlob.upload(sourceFile);
     }
 
     public void deleteBlob(String blob, boolean... status) throws Exception {
+        createContainersIfRequired();
         Thread.sleep(1000);
         BlobClient cloudBlockBlob = cloudBlobContainer.getBlobClient(blob);
         if (cloudBlockBlob.exists()) {
@@ -77,7 +84,16 @@ public class LrdBlobSupport {
     }
 
     public boolean isBlobPresent(String blob) throws Exception {
+        createContainersIfRequired();
         BlobClient cloudBlockBlob = cloudBlobContainer.getBlobClient(blob);
         return cloudBlockBlob.exists();
+    }
+
+    private synchronized void createContainersIfRequired() {
+        if (!containersCreated) {
+            cloudBlobClient.createBlobContainerIfNotExists(ACTIVE_CONTAINER_NAME);
+            cloudBlobClient.createBlobContainerIfNotExists(ARCHIVE_CONTAINER_NAME);
+            containersCreated = true;
+        }
     }
 }
