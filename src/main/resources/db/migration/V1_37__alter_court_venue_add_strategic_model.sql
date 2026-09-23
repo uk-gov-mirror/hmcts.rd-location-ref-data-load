@@ -244,47 +244,47 @@ CREATE TABLE IF NOT EXISTS court_use_mapping (
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_status AS
 SELECT court_status_code, language_code, court_status_desc
-FROM locrefdata.court_status;
+FROM court_status;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_reference_codes AS
 SELECT mrd_venue_id, reference_code_type, reference_code
-FROM locrefdata.reference_codes;
+FROM reference_codes;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_name_type AS
 SELECT court_name_type, court_name_type_desc
-FROM locrefdata.court_name_type;
+FROM court_name_type;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_venue_name AS
 SELECT mrd_venue_id, court_name_type, language_code, name_desc
-FROM locrefdata.court_venue_name;
+FROM court_venue_name;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_address AS
 SELECT mrd_venue_id, address_type, language_code, address, post_code, uprn
-FROM locrefdata.address;
+FROM address;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_contact_method AS
 SELECT contact_method_code, language_code, contact_method_desc
-FROM locrefdata.contact_method;
+FROM contact_method;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_contact_type AS
 SELECT contact_type_code, language_code, contact_type_desc
-FROM locrefdata.contact_type;
+FROM contact_type;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_contact_details AS
 SELECT mrd_venue_id, contact_method_code, contact_type_code, contact_value
-FROM locrefdata.contact_details;
+FROM contact_details;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_use_type AS
 SELECT use_type_code, language_code, use_type_desc
-FROM locrefdata.use_type;
+FROM use_type;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_use_mapping AS
 SELECT mrd_venue_id, use_type_code
-FROM locrefdata.court_use_mapping;
+FROM court_use_mapping;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_venue_url AS
 SELECT mrd_venue_id, url_type, url
-FROM locrefdata.court_venue_url;
+FROM court_venue_url;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_venue AS
 SELECT site_name, region_id, court_type_id, cluster_id, open_for_public, court_address, postcode, phone_number,
@@ -297,4 +297,4 @@ SELECT site_name, region_id, court_type_id, cluster_id, open_for_public, court_a
        district_registry_site_name, district_registry_welsh_site_name, district_registry_external_short_name,
        district_registry_welsh_external_short_name, contact_email, breathing_space_email,
        is_district_registry, is_appeal_centre, mrd_created_time, mrd_updated_time, mrd_deleted_time
-FROM locrefdata.court_venue;
+FROM court_venue;

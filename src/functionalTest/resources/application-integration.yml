@@ -17,8 +17,6 @@ spring:
   flyway:
     locations: classpath:db/testmigration
     enabled: true
-    schemas: locrefdata
-    default-schema: locrefdata
   batch:
     jdbc:
      initialize-schema: always
