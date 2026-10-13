@@ -1,4 +1,5 @@
-ARG APP_INSIGHTS_AGENT_VERSION=3.4.9
+# renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
+ARG APP_INSIGHTS_AGENT_VERSION=3.7.8
 ARG PLATFORM=""
 # Application image
 
