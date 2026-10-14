@@ -11,7 +11,7 @@ services:
     volumes:
       - rd-location-ref-data-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-locrefdata}"
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
       - ROOT_APPENDER
       - JSON_CONSOLE_PRETTY_PRINT
       - ROOT_LOGGING_LEVEL
