@@ -10,7 +10,7 @@ fi
 echo "Creating locrefdata database . . ."
 
 psql -v ON_ERROR_STOP=1 --username postgres --dbname postgres <<-EOSQL
-  CREATE ROLE locrefdata WITH PASSWORD 'locrefdata';
+  CREATE ROLE locrefdata WITH PASSWORD '${POSTGRES_PASSWORD}';
   CREATE DATABASE locrefdata ENCODING = 'UTF-8' CONNECTION LIMIT = -1;
   GRANT ALL PRIVILEGES ON DATABASE locrefdata TO locrefdata;
   ALTER ROLE locrefdata WITH LOGIN;
