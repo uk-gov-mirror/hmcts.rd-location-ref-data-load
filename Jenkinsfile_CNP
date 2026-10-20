@@ -9,7 +9,7 @@ properties(
   ]
 )
 
-@Library("Infrastructure@2.5.4")
+@Library("Infrastructure@2.12.2")
 import uk.gov.hmcts.contino.DockerImage
 import uk.gov.hmcts.contino.GradleBuilder
 import uk.gov.hmcts.contino.Kubectl
