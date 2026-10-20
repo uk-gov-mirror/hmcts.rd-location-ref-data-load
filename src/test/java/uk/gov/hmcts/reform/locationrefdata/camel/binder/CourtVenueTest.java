@@ -190,14 +190,14 @@ class CourtVenueTest {
                          + "externalShortName=shortName, "
                          + "welshExternalShortName=welshExternalShortName, "
                          + "serviceCode=serviceCode1, "
-                         + "districtRegistrySiteName=districtRegistrySiteName, "
-                         + "districtRegistryWelshSiteName=districtRegistryWelshSiteName, "
-                         + "districtRegistryExternalShortName=districtRegistryExternalShortName, "
-                         + "districtRegistryWelshExternalShortName=districtRegistryWelshExternalShortName, "
                          + "contactEmail=contact@example.com, breathingSpaceEmail=breathing@example.com, "
                          + "isDistrictRegistry=Y, isAppealCentre=N, "
                          + "districtRegistryVenueId=districtRegistryVenueId, "
-                         + "appealCentreVenueId=appealCentreVenueId)",
+                         + "appealCentreVenueId=appealCentreVenueId, "
+                         + "districtRegistrySiteName=districtRegistrySiteName, "
+                         + "districtRegistryWelshSiteName=districtRegistryWelshSiteName, "
+                         + "districtRegistryExternalShortName=districtRegistryExternalShortName, "
+                         + "districtRegistryWelshExternalShortName=districtRegistryWelshExternalShortName)",
                      courtVenueString);
 
     }
