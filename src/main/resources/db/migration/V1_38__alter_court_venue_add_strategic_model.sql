@@ -85,7 +85,8 @@ BEGIN
     ) THEN
         ALTER TABLE court_venue
             ADD CONSTRAINT court_venue_parent_id_fk FOREIGN KEY (parent_id)
-                REFERENCES court_venue (mrd_venue_id);
+                REFERENCES court_venue (mrd_venue_id)
+                DEFERRABLE INITIALLY DEFERRED;
     END IF;
 END $$;
 
@@ -98,7 +99,8 @@ BEGIN
     ) THEN
         ALTER TABLE court_venue
             ADD CONSTRAINT court_venue_district_registry_venue_id_fk FOREIGN KEY (district_registry_venue_id)
-                REFERENCES court_venue (mrd_venue_id);
+                REFERENCES court_venue (mrd_venue_id)
+                DEFERRABLE INITIALLY DEFERRED;
     END IF;
 END $$;
 
@@ -111,7 +113,8 @@ BEGIN
     ) THEN
         ALTER TABLE court_venue
             ADD CONSTRAINT court_venue_appeal_centre_venue_id_fk FOREIGN KEY (appeal_centre_venue_id)
-                REFERENCES court_venue (mrd_venue_id);
+                REFERENCES court_venue (mrd_venue_id)
+                DEFERRABLE INITIALLY DEFERRED;
     END IF;
 END $$;
 
