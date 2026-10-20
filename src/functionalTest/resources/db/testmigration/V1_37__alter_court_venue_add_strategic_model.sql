@@ -299,7 +299,8 @@ FROM court_venue_url;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_venue AS
 SELECT site_en.name_desc AS site_name, cv.region_id, cv.court_type_id, cv.cluster_id, cv.open_for_public,
-       addr_en.address AS court_address, addr_en.post_code AS postcode, phone.contact_value AS phone_number,
+       addr_en.address AS court_address, addr_en.post_code AS postcode,
+       phone.contact_value::VARCHAR(128) AS phone_number,
        cv.closed_date, cv.court_location_code, cv.dx_address,
        site_cy.name_desc AS welsh_site_name, addr_cy.address AS welsh_court_address, cv.court_status,
        cv.court_open_date,
@@ -314,7 +315,8 @@ SELECT site_en.name_desc AS site_name, cv.region_id, cv.court_type_id, cv.cluste
        dr_site_cy.name_desc AS district_registry_welsh_site_name,
        dr_ext_en.name_desc AS district_registry_external_short_name,
        dr_ext_cy.name_desc AS district_registry_welsh_external_short_name,
-       contact_email.contact_value AS contact_email, breathing_space.contact_value AS breathing_space_email,
+       contact_email.contact_value::VARCHAR(256) AS contact_email,
+       breathing_space.contact_value::VARCHAR(256) AS breathing_space_email,
        cv.is_district_registry, cv.is_appeal_centre,
        cv.mrd_created_time, cv.mrd_updated_time, cv.mrd_deleted_time
 FROM court_venue cv
