@@ -103,14 +103,6 @@ class CourtVenueMapperTest {
         expectedMap.put("external_short_name","External Court");
         expectedMap.put("welsh_external_short_name","WelshExternalShortName");
         expectedMap.put("service_code","serviceCode1");
-        expectedMap.put("district_registry_site_name", "District Registry Site");
-        expectedMap.put("district_registry_welsh_site_name", "District Registry Welsh Site");
-        expectedMap.put("district_registry_external_short_name", "District Registry External");
-        expectedMap.put("district_registry_welsh_external_short_name", "District Registry Welsh External");
-        expectedMap.put("contact_email", "contact@example.com");
-        expectedMap.put("breathing_space_email", "breathing@example.com");
-        expectedMap.put("is_district_registry", "Y");
-        expectedMap.put("is_appeal_centre", "N");
         expectedMap.put("district_registry_venue_id", "mrdVenueId2");
         expectedMap.put("appeal_centre_venue_id", "mrdVenueId3");
         var actualMap = courtVenueMapper.getMap(courtVenue);

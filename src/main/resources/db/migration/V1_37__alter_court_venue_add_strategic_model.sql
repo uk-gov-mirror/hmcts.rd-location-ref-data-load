@@ -5,14 +5,6 @@ ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS district_registry_venue_id VARC
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS appeal_centre_venue_id VARCHAR(16);
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS effective_from_date DATE;
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS effective_to_date DATE;
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS district_registry_site_name VARCHAR(256);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS district_registry_welsh_site_name VARCHAR(256);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS district_registry_external_short_name VARCHAR(256);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS district_registry_welsh_external_short_name VARCHAR(256);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS contact_email VARCHAR(256);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS breathing_space_email VARCHAR(256);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS is_district_registry VARCHAR(1);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS is_appeal_centre VARCHAR(1);
 
 UPDATE court_venue
 SET mrd_venue_id = NULL
@@ -318,9 +310,18 @@ SELECT site_en.name_desc AS site_name, cv.region_id, cv.court_type_id, cv.cluste
        dr_ext_cy.name_desc AS district_registry_welsh_external_short_name,
        contact_email.contact_value::VARCHAR(256) AS contact_email,
        breathing_space.contact_value::VARCHAR(256) AS breathing_space_email,
-       cv.is_district_registry, cv.is_appeal_centre,
+       CASE WHEN use_district_registry.use_type_code IS NOT NULL THEN 'Y' ELSE 'N' END::VARCHAR(1)
+           AS is_district_registry,
+       CASE WHEN use_appeal_centre.use_type_code IS NOT NULL THEN 'Y' ELSE 'N' END::VARCHAR(1)
+           AS is_appeal_centre,
        cv.mrd_created_time, cv.mrd_updated_time, cv.mrd_deleted_time
 FROM court_venue cv
+LEFT JOIN court_use_mapping use_district_registry
+    ON use_district_registry.mrd_venue_id = cv.mrd_venue_id
+   AND use_district_registry.use_type_code = 'DISTRICT_REGISTRY'
+LEFT JOIN court_use_mapping use_appeal_centre
+    ON use_appeal_centre.mrd_venue_id = cv.mrd_venue_id
+   AND use_appeal_centre.use_type_code = 'APPEAL_CENTRE'
 LEFT JOIN address addr_en
     ON addr_en.mrd_venue_id = cv.mrd_venue_id
    AND addr_en.address_type = 'MAILING'
