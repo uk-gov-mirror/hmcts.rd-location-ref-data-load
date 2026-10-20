@@ -299,12 +299,14 @@ FROM court_venue_url;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_venue AS
 SELECT site_en.name_desc AS site_name, cv.region_id, cv.court_type_id, cv.cluster_id, cv.open_for_public,
-       cv.court_address, cv.postcode, cv.phone_number, cv.closed_date, cv.court_location_code, cv.dx_address,
-       site_cy.name_desc AS welsh_site_name, cv.welsh_court_address, cv.court_status, cv.court_open_date,
+       addr_en.address AS court_address, addr_en.post_code AS postcode, phone.contact_value AS phone_number,
+       cv.closed_date, cv.court_location_code, cv.dx_address,
+       site_cy.name_desc AS welsh_site_name, addr_cy.address AS welsh_court_address, cv.court_status,
+       cv.court_open_date,
        court_en.name_desc AS court_name, venue_en.name_desc AS venue_name, cv.is_case_management_location,
        cv.is_hearing_location, venue_cy.name_desc AS welsh_venue_name, cv.is_temporary_location,
        cv.is_nightingale_court, cv.location_type, cv.parent_location, court_cy.name_desc AS welsh_court_name,
-       cv.uprn, cv.venue_ou_code, cv.mrd_building_location_id, cv.mrd_venue_id, cv.service_url, cv.fact_url,
+       addr_en.uprn, cv.venue_ou_code, cv.mrd_building_location_id, cv.mrd_venue_id, cv.service_url, cv.fact_url,
        ext_en.name_desc AS external_short_name, ext_cy.name_desc AS welsh_external_short_name, cv.service_code,
        cv.court_status_code, cv.open_date, cv.parent_id, cv.district_registry_venue_id, cv.appeal_centre_venue_id,
        cv.effective_from_date, cv.effective_to_date,
@@ -312,9 +314,30 @@ SELECT site_en.name_desc AS site_name, cv.region_id, cv.court_type_id, cv.cluste
        dr_site_cy.name_desc AS district_registry_welsh_site_name,
        dr_ext_en.name_desc AS district_registry_external_short_name,
        dr_ext_cy.name_desc AS district_registry_welsh_external_short_name,
-       cv.contact_email, cv.breathing_space_email, cv.is_district_registry, cv.is_appeal_centre,
+       contact_email.contact_value AS contact_email, breathing_space.contact_value AS breathing_space_email,
+       cv.is_district_registry, cv.is_appeal_centre,
        cv.mrd_created_time, cv.mrd_updated_time, cv.mrd_deleted_time
 FROM court_venue cv
+LEFT JOIN address addr_en
+    ON addr_en.mrd_venue_id = cv.mrd_venue_id
+   AND addr_en.address_type = 'MAILING'
+   AND addr_en.language_code = 'EN'
+LEFT JOIN address addr_cy
+    ON addr_cy.mrd_venue_id = cv.mrd_venue_id
+   AND addr_cy.address_type = 'MAILING'
+   AND addr_cy.language_code = 'CY'
+LEFT JOIN contact_details phone
+    ON phone.mrd_venue_id = cv.mrd_venue_id
+   AND phone.contact_method_code = 'PHONE'
+   AND phone.contact_type_code = 'CONTACT_SERVICE'
+LEFT JOIN contact_details contact_email
+    ON contact_email.mrd_venue_id = cv.mrd_venue_id
+   AND contact_email.contact_method_code = 'EMAIL'
+   AND contact_email.contact_type_code = 'CONTACT_SERVICE'
+LEFT JOIN contact_details breathing_space
+    ON breathing_space.mrd_venue_id = cv.mrd_venue_id
+   AND breathing_space.contact_method_code = 'EMAIL'
+   AND breathing_space.contact_type_code = 'BREATHING_SPACE'
 LEFT JOIN court_venue_name site_en
     ON site_en.mrd_venue_id = cv.mrd_venue_id
    AND site_en.court_name_type = 'SITE'

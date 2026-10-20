@@ -43,6 +43,14 @@ ON CONFLICT (contact_type_code) DO UPDATE
 SET language_code = EXCLUDED.language_code,
     contact_type_desc = EXCLUDED.contact_type_desc;
 
+INSERT INTO contact_method (contact_method_code, language_code, contact_method_desc)
+VALUES
+    ('PHONE', 'EN', 'Phone'),
+    ('EMAIL', 'EN', 'Email')
+ON CONFLICT (contact_method_code) DO UPDATE
+SET language_code = EXCLUDED.language_code,
+    contact_method_desc = EXCLUDED.contact_method_desc;
+
 INSERT INTO use_type (use_type_code, language_code, use_type_desc)
 VALUES
     ('CASE_MANAGEMENT', 'EN', 'Case Management Location'),
