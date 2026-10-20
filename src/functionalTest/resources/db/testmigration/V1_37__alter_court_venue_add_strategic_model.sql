@@ -173,6 +173,17 @@ CREATE TABLE IF NOT EXISTS court_name_type (
     CONSTRAINT court_name_type_pk PRIMARY KEY (court_name_type)
 );
 
+INSERT INTO court_name_type (court_name_type, court_name_type_desc)
+VALUES
+    ('SITE', 'Site'),
+    ('COURT', 'Court'),
+    ('VENUE', 'Venue'),
+    ('EXTERNAL_SHORT', 'External Short'),
+    ('DISTRICT_REGISTRY_SITE', 'District Registry Site'),
+    ('DISTRICT_REGISTRY_EXTERNAL_SHORT', 'District Registry External Short')
+ON CONFLICT (court_name_type) DO UPDATE
+SET court_name_type_desc = EXCLUDED.court_name_type_desc;
+
 CREATE TABLE IF NOT EXISTS contact_method (
     contact_method_code VARCHAR(64) NOT NULL,
     language_code VARCHAR(2) NOT NULL DEFAULT 'EN',
@@ -287,14 +298,68 @@ SELECT mrd_venue_id, url_type, url
 FROM court_venue_url;
 
 CREATE OR REPLACE VIEW rdlocationreport.vw_court_venue AS
-SELECT site_name, region_id, court_type_id, cluster_id, open_for_public, court_address, postcode, phone_number,
-       closed_date, court_location_code, dx_address, welsh_site_name, welsh_court_address, court_status,
-       court_open_date, court_name, venue_name, is_case_management_location, is_hearing_location,
-       welsh_venue_name, is_temporary_location, is_nightingale_court, location_type, parent_location,
-       welsh_court_name, uprn, venue_ou_code, mrd_building_location_id, mrd_venue_id, service_url, fact_url,
-       external_short_name, welsh_external_short_name, service_code, court_status_code, open_date, parent_id,
-       district_registry_venue_id, appeal_centre_venue_id, effective_from_date, effective_to_date,
-       district_registry_site_name, district_registry_welsh_site_name, district_registry_external_short_name,
-       district_registry_welsh_external_short_name, contact_email, breathing_space_email,
-       is_district_registry, is_appeal_centre, mrd_created_time, mrd_updated_time, mrd_deleted_time
-FROM court_venue;
+SELECT site_en.name_desc AS site_name, cv.region_id, cv.court_type_id, cv.cluster_id, cv.open_for_public,
+       cv.court_address, cv.postcode, cv.phone_number, cv.closed_date, cv.court_location_code, cv.dx_address,
+       site_cy.name_desc AS welsh_site_name, cv.welsh_court_address, cv.court_status, cv.court_open_date,
+       court_en.name_desc AS court_name, venue_en.name_desc AS venue_name, cv.is_case_management_location,
+       cv.is_hearing_location, venue_cy.name_desc AS welsh_venue_name, cv.is_temporary_location,
+       cv.is_nightingale_court, cv.location_type, cv.parent_location, court_cy.name_desc AS welsh_court_name,
+       cv.uprn, cv.venue_ou_code, cv.mrd_building_location_id, cv.mrd_venue_id, cv.service_url, cv.fact_url,
+       ext_en.name_desc AS external_short_name, ext_cy.name_desc AS welsh_external_short_name, cv.service_code,
+       cv.court_status_code, cv.open_date, cv.parent_id, cv.district_registry_venue_id, cv.appeal_centre_venue_id,
+       cv.effective_from_date, cv.effective_to_date,
+       dr_site_en.name_desc AS district_registry_site_name,
+       dr_site_cy.name_desc AS district_registry_welsh_site_name,
+       dr_ext_en.name_desc AS district_registry_external_short_name,
+       dr_ext_cy.name_desc AS district_registry_welsh_external_short_name,
+       cv.contact_email, cv.breathing_space_email, cv.is_district_registry, cv.is_appeal_centre,
+       cv.mrd_created_time, cv.mrd_updated_time, cv.mrd_deleted_time
+FROM court_venue cv
+LEFT JOIN court_venue_name site_en
+    ON site_en.mrd_venue_id = cv.mrd_venue_id
+   AND site_en.court_name_type = 'SITE'
+   AND site_en.language_code = 'EN'
+LEFT JOIN court_venue_name site_cy
+    ON site_cy.mrd_venue_id = cv.mrd_venue_id
+   AND site_cy.court_name_type = 'SITE'
+   AND site_cy.language_code = 'CY'
+LEFT JOIN court_venue_name court_en
+    ON court_en.mrd_venue_id = cv.mrd_venue_id
+   AND court_en.court_name_type = 'COURT'
+   AND court_en.language_code = 'EN'
+LEFT JOIN court_venue_name court_cy
+    ON court_cy.mrd_venue_id = cv.mrd_venue_id
+   AND court_cy.court_name_type = 'COURT'
+   AND court_cy.language_code = 'CY'
+LEFT JOIN court_venue_name venue_en
+    ON venue_en.mrd_venue_id = cv.mrd_venue_id
+   AND venue_en.court_name_type = 'VENUE'
+   AND venue_en.language_code = 'EN'
+LEFT JOIN court_venue_name venue_cy
+    ON venue_cy.mrd_venue_id = cv.mrd_venue_id
+   AND venue_cy.court_name_type = 'VENUE'
+   AND venue_cy.language_code = 'CY'
+LEFT JOIN court_venue_name ext_en
+    ON ext_en.mrd_venue_id = cv.mrd_venue_id
+   AND ext_en.court_name_type = 'EXTERNAL_SHORT'
+   AND ext_en.language_code = 'EN'
+LEFT JOIN court_venue_name ext_cy
+    ON ext_cy.mrd_venue_id = cv.mrd_venue_id
+   AND ext_cy.court_name_type = 'EXTERNAL_SHORT'
+   AND ext_cy.language_code = 'CY'
+LEFT JOIN court_venue_name dr_site_en
+    ON dr_site_en.mrd_venue_id = cv.mrd_venue_id
+   AND dr_site_en.court_name_type = 'DISTRICT_REGISTRY_SITE'
+   AND dr_site_en.language_code = 'EN'
+LEFT JOIN court_venue_name dr_site_cy
+    ON dr_site_cy.mrd_venue_id = cv.mrd_venue_id
+   AND dr_site_cy.court_name_type = 'DISTRICT_REGISTRY_SITE'
+   AND dr_site_cy.language_code = 'CY'
+LEFT JOIN court_venue_name dr_ext_en
+    ON dr_ext_en.mrd_venue_id = cv.mrd_venue_id
+   AND dr_ext_en.court_name_type = 'DISTRICT_REGISTRY_EXTERNAL_SHORT'
+   AND dr_ext_en.language_code = 'EN'
+LEFT JOIN court_venue_name dr_ext_cy
+    ON dr_ext_cy.mrd_venue_id = cv.mrd_venue_id
+   AND dr_ext_cy.court_name_type = 'DISTRICT_REGISTRY_EXTERNAL_SHORT'
+   AND dr_ext_cy.language_code = 'CY';
