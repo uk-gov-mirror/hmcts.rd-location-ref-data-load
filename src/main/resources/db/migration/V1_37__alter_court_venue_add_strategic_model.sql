@@ -1,5 +1,4 @@
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS court_status_code VARCHAR(32);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS open_date DATE;
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS parent_id VARCHAR(16);
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS district_registry_venue_id VARCHAR(16);
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS appeal_centre_venue_id VARCHAR(16);
@@ -9,11 +8,6 @@ ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS effective_to_date DATE;
 UPDATE court_venue
 SET mrd_venue_id = NULL
 WHERE mrd_venue_id = '';
-
-UPDATE court_venue
-SET open_date = court_open_date::date
-WHERE open_date IS NULL
-  AND court_open_date IS NOT NULL;
 
 DO $$
 BEGIN
@@ -302,7 +296,7 @@ SELECT site_en.name_desc AS site_name, cv.region_id, cv.court_type_id, cv.cluste
        addr_en.uprn, cv.venue_ou_code, cv.mrd_building_location_id, cv.mrd_venue_id, cv.service_url, cv.fact_url,
        ext_en.name_desc::VARCHAR(80) AS external_short_name,
        ext_cy.name_desc::VARCHAR(80) AS welsh_external_short_name, cv.service_code,
-       cv.court_status_code, cv.open_date, cv.parent_id, cv.district_registry_venue_id, cv.appeal_centre_venue_id,
+       cv.court_status_code, cv.parent_id, cv.district_registry_venue_id, cv.appeal_centre_venue_id,
        cv.effective_from_date, cv.effective_to_date,
        dr_site_en.name_desc AS district_registry_site_name,
        dr_site_cy.name_desc AS district_registry_welsh_site_name,
