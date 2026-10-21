@@ -217,13 +217,6 @@ class CourtVenueChildTableSyncProcessorTest {
 
         ArgumentCaptor<List<Object[]>> venueIdsCaptor = ArgumentCaptor.forClass(List.class);
         verify(jdbcTemplate).batchUpdate(
-            eq("UPDATE court_venue SET parent_id = NULL WHERE parent_id = ?"),
-            venueIdsCaptor.capture()
-        );
-        assertThat(venueIdsCaptor.getValue())
-            .singleElement()
-            .satisfies(values -> assertThat(values).containsExactly("venue-2"));
-        verify(jdbcTemplate).batchUpdate(
             eq("DELETE FROM court_district_family_jurisdiction_assoc "
                    + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)"),
             anyList()

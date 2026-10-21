@@ -1,5 +1,4 @@
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS court_status_code VARCHAR(32);
-ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS parent_id VARCHAR(16);
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS district_registry_venue_id VARCHAR(16);
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS appeal_centre_venue_id VARCHAR(16);
 ALTER TABLE court_venue ADD COLUMN IF NOT EXISTS effective_from_date DATE;
@@ -75,20 +74,6 @@ ALTER TABLE court_district_civil_jurisdiction_assoc
     ADD CONSTRAINT dcj_court_location_id_fk
         FOREIGN KEY (court_location_id)
             REFERENCES court_venue (court_venue_id);
-
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint
-        WHERE conname = 'court_venue_parent_id_fk'
-    ) THEN
-        ALTER TABLE court_venue
-            ADD CONSTRAINT court_venue_parent_id_fk FOREIGN KEY (parent_id)
-                REFERENCES court_venue (mrd_venue_id)
-                DEFERRABLE INITIALLY DEFERRED;
-    END IF;
-END $$;
 
 DO $$
 BEGIN
@@ -299,7 +284,7 @@ SELECT site_en.name_desc AS site_name, cv.region_id, cv.court_type_id, cv.cluste
        addr_en.uprn, cv.venue_ou_code, cv.mrd_building_location_id, cv.mrd_venue_id, cv.service_url, cv.fact_url,
        ext_en.name_desc::VARCHAR(80) AS external_short_name,
        ext_cy.name_desc::VARCHAR(80) AS welsh_external_short_name, cv.service_code,
-       cv.court_status_code, cv.parent_id, cv.district_registry_venue_id, cv.appeal_centre_venue_id,
+       cv.court_status_code, cv.district_registry_venue_id, cv.appeal_centre_venue_id,
        cv.effective_from_date, cv.effective_to_date,
        dr_site_en.name_desc AS district_registry_site_name,
        dr_site_cy.name_desc AS district_registry_welsh_site_name,

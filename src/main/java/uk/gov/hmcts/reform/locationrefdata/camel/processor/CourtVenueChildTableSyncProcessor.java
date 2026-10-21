@@ -442,7 +442,6 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     }
 
     private void clearSelfReferencesToDeletedCourtVenues(List<Object[]> venueIdsToDelete) {
-        jdbcTemplate.batchUpdate("UPDATE court_venue SET parent_id = NULL WHERE parent_id = ?", venueIdsToDelete);
         jdbcTemplate.batchUpdate(
             "UPDATE court_venue SET district_registry_venue_id = NULL WHERE district_registry_venue_id = ?",
             venueIdsToDelete
