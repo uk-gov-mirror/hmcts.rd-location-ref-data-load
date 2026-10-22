@@ -66,3 +66,10 @@ mail:
 zero-byte-characters: >
   \u200B,
    
+
+# Temporary: rows in the court venue file delivered without a service id (ServiceID) are never
+# loaded. While this is on, such rows are only reported and the rest of the file is still loaded.
+# Switch it off to fail the file instead. Can be removed once the source file always holds a
+# service id for every row.
+court-venue:
+  skip-rows-with-blank-service-code: true
