@@ -153,6 +153,11 @@ mail:
 
 idempotent-flag-ingestion: true
 
+# Rows in the court venue file delivered without a service id are never loaded. The switch that
+# tolerates them is off here, so the strict rule applies, and the dedicated test switches it on.
+court-venue:
+  skip-rows-with-blank-service-code: false
+
 CONTAINER_NAME: lrd-ref-data
 zero-byte-characters: >
   \u200B,
