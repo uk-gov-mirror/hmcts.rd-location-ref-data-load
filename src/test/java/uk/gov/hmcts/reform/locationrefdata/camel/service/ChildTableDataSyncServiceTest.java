@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,7 +48,7 @@ class ChildTableDataSyncServiceTest {
         childTableDataSyncService.sync(definition, List.of(
             row("id", "1", "type", "A", "description", "Updated"),
             row("id", "3", "type", "A", "description", "Created")
-        ));
+        ), Set.of());
 
         ArgumentCaptor<List<Object[]>> deleteRowsCaptor = ArgumentCaptor.forClass(List.class);
         verify(jdbcTemplate).batchUpdate(
@@ -71,6 +72,58 @@ class ChildTableDataSyncServiceTest {
     }
 
     @Test
+    void syncDeletesStaleRowsWithinScopeAndKeepsRowsOutsideScope() {
+        ChildTableSyncDefinition definition = new ChildTableSyncDefinition(
+            "test_child",
+            List.of("mrd_venue_id", "type"),
+            List.of("description"),
+            "mrd_venue_id"
+        );
+
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id, type FROM test_child")).thenReturn(List.of(
+            row("mrd_venue_id", "venue-1", "type", "A"),
+            row("mrd_venue_id", "venue-1", "type", "B"),
+            row("mrd_venue_id", "venue-2", "type", "A")
+        ));
+
+        childTableDataSyncService.sync(definition, List.of(
+            row("mrd_venue_id", "venue-1", "type", "A", "description", "Updated")
+        ), Set.of("venue-1"));
+
+        ArgumentCaptor<List<Object[]>> deleteRowsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(jdbcTemplate).batchUpdate(
+            eq("DELETE FROM test_child WHERE mrd_venue_id = ? AND type = ?"),
+            deleteRowsCaptor.capture()
+        );
+        assertThat(deleteRowsCaptor.getValue())
+            .singleElement()
+            .satisfies(values -> assertThat(values).containsExactly("venue-1", "B"));
+    }
+
+    @Test
+    void syncKeepsRowsOutsideScope() {
+        ChildTableSyncDefinition definition = new ChildTableSyncDefinition(
+            "test_child",
+            List.of("mrd_venue_id", "type"),
+            List.of("description"),
+            "mrd_venue_id"
+        );
+
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id, type FROM test_child")).thenReturn(List.of(
+            row("mrd_venue_id", "venue-2", "type", "A")
+        ));
+
+        childTableDataSyncService.sync(definition, List.of(
+            row("mrd_venue_id", "venue-1", "type", "A", "description", "Created")
+        ), Set.of("venue-1"));
+
+        verify(jdbcTemplate, never()).batchUpdate(
+            eq("DELETE FROM test_child WHERE mrd_venue_id = ? AND type = ?"),
+            anyList()
+        );
+    }
+
+    @Test
     void syncUsesDoNothingForKeyOnlyTables() {
         ChildTableSyncDefinition definition = new ChildTableSyncDefinition(
             "test_mapping",
@@ -80,7 +133,7 @@ class ChildTableDataSyncServiceTest {
 
         when(jdbcTemplate.queryForList("SELECT id, type FROM test_mapping")).thenReturn(List.of());
 
-        childTableDataSyncService.sync(definition, List.of(row("id", "1", "type", "A")));
+        childTableDataSyncService.sync(definition, List.of(row("id", "1", "type", "A")), Set.of());
 
         verify(jdbcTemplate).batchUpdate(
             eq("INSERT INTO test_mapping (id, type) VALUES (?, ?) ON CONFLICT (id, type) DO NOTHING"),
@@ -98,7 +151,7 @@ class ChildTableDataSyncServiceTest {
 
         when(jdbcTemplate.queryForList("SELECT id FROM test_child")).thenReturn(List.of(row("id", "1")));
 
-        childTableDataSyncService.sync(definition, List.of());
+        childTableDataSyncService.sync(definition, List.of(), Set.of());
 
         verify(jdbcTemplate).batchUpdate(eq("DELETE FROM test_child WHERE id = ?"), anyList());
         verify(jdbcTemplate, never()).batchUpdate(
@@ -116,9 +169,25 @@ class ChildTableDataSyncServiceTest {
             List.of("description")
         );
 
-        assertThatThrownBy(() -> childTableDataSyncService.sync(definition, List.of()))
+        assertThatThrownBy(() -> childTableDataSyncService.sync(definition, List.of(), Set.of()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid SQL identifier: test_child;drop");
+
+        verify(jdbcTemplate, never()).queryForList(anyString());
+    }
+
+    @Test
+    void syncRejectsScopeColumnThatIsNotAKeyColumn() {
+        ChildTableSyncDefinition definition = new ChildTableSyncDefinition(
+            "test_child",
+            List.of("id"),
+            List.of("description"),
+            "mrd_venue_id"
+        );
+
+        assertThatThrownBy(() -> childTableDataSyncService.sync(definition, List.of(), Set.of()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Scope column must be a key column: mrd_venue_id");
 
         verify(jdbcTemplate, never()).queryForList(anyString());
     }

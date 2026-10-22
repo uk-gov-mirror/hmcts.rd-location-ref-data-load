@@ -15,11 +15,11 @@ import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableDataSyncServi
 import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableSyncDefinition;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.locationrefdata.camel.util.LrdLoadUtils.trim;
 
@@ -41,7 +41,8 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     private static final ChildTableSyncDefinition REFERENCE_CODES = new ChildTableSyncDefinition(
         "reference_codes",
         List.of(MRD_VENUE_ID, "reference_code_type", "reference_code"),
-        List.of()
+        List.of(),
+        MRD_VENUE_ID
     );
     private static final ChildTableSyncDefinition COURT_STATUS = new ChildTableSyncDefinition(
         "court_status",
@@ -51,17 +52,20 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     private static final ChildTableSyncDefinition COURT_VENUE_NAME = new ChildTableSyncDefinition(
         "court_venue_name",
         List.of(MRD_VENUE_ID, "court_name_type", LANGUAGE_CODE),
-        List.of("name_desc")
+        List.of("name_desc"),
+        MRD_VENUE_ID
     );
     private static final ChildTableSyncDefinition ADDRESS = new ChildTableSyncDefinition(
         "address",
         List.of(MRD_VENUE_ID, "address_type", LANGUAGE_CODE),
-        List.of("address", "post_code", "uprn")
+        List.of("address", "post_code", "uprn"),
+        MRD_VENUE_ID
     );
     private static final ChildTableSyncDefinition CONTACT_DETAILS = new ChildTableSyncDefinition(
         "contact_details",
         List.of(MRD_VENUE_ID, "contact_method_code", "contact_type_code"),
-        List.of("contact_value")
+        List.of("contact_value"),
+        MRD_VENUE_ID
     );
     private static final ChildTableSyncDefinition CONTACT_METHOD = new ChildTableSyncDefinition(
         "contact_method",
@@ -71,12 +75,14 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     private static final ChildTableSyncDefinition COURT_USE_MAPPING = new ChildTableSyncDefinition(
         "court_use_mapping",
         List.of(MRD_VENUE_ID, "use_type_code"),
-        List.of()
+        List.of(),
+        MRD_VENUE_ID
     );
     private static final ChildTableSyncDefinition COURT_VENUE_URL = new ChildTableSyncDefinition(
         "court_venue_url",
         List.of(MRD_VENUE_ID, "url_type"),
-        List.of("url")
+        List.of("url"),
+        MRD_VENUE_ID
     );
 
     private final ChildTableDataSyncService childTableDataSyncService;
@@ -107,18 +113,25 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     }
 
     private void syncChildTables(List<CourtVenue> courtVenues) {
-        clearCourtVenueStatusCodes();
-        childTableDataSyncService.sync(CONTACT_DETAILS, List.of());
-        childTableDataSyncService.sync(COURT_STATUS, courtStatusRows(courtVenues));
-        childTableDataSyncService.sync(CONTACT_METHOD, contactMethodRows(courtVenues));
+        Set<String> venueScope = venueScope(courtVenues);
+        clearCourtVenueStatusCodes(venueScope);
+        childTableDataSyncService.sync(COURT_STATUS, courtStatusRows(courtVenues), venueScope);
+        childTableDataSyncService.sync(CONTACT_METHOD, contactMethodRows(courtVenues), venueScope);
         updateCourtVenueStatusCodes(courtVenues);
-        childTableDataSyncService.sync(COURT_VENUE_NAME, courtVenueNameRows(courtVenues));
-        childTableDataSyncService.sync(ADDRESS, addressRows(courtVenues));
-        childTableDataSyncService.sync(CONTACT_DETAILS, contactDetailRows(courtVenues));
-        childTableDataSyncService.sync(COURT_USE_MAPPING, courtUseMappingRows(courtVenues));
-        childTableDataSyncService.sync(REFERENCE_CODES, referenceCodeRows(courtVenues));
-        childTableDataSyncService.sync(COURT_VENUE_URL, courtVenueUrlRows(courtVenues));
-        deleteCourtVenuesMissingFromFile(courtVenues);
+        childTableDataSyncService.sync(COURT_VENUE_NAME, courtVenueNameRows(courtVenues), venueScope);
+        childTableDataSyncService.sync(ADDRESS, addressRows(courtVenues), venueScope);
+        childTableDataSyncService.sync(CONTACT_DETAILS, contactDetailRows(courtVenues), venueScope);
+        childTableDataSyncService.sync(COURT_USE_MAPPING, courtUseMappingRows(courtVenues), venueScope);
+        childTableDataSyncService.sync(REFERENCE_CODES, referenceCodeRows(courtVenues), venueScope);
+        childTableDataSyncService.sync(COURT_VENUE_URL, courtVenueUrlRows(courtVenues), venueScope);
+    }
+
+    private Set<String> venueScope(List<CourtVenue> courtVenues) {
+        return courtVenues.stream()
+            .map(CourtVenue::getMrdVenueId)
+            .map(venueId -> trim(venueId))
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toSet());
     }
 
     private List<CourtVenue> getCourtVenues(Exchange exchange) {
@@ -338,7 +351,7 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
             "address_type", "MAILING",
             LANGUAGE_CODE, languageCode,
             "address", address,
-            "post_code", postCode,
+            "post_code", nullIfBlank(postCode),
             "uprn", trim(courtVenue.getUprn())
         ));
     }
@@ -401,8 +414,15 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
         return StringUtils.capitalize(courtStatusCode.toLowerCase().replace('_', ' '));
     }
 
-    private void clearCourtVenueStatusCodes() {
-        jdbcTemplate.update("UPDATE court_venue SET court_status_code = NULL WHERE court_status_code IS NOT NULL");
+    private void clearCourtVenueStatusCodes(Set<String> venueScope) {
+        if (venueScope.isEmpty()) {
+            return;
+        }
+        jdbcTemplate.batchUpdate(
+            "UPDATE court_venue SET court_status_code = NULL WHERE court_status_code IS NOT NULL "
+                + "AND mrd_venue_id = ?",
+            venueScope.stream().map(venueId -> new Object[] {venueId}).toList()
+        );
     }
 
     private void updateCourtVenueStatusCodes(List<CourtVenue> courtVenues) {
@@ -422,57 +442,11 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
         }
     }
 
-    private void deleteCourtVenuesMissingFromFile(List<CourtVenue> courtVenues) {
-        Set<String> desiredVenueIds = courtVenues.stream()
-            .map(CourtVenue::getMrdVenueId)
-            .map(this::trimVenueId)
-            .filter(StringUtils::isNotBlank)
-            .collect(HashSet::new, Set::add, Set::addAll);
-
-        List<Object[]> venueIdsToDelete = jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")
-            .stream()
-            .map(row -> trimVenueId((String) row.get(MRD_VENUE_ID)))
-            .filter(StringUtils::isNotBlank)
-            .filter(existingVenueId -> !desiredVenueIds.contains(existingVenueId))
-            .map(existingVenueId -> new Object[] {existingVenueId})
-            .toList();
-
-        if (!venueIdsToDelete.isEmpty()) {
-            deleteLegacyJurisdictionAssociations(venueIdsToDelete);
-            clearSelfReferencesToDeletedCourtVenues(venueIdsToDelete);
-            jdbcTemplate.batchUpdate("DELETE FROM court_venue WHERE mrd_venue_id = ?", venueIdsToDelete);
-        }
-    }
-
-    private void deleteLegacyJurisdictionAssociations(List<Object[]> venueIdsToDelete) {
-        jdbcTemplate.batchUpdate(
-            "DELETE FROM court_district_family_jurisdiction_assoc "
-                + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)",
-            venueIdsToDelete
-        );
-        jdbcTemplate.batchUpdate(
-            "DELETE FROM court_district_civil_jurisdiction_assoc "
-                + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)",
-            venueIdsToDelete
-        );
-    }
-
-    private void clearSelfReferencesToDeletedCourtVenues(List<Object[]> venueIdsToDelete) {
-        jdbcTemplate.batchUpdate(
-            "UPDATE court_venue SET district_registry_venue_id = NULL WHERE district_registry_venue_id = ?",
-            venueIdsToDelete
-        );
-        jdbcTemplate.batchUpdate(
-            "UPDATE court_venue SET appeal_centre_venue_id = NULL WHERE appeal_centre_venue_id = ?",
-            venueIdsToDelete
-        );
-    }
-
-    private String trimVenueId(String venueId) {
-        return trim(venueId);
-    }
-
     private String emptyIfBlank(String value) {
         return StringUtils.isBlank(value) ? "" : value;
+    }
+
+    private String nullIfBlank(String value) {
+        return StringUtils.isBlank(value) ? null : value;
     }
 }

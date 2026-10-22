@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -21,16 +22,19 @@ public class ChildTableDataSyncService {
     private final JdbcTemplate jdbcTemplate;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void sync(ChildTableSyncDefinition definition, List<Map<String, Object>> desiredRows) {
+    public void sync(ChildTableSyncDefinition definition,
+                     List<Map<String, Object>> desiredRows,
+                     Set<String> scopeValues) {
         validateDefinition(definition);
 
         List<Map<String, Object>> uniqueDesiredRows = removeDuplicateKeys(definition, desiredRows);
-        deleteRowsMissingFromFile(definition, uniqueDesiredRows);
+        deleteRowsMissingFromFile(definition, uniqueDesiredRows, scopeValues);
         upsertRowsFromFile(definition, uniqueDesiredRows);
     }
 
     private void deleteRowsMissingFromFile(ChildTableSyncDefinition definition,
-                                           List<Map<String, Object>> desiredRows) {
+                                           List<Map<String, Object>> desiredRows,
+                                           Set<String> scopeValues) {
         List<Map<String, Object>> existingRows = jdbcTemplate.queryForList(selectKeysSql(definition));
         var desiredKeys = desiredRows.stream()
             .map(row -> key(definition, row))
@@ -38,12 +42,24 @@ public class ChildTableDataSyncService {
 
         List<Object[]> rowsToDelete = existingRows.stream()
             .filter(row -> !desiredKeys.contains(key(definition, row)))
+            .filter(row -> withinScope(definition, row, scopeValues))
             .map(row -> keyValues(definition, row))
             .toList();
 
         if (!rowsToDelete.isEmpty()) {
             jdbcTemplate.batchUpdate(deleteSql(definition), rowsToDelete);
         }
+    }
+
+    private boolean withinScope(ChildTableSyncDefinition definition,
+                                Map<String, Object> row,
+                                Set<String> scopeValues) {
+        String scopeColumn = definition.scopeColumn();
+        if (scopeColumn == null) {
+            return true;
+        }
+        Object scopeValue = row.get(scopeColumn);
+        return scopeValue != null && scopeValues.contains(scopeValue.toString());
     }
 
     private void upsertRowsFromFile(ChildTableSyncDefinition definition,
@@ -113,6 +129,18 @@ public class ChildTableDataSyncService {
     private void validateDefinition(ChildTableSyncDefinition definition) {
         validateIdentifier(definition.tableName());
         definition.columns().forEach(this::validateIdentifier);
+        validateScopeColumn(definition);
+    }
+
+    private void validateScopeColumn(ChildTableSyncDefinition definition) {
+        String scopeColumn = definition.scopeColumn();
+        if (scopeColumn == null) {
+            return;
+        }
+        validateIdentifier(scopeColumn);
+        if (!definition.keyColumns().contains(scopeColumn)) {
+            throw new IllegalArgumentException("Scope column must be a key column: " + scopeColumn);
+        }
     }
 
     private void validateIdentifier(String identifier) {

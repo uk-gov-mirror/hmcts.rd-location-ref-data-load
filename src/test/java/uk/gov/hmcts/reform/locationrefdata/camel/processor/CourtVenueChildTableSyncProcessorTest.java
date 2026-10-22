@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,21 +19,24 @@ import uk.gov.hmcts.reform.locationrefdata.camel.service.ChildTableSyncDefinitio
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
 class CourtVenueChildTableSyncProcessorTest {
+
+    private static final int SYNCED_CHILD_TABLES = 8;
 
     @Mock
     private ChildTableDataSyncService childTableDataSyncService;
@@ -56,32 +58,16 @@ class CourtVenueChildTableSyncProcessorTest {
     @Test
     void processSyncsAllCourtVenueChildTables() {
         exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
-        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
 
         processor.process(exchange);
 
         ArgumentCaptor<ChildTableSyncDefinition> definitionCaptor =
             ArgumentCaptor.forClass(ChildTableSyncDefinition.class);
-        ArgumentCaptor<List<Map<String, Object>>> rowsCaptor = ArgumentCaptor.forClass(List.class);
-
-        verify(childTableDataSyncService, times(9))
-            .sync(definitionCaptor.capture(), rowsCaptor.capture());
-        verify(jdbcTemplate).update(
-            "UPDATE court_venue SET court_status_code = NULL WHERE court_status_code IS NOT NULL"
-        );
-        ArgumentCaptor<List<Object[]>> statusUpdateCaptor = ArgumentCaptor.forClass(List.class);
-        verify(jdbcTemplate).batchUpdate(
-            eq("UPDATE court_venue SET court_status_code = ? WHERE mrd_venue_id = ?"),
-            statusUpdateCaptor.capture()
-        );
-        assertThat(statusUpdateCaptor.getValue())
-            .singleElement()
-            .satisfies(values -> assertThat(values).containsExactly("OPEN", "venue-1"));
-
+        verify(childTableDataSyncService, times(SYNCED_CHILD_TABLES))
+            .sync(definitionCaptor.capture(), anyList(), anySet());
         assertThat(definitionCaptor.getAllValues())
             .extracting(ChildTableSyncDefinition::tableName)
             .containsExactly(
-                "contact_details",
                 "court_status",
                 "contact_method",
                 "court_venue_name",
@@ -92,14 +78,31 @@ class CourtVenueChildTableSyncProcessorTest {
                 "court_venue_url"
             );
 
-        assertThat(rowsCaptor.getAllValues().get(0))
-            .isEmpty();
-        assertThat(rowsCaptor.getAllValues().get(1))
+        ArgumentCaptor<List<Object[]>> statusClearCaptor = ArgumentCaptor.forClass(List.class);
+        verify(jdbcTemplate).batchUpdate(
+            eq("UPDATE court_venue SET court_status_code = NULL WHERE court_status_code IS NOT NULL "
+                   + "AND mrd_venue_id = ?"),
+            statusClearCaptor.capture()
+        );
+        assertThat(statusClearCaptor.getValue())
+            .singleElement()
+            .satisfies(values -> assertThat(values).containsExactly("venue-1"));
+
+        ArgumentCaptor<List<Object[]>> statusUpdateCaptor = ArgumentCaptor.forClass(List.class);
+        verify(jdbcTemplate).batchUpdate(
+            eq("UPDATE court_venue SET court_status_code = ? WHERE mrd_venue_id = ?"),
+            statusUpdateCaptor.capture()
+        );
+        assertThat(statusUpdateCaptor.getValue())
+            .singleElement()
+            .satisfies(values -> assertThat(values).containsExactly("OPEN", "venue-1"));
+
+        assertThat(rowsFor("court_status"))
             .singleElement()
             .satisfies(row -> assertThat(row).containsEntry("court_status_code", "OPEN")
                 .containsEntry("language_code", "EN")
                 .containsEntry("court_status_desc", "Open"));
-        assertThat(rowsCaptor.getAllValues().get(2))
+        assertThat(rowsFor("contact_method"))
             .hasSize(2)
             .anySatisfy(row -> assertThat(row).containsEntry("contact_method_code", "PHONE")
                 .containsEntry("language_code", "EN")
@@ -107,7 +110,7 @@ class CourtVenueChildTableSyncProcessorTest {
             .anySatisfy(row -> assertThat(row).containsEntry("contact_method_code", "EMAIL")
                 .containsEntry("language_code", "EN")
                 .containsEntry("contact_method_desc", "Email"));
-        assertThat(rowsCaptor.getAllValues().get(3))
+        assertThat(rowsFor("court_venue_name"))
             .hasSize(12)
             .anySatisfy(row -> assertThat(row).containsEntry("court_name_type", "SITE")
                 .containsEntry("language_code", "EN")
@@ -118,12 +121,12 @@ class CourtVenueChildTableSyncProcessorTest {
             .anySatisfy(row -> assertThat(row).containsEntry("court_name_type", "DISTRICT_REGISTRY_EXTERNAL_SHORT")
                 .containsEntry("language_code", "CY")
                 .containsEntry("name_desc", "Welsh district registry external short"));
-        assertThat(rowsCaptor.getAllValues().get(4))
+        assertThat(rowsFor("address"))
             .hasSize(2)
             .anySatisfy(row -> assertThat(row).containsEntry("address_type", "MAILING")
                 .containsEntry("language_code", "EN")
                 .containsEntry("address", "Court address"));
-        assertThat(rowsCaptor.getAllValues().get(5))
+        assertThat(rowsFor("contact_details"))
             .hasSize(3)
             .anySatisfy(row -> assertThat(row).containsEntry("contact_method_code", "PHONE")
                 .containsEntry("contact_type_code", "CONTACT_SERVICE")
@@ -134,26 +137,66 @@ class CourtVenueChildTableSyncProcessorTest {
             .anySatisfy(row -> assertThat(row).containsEntry("contact_method_code", "EMAIL")
                 .containsEntry("contact_type_code", "BREATHING_SPACE")
                 .containsEntry("contact_value", "breathing@example.com"));
-        assertThat(rowsCaptor.getAllValues().get(6))
+        assertThat(rowsFor("court_use_mapping"))
             .hasSize(4)
             .anySatisfy(row -> assertThat(row).containsEntry("use_type_code", "CASE_MANAGEMENT"))
             .anySatisfy(row -> assertThat(row).containsEntry("use_type_code", "TEMPORARY"))
             .anySatisfy(row -> assertThat(row).containsEntry("use_type_code", "DISTRICT_REGISTRY"))
             .anySatisfy(row -> assertThat(row).containsEntry("use_type_code", "APPEAL_CENTRE"));
-        assertThat(rowsCaptor.getAllValues().get(7))
+        assertThat(rowsFor("reference_codes"))
             .hasSize(2)
             .anySatisfy(row -> assertThat(row).containsEntry("reference_code_type", "COURT_LOCATION_CODE"))
             .anySatisfy(row -> assertThat(row).containsEntry("reference_code_type", "VENUE_OU_CODE"));
-        assertThat(rowsCaptor.getAllValues().get(8))
+        assertThat(rowsFor("court_venue_url"))
             .hasSize(2)
             .anySatisfy(row -> assertThat(row).containsEntry("url_type", "SERVICE"))
             .anySatisfy(row -> assertThat(row).containsEntry("url_type", "FACT"));
     }
 
     @Test
+    void processScopesChildTableDeletesToTheVenueIdsInTheFile() {
+        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
+
+        processor.process(exchange);
+
+        ArgumentCaptor<Set<String>> scopeCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(childTableDataSyncService, times(SYNCED_CHILD_TABLES))
+            .sync(any(ChildTableSyncDefinition.class), anyList(), scopeCaptor.capture());
+        assertThat(scopeCaptor.getAllValues())
+            .allSatisfy(scope -> assertThat(scope).containsExactly("venue-1"));
+    }
+
+    @Test
+    void processDoesNotDeleteCourtVenuesMissingFromTheFile() {
+        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
+
+        processor.process(exchange);
+
+        verify(jdbcTemplate, never()).batchUpdate(eq("DELETE FROM court_venue WHERE mrd_venue_id = ?"), anyList());
+        verify(jdbcTemplate, never()).batchUpdate(
+            eq("DELETE FROM court_district_family_jurisdiction_assoc "
+                   + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)"),
+            anyList()
+        );
+        verify(jdbcTemplate, never()).batchUpdate(
+            eq("DELETE FROM court_district_civil_jurisdiction_assoc "
+                   + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)"),
+            anyList()
+        );
+        verify(jdbcTemplate, never()).batchUpdate(
+            eq("UPDATE court_venue SET district_registry_venue_id = NULL WHERE district_registry_venue_id = ?"),
+            anyList()
+        );
+        verify(jdbcTemplate, never()).batchUpdate(
+            eq("UPDATE court_venue SET appeal_centre_venue_id = NULL WHERE appeal_centre_venue_id = ?"),
+            anyList()
+        );
+        verify(jdbcTemplate, never()).queryForList(anyString());
+    }
+
+    @Test
     void processDefersSyncUntilTransactionCommits() {
         exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
-        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
         TransactionSynchronizationManager.initSynchronization();
 
         try {
@@ -161,18 +204,24 @@ class CourtVenueChildTableSyncProcessorTest {
 
             verify(childTableDataSyncService, never()).sync(
                 any(ChildTableSyncDefinition.class),
-                anyList()
+                anyList(),
+                anySet()
             );
             verify(jdbcTemplate, never()).update(anyString());
 
             TransactionSynchronizationManager.getSynchronizations()
                 .forEach(TransactionSynchronization::afterCommit);
 
-            verify(childTableDataSyncService, times(9)).sync(
+            verify(childTableDataSyncService, times(SYNCED_CHILD_TABLES)).sync(
                 any(ChildTableSyncDefinition.class),
+                anyList(),
+                anySet()
+            );
+            verify(jdbcTemplate).batchUpdate(
+                eq("UPDATE court_venue SET court_status_code = NULL WHERE court_status_code IS NOT NULL "
+                       + "AND mrd_venue_id = ?"),
                 anyList()
             );
-            verify(jdbcTemplate).update(anyString());
         } finally {
             TransactionSynchronizationManager.clearSynchronization();
         }
@@ -188,65 +237,23 @@ class CourtVenueChildTableSyncProcessorTest {
 
         verify(childTableDataSyncService, never()).sync(
             any(ChildTableSyncDefinition.class),
-            anyList()
+            anyList(),
+            anySet()
         );
+        verifyNoMoreInteractions(jdbcTemplate);
     }
 
     @Test
     void processUsesStoredCourtVenuesWhenExchangePropertyIsNotAvailable() {
         new CourtVenueFileDataStore().addAll("default", List.of(courtVenue()));
-        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
 
         processor.process(exchange);
 
-        verify(childTableDataSyncService, times(9)).sync(
+        verify(childTableDataSyncService, times(SYNCED_CHILD_TABLES)).sync(
             any(ChildTableSyncDefinition.class),
-            anyList()
+            anyList(),
+            anySet()
         );
-    }
-
-    @Test
-    void processDeletesCourtVenuesMissingFromFileAfterChildTables() {
-        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(courtVenue()));
-        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of(
-            Map.of("mrd_venue_id", "venue-1"),
-            Map.of("mrd_venue_id", "venue-2")
-        ));
-
-        processor.process(exchange);
-
-        ArgumentCaptor<List<Object[]>> venueIdsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(jdbcTemplate).batchUpdate(
-            eq("DELETE FROM court_district_family_jurisdiction_assoc "
-                   + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)"),
-            anyList()
-        );
-        verify(jdbcTemplate).batchUpdate(
-            eq("DELETE FROM court_district_civil_jurisdiction_assoc "
-                   + "WHERE court_location_id = (SELECT court_venue_id FROM court_venue WHERE mrd_venue_id = ?)"),
-            anyList()
-        );
-        verify(jdbcTemplate).batchUpdate(
-            eq("UPDATE court_venue SET district_registry_venue_id = NULL WHERE district_registry_venue_id = ?"),
-            anyList()
-        );
-        verify(jdbcTemplate).batchUpdate(
-            eq("UPDATE court_venue SET appeal_centre_venue_id = NULL WHERE appeal_centre_venue_id = ?"),
-            anyList()
-        );
-
-        InOrder inOrder = inOrder(childTableDataSyncService, jdbcTemplate);
-        inOrder.verify(childTableDataSyncService, times(9)).sync(
-            any(ChildTableSyncDefinition.class),
-            anyList()
-        );
-        inOrder.verify(jdbcTemplate).batchUpdate(
-            eq("DELETE FROM court_venue WHERE mrd_venue_id = ?"),
-            venueIdsCaptor.capture()
-        );
-        assertThat(venueIdsCaptor.getValue())
-            .singleElement()
-            .satisfies(values -> assertThat(values).containsExactly("venue-2"));
     }
 
     @Test
@@ -259,11 +266,10 @@ class CourtVenueChildTableSyncProcessorTest {
                 .uprn("123")
                 .build()
         ));
-        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
 
         processor.process(exchange);
 
-        assertThat(addressRows())
+        assertThat(rowsFor("address"))
             .singleElement()
             .satisfies(row -> assertThat(row)
                 .containsEntry("mrd_venue_id", "venue-1")
@@ -284,18 +290,17 @@ class CourtVenueChildTableSyncProcessorTest {
                 .uprn("123")
                 .build()
         ));
-        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
 
         processor.process(exchange);
 
-        assertThat(addressRows())
+        assertThat(rowsFor("address"))
             .singleElement()
             .satisfies(row -> assertThat(row)
                 .containsEntry("mrd_venue_id", "venue-1")
                 .containsEntry("address_type", "MAILING")
                 .containsEntry("language_code", "EN")
                 .containsEntry("address", "Court address")
-                .containsEntry("post_code", "")
+                .containsEntry("post_code", null)
                 .containsEntry("uprn", "123"));
     }
 
@@ -310,11 +315,10 @@ class CourtVenueChildTableSyncProcessorTest {
                 .uprn("123")
                 .build()
         ));
-        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
 
         processor.process(exchange);
 
-        assertThat(addressRows())
+        assertThat(rowsFor("address"))
             .singleElement()
             .satisfies(row -> assertThat(row)
                 .containsEntry("mrd_venue_id", "venue-1")
@@ -333,31 +337,34 @@ class CourtVenueChildTableSyncProcessorTest {
                 .uprn("123")
                 .build()
         ));
-        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
 
         processor.process(exchange);
 
-        assertThat(addressRows())
+        assertThat(rowsFor("address"))
             .singleElement()
             .satisfies(row -> assertThat(row)
                 .containsEntry("language_code", "EN")
                 .containsEntry("address", "Court address"));
     }
 
-    private List<Map<String, Object>> addressRows() {
+    private List<Map<String, Object>> rowsFor(String tableName) {
         ArgumentCaptor<ChildTableSyncDefinition> definitionCaptor =
             ArgumentCaptor.forClass(ChildTableSyncDefinition.class);
         ArgumentCaptor<List<Map<String, Object>>> rowsCaptor = ArgumentCaptor.forClass(List.class);
 
-        verify(childTableDataSyncService, times(9)).sync(definitionCaptor.capture(), rowsCaptor.capture());
+        verify(childTableDataSyncService, times(SYNCED_CHILD_TABLES)).sync(
+            definitionCaptor.capture(),
+            rowsCaptor.capture(),
+            anySet()
+        );
 
         List<ChildTableSyncDefinition> definitions = definitionCaptor.getAllValues();
         for (int index = 0; index < definitions.size(); index++) {
-            if ("address".equals(definitions.get(index).tableName())) {
+            if (tableName.equals(definitions.get(index).tableName())) {
                 return rowsCaptor.getAllValues().get(index);
             }
         }
-        throw new AssertionError("address child table was not synced");
+        throw new AssertionError(tableName + " child table was not synced");
     }
 
     private CourtVenue courtVenue() {
