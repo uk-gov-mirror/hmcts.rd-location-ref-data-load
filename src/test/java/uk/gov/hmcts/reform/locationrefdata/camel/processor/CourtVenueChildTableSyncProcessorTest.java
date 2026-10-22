@@ -249,6 +249,117 @@ class CourtVenueChildTableSyncProcessorTest {
             .satisfies(values -> assertThat(values).containsExactly("venue-2"));
     }
 
+    @Test
+    void processAddsEnglishAddressRowWithoutCourtAddressWhenOnlyPostcodeExists() {
+        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(
+            CourtVenue.builder()
+                .mrdVenueId("venue-1")
+                .courtAddress("  ")
+                .postcode("SW1A 1AA")
+                .uprn("123")
+                .build()
+        ));
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
+
+        processor.process(exchange);
+
+        assertThat(addressRows())
+            .singleElement()
+            .satisfies(row -> assertThat(row)
+                .containsEntry("mrd_venue_id", "venue-1")
+                .containsEntry("address_type", "MAILING")
+                .containsEntry("language_code", "EN")
+                .containsEntry("address", "")
+                .containsEntry("post_code", "SW1A 1AA")
+                .containsEntry("uprn", "123"));
+    }
+
+    @Test
+    void processAddsEnglishAddressRowWithCourtAddressWhenPostcodeIsMissing() {
+        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(
+            CourtVenue.builder()
+                .mrdVenueId("venue-1")
+                .courtAddress("Court address")
+                .postcode("  ")
+                .uprn("123")
+                .build()
+        ));
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
+
+        processor.process(exchange);
+
+        assertThat(addressRows())
+            .singleElement()
+            .satisfies(row -> assertThat(row)
+                .containsEntry("mrd_venue_id", "venue-1")
+                .containsEntry("address_type", "MAILING")
+                .containsEntry("language_code", "EN")
+                .containsEntry("address", "Court address")
+                .containsEntry("post_code", "")
+                .containsEntry("uprn", "123"));
+    }
+
+    @Test
+    void processAddsNoEnglishAddressRowWhenCourtAddressAndPostcodeAreMissing() {
+        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(
+            CourtVenue.builder()
+                .mrdVenueId("venue-1")
+                .courtAddress("  ")
+                .postcode("  ")
+                .welshCourtAddress("Welsh court address")
+                .uprn("123")
+                .build()
+        ));
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
+
+        processor.process(exchange);
+
+        assertThat(addressRows())
+            .singleElement()
+            .satisfies(row -> assertThat(row)
+                .containsEntry("mrd_venue_id", "venue-1")
+                .containsEntry("address_type", "MAILING")
+                .containsEntry("language_code", "CY")
+                .containsEntry("address", "Welsh court address"));
+    }
+
+    @Test
+    void processAddsNoWelshAddressRowWhenWelshCourtAddressIsMissing() {
+        exchange.setProperty(CourtVenueChildTableSyncProcessor.COURT_VENUES_EXCHANGE_PROPERTY, List.of(
+            CourtVenue.builder()
+                .mrdVenueId("venue-1")
+                .courtAddress("Court address")
+                .postcode("SW1A 1AA")
+                .uprn("123")
+                .build()
+        ));
+        when(jdbcTemplate.queryForList("SELECT mrd_venue_id FROM court_venue")).thenReturn(List.of());
+
+        processor.process(exchange);
+
+        assertThat(addressRows())
+            .singleElement()
+            .satisfies(row -> assertThat(row)
+                .containsEntry("language_code", "EN")
+                .containsEntry("address", "Court address"));
+    }
+
+    private List<Map<String, Object>> addressRows() {
+        ArgumentCaptor<ChildTableSyncDefinition> definitionCaptor =
+            ArgumentCaptor.forClass(ChildTableSyncDefinition.class);
+        ArgumentCaptor<List<Map<String, Object>>> rowsCaptor = ArgumentCaptor.forClass(List.class);
+
+        verify(childTableDataSyncService, times(9)).sync(definitionCaptor.capture(), rowsCaptor.capture());
+
+        List<ChildTableSyncDefinition> definitions = definitionCaptor.getAllValues();
+        for (int index = 0; index < definitions.size(); index++) {
+            if ("address".equals(definitions.get(index).tableName())) {
+                return rowsCaptor.getAllValues().get(index);
+            }
+        }
+        throw new AssertionError("address child table was not synced");
+    }
+
     private CourtVenue courtVenue() {
         return CourtVenue.builder()
             .mrdVenueId("venue-1")

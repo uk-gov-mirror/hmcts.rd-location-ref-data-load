@@ -64,11 +64,9 @@ public class CourtVenue extends CommonCsvField {
     String openForPublic;
 
     @DataField(pos = 10, columnName = "Court_Address")
-    @NotBlank
     String courtAddress;
 
     @DataField(pos = 11, columnName = "Postcode")
-    @NotBlank
     String postcode;
 
     @DataField(pos = 12, columnName = "Phone_Number")

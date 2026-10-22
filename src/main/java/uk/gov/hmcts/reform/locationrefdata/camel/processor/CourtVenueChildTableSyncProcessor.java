@@ -228,8 +228,8 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
     private List<Map<String, Object>> addressRows(List<CourtVenue> courtVenues) {
         List<Map<String, Object>> rows = new ArrayList<>();
         courtVenues.forEach(courtVenue -> {
-            addAddress(rows, courtVenue, ENGLISH, courtVenue.getCourtAddress());
-            addAddress(rows, courtVenue, WELSH, courtVenue.getWelshCourtAddress());
+            addEnglishAddress(rows, courtVenue);
+            addWelshAddress(rows, courtVenue);
         });
         return rows;
     }
@@ -311,20 +311,36 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
         }
     }
 
+    private void addEnglishAddress(List<Map<String, Object>> rows, CourtVenue courtVenue) {
+        String address = trim(courtVenue.getCourtAddress());
+        String postCode = trim(courtVenue.getPostcode());
+        if (StringUtils.isBlank(address) && StringUtils.isBlank(postCode)) {
+            return;
+        }
+        addAddress(rows, courtVenue, ENGLISH, emptyIfBlank(address), postCode);
+    }
+
+    private void addWelshAddress(List<Map<String, Object>> rows, CourtVenue courtVenue) {
+        String address = trim(courtVenue.getWelshCourtAddress());
+        if (StringUtils.isBlank(address)) {
+            return;
+        }
+        addAddress(rows, courtVenue, WELSH, address, trim(courtVenue.getPostcode()));
+    }
+
     private void addAddress(List<Map<String, Object>> rows,
                             CourtVenue courtVenue,
                             String languageCode,
-                            String address) {
-        if (StringUtils.isNotBlank(trim(address))) {
-            rows.add(row(
-                MRD_VENUE_ID, trim(courtVenue.getMrdVenueId()),
-                "address_type", "MAILING",
-                LANGUAGE_CODE, languageCode,
-                "address", trim(address),
-                "post_code", trim(courtVenue.getPostcode()),
-                "uprn", trim(courtVenue.getUprn())
-            ));
-        }
+                            String address,
+                            String postCode) {
+        rows.add(row(
+            MRD_VENUE_ID, trim(courtVenue.getMrdVenueId()),
+            "address_type", "MAILING",
+            LANGUAGE_CODE, languageCode,
+            "address", address,
+            "post_code", postCode,
+            "uprn", trim(courtVenue.getUprn())
+        ));
     }
 
     private void addUseMapping(List<Map<String, Object>> rows,
@@ -454,5 +470,9 @@ public class CourtVenueChildTableSyncProcessor implements Processor {
 
     private String trimVenueId(String venueId) {
         return trim(venueId);
+    }
+
+    private String emptyIfBlank(String value) {
+        return StringUtils.isBlank(value) ? "" : value;
     }
 }
