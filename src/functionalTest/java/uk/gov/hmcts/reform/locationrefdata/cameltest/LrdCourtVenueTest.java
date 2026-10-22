@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.reform.data.ingestion.configuration.AzureBlobConfig;
 import uk.gov.hmcts.reform.data.ingestion.configuration.BlobStorageCredentials;
 import uk.gov.hmcts.reform.locationrefdata.camel.binder.CourtVenue;
+import uk.gov.hmcts.reform.locationrefdata.camel.processor.CourtVenueProcessor;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.LrdIntegrationBaseTest;
 import uk.gov.hmcts.reform.locationrefdata.cameltest.testsupport.SpringStarter;
 import uk.gov.hmcts.reform.locationrefdata.config.LrdCamelConfig;
@@ -54,6 +55,7 @@ import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadCon
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.REGION_ID;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.REGION_ID_NOT_EXISTS;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.SERVICE_CODE;
+import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.SERVICE_CODE_BLANK;
 import static uk.gov.hmcts.reform.locationrefdata.camel.constants.LrdDataLoadConstants.SERVICE_CODE_NOT_EXISTS;
 
 @TestPropertySource(properties = "spring.config.location=classpath:application-integration.yml")
@@ -154,7 +156,7 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
                 .venueOuCode("venueOuCode1").mrdBuildingLocationId("mrdBId1")
                 .mrdVenueId("mrdVenueId1").serviceUrl("serviceUrl1").factUrl("factUrl1")
                 .mrdCreatedTime("2022-04-01 02:00:01").mrdUpdatedTime("2022-04-01 02:00:02")
-                .mrdDeletedTime("2022-04-01 02:00:03").build(),
+                .mrdDeletedTime("2022-04-01 02:00:03").serviceCode("AAA1").build(),
             CourtVenue.builder().epimmsId("123456").siteName("B Tribunal Hearing Centre")
                 .courtName("B TRIBUNAL HEARING CENTRE").courtStatus("Open").regionId("7").courtTypeId("31")
                 .openForPublic("Yes").courtAddress("AB1,48 COURT STREET,LONDON").postcode("AB12 3AB")
@@ -163,7 +165,8 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
                 .welshVenueName("testVenue2").isTemporaryLocation("N").isNightingaleCourt("N").locationType("Court")
                 .parentLocation("372653").welshCourtName("testWelshCourtName").uprn("uprn123")
                 .venueOuCode("venueOuCode1").mrdBuildingLocationId("mrdBId1")
-                .mrdVenueId("mrdVenueId2").serviceUrl("serviceUrl1").factUrl("factUrl1").build()
+                .mrdVenueId("mrdVenueId2").serviceUrl("serviceUrl1").factUrl("factUrl1")
+                .serviceCode("AAA2").build()
         ), 2);
         validateCourtVenueChildTables();
         //Validates Success Audit
@@ -218,7 +221,7 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
                 .mrdVenueId("mrdVenueId1").serviceUrl("serviceUrl1").factUrl("factUrl1")
                 .mrdCreatedTime("2022-04-01 02:00:01").mrdUpdatedTime("2022-04-01 02:00:02")
                 .mrdDeletedTime("2022-04-01 02:00:03")
-                .externalShortName("A TRIBUNAL HEARING CENTRE External").build(),
+                .externalShortName("A TRIBUNAL HEARING CENTRE External").serviceCode("AAA1").build(),
             CourtVenue.builder().epimmsId("123456").siteName("B Tribunal Hearing Centre")
                 .courtName("B TRIBUNAL HEARING CENTRE").courtStatus("Open").regionId("7").courtTypeId("31")
                 .openForPublic("Yes").courtAddress("AB1,48 COURT STREET,LONDON").postcode("AB12 3AB")
@@ -228,7 +231,7 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
                 .parentLocation("372653").welshCourtName("testWelshCourtName").uprn("uprn123")
                 .venueOuCode("venueOuCode1").mrdBuildingLocationId("mrdBId1")
                 .mrdVenueId("mrdVenueId2").serviceUrl("serviceUrl1").factUrl("factUrl1")
-                .externalShortName("A TRIBUNAL HEARING CENTRE External").build()
+                .externalShortName("A TRIBUNAL HEARING CENTRE External").serviceCode("AAA2").build()
         ), 2);
         //Validates Success Audit
         validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Success", UPLOAD_COURT_FILE_NAME);
@@ -268,7 +271,7 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
             .welshCourtAddress("").venueName("").isCaseManagementLocation("").isHearingLocation("")
             .welshVenueName("").isTemporaryLocation("").isNightingaleCourt("").locationType("")
             .parentLocation("").welshCourtName("").uprn("").venueOuCode("")
-            .mrdVenueId("mrdVenueId1").serviceUrl("").factUrl("");
+            .mrdVenueId("mrdVenueId1").serviceUrl("").factUrl("").serviceCode("AAA1");
     }
 
 
@@ -489,8 +492,62 @@ public class LrdCourtVenueTest extends LrdIntegrationBaseTest {
 
     }
 
+    @Test
+    @Sql(scripts = {"/testData/truncate-lrd-court-venue.sql", "/testData/insert-building-location.sql"})
+    void testCourtVenueWithBlankServiceIdIsSkipped() throws Exception {
+        System.setProperty(CourtVenueProcessor.SKIP_BLANK_SERVICE_CODE_PROPERTY, "true");
+
+        lrdBlobSupport.uploadFile(
+            UPLOAD_COURT_FILE_NAME,
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/courtVenues/court-venue-test-blank-service-id.csv"))
+        );
+
+        jobLauncherTestUtils.launchJob();
+
+        // the row delivered without a service id is not loaded, the row with a service id is loaded
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM court_venue", Integer.class))
+            .isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("SELECT mrd_venue_id FROM court_venue", String.class))
+            .isEqualTo("mrdVenueId1");
+
+        // the row that is not loaded is reported
+        assertThat(jdbcTemplate.queryForList(
+            "SELECT field_in_error, error_description FROM dataload_exception_records "
+                + "WHERE field_in_error = 'service_code'"))
+            .hasSize(1)
+            .allSatisfy(exception -> assertThat(exception)
+                .containsEntry("field_in_error", "service_code")
+                .containsEntry("error_description", SERVICE_CODE_BLANK));
+
+        // the file is tolerated while the skip is switched on
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "PartialSuccess", UPLOAD_COURT_FILE_NAME);
+    }
+
+    @Test
+    @Sql(scripts = {"/testData/truncate-lrd-court-venue.sql", "/testData/insert-building-location.sql"})
+    void testCourtVenueWithBlankServiceIdFailsTheFile() throws Exception {
+        System.setProperty(CourtVenueProcessor.SKIP_BLANK_SERVICE_CODE_PROPERTY, "false");
+
+        lrdBlobSupport.uploadFile(
+            UPLOAD_COURT_FILE_NAME,
+            new FileInputStream(getFile(
+                "classpath:sourceFiles/courtVenues/court-venue-test-blank-service-id.csv"))
+        );
+
+        jobLauncherTestUtils.launchJob();
+
+        // the row delivered without a service id is not loaded, the row with a service id is loaded
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM court_venue", Integer.class))
+            .isEqualTo(1);
+
+        // the file fails as the rule is in place
+        validateLrdServiceFileAudit(jdbcTemplate, auditSchedulerQuery, "Failure", UPLOAD_COURT_FILE_NAME);
+    }
+
     @AfterEach
     void tearDown() throws Exception {
+        System.clearProperty(CourtVenueProcessor.SKIP_BLANK_SERVICE_CODE_PROPERTY);
         //Delete Uploaded test file with Snapshot delete
         lrdBlobSupport.deleteBlob(UPLOAD_COURT_FILE_NAME);
     }
